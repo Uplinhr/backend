@@ -1,7 +1,7 @@
 import express from 'express'
 import morgan from 'morgan'
 import config from './config.js'
-import usuariosRoutes from './features/usuarios/routes.js'
+import {usuariosRoutes} from './features/usuarios/index.js'
 
 const app = express();
 

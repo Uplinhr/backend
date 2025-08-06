@@ -1,12 +1,18 @@
 import { successRes, errorRes } from "../../utils/apiResponse.js";
-import pool from "../../database.js";
+import UsuarioModel from "./model.js";
 
 export const getUsuarios = async (req, res) => {
     try{
-        const [rows] = await pool.query('SELECT * FROM usuarios');
+        const usuarios = await UsuarioModel.getAll()
+        if(usuarios === null){
+            errorRes(res, {
+                message: 'No se han encontrado usuarios',
+                statusCode: 404,
+            })
+        }
         successRes(res, { 
-          data: rows,
-          message: 'Usuarios obtenidos correctamente'
+          data: usuarios,
+          message: 'Usuarios obtenidos correctamente',
         });
     } catch (error){
         errorRes(res, {
@@ -26,22 +32,22 @@ export const getUsuarioById = async (req, res) => {
                 statusCode: 400
             })
             }
-        const [rows] = await pool.query(`SELECT nombre, email FROM usuarios WHERE id = ?`, [id])
-        if(rows.length === 0){ // SI NO EXISTE EL USUARIO
+        const usuario = await UsuarioModel.getById(id)
+        if(usuario === null){ // SI NO EXISTE EL USUARIO
             return errorRes(res,{
                 message: 'Usuario no encontrado',
                 statusCode: 404
             })
         }
         successRes(res, {
-            data: rows[0],
+            data: usuario,
             message: 'Usuario obtenido correctamente'
         })
     } catch (error){
-        errorResponse(res, {
+        errorRes(res, {
           message: 'Error al obtener el usuario',
           statusCode: 500,
-          errors: err.message
+          errors: error.message
         });
     }
 }
