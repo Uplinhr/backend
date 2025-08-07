@@ -6,10 +6,16 @@ const UsuarioModel = {
         'SELECT * FROM usuarios'
     );
     return rows || null
-    },
+    },/*
+    getAllActives: async () => {
+    const [rows] = await pool.query(
+        'SELECT * FROM usuarios WHERE estado = ?', ['activo']
+    );
+    return rows || null
+    },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT nombre, email FROM usuarios WHERE id = ?', 
+            'SELECT nombre, email, apellido, fecha_alta FROM usuarios WHERE id = ?', 
             [id]
         );
         return rows[0] || null
