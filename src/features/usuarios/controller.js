@@ -54,16 +54,16 @@ export const getUsuarioById = async (req, res) => {
 
 export const createUsuario = async (req, res) => {
     try{
-        const {nombre, email} = req.body
+        const {nombre, apellido, contrasenia, email, estado} = req.body
 
-        if(!nombre || !email) {
+        if(!nombre || !apellido || !contrasenia || !email || !estado) {
             return errorRes(res, {
-                message: 'Se requiere un nombre y un email',
+                message: 'Se requieren todos los campos',
                 statusCode: 404
             })
         }
 
-        const idUsuario = await UsuarioModel.create(nombre, email)
+        const idUsuario = await UsuarioModel.create(nombre, apellido, contrasenia, email, estado)
         successRes(res, {
             data: { id: idUsuario },
             message: 'Usuario creado exitosamente',

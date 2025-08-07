@@ -14,10 +14,10 @@ const UsuarioModel = {
         );
         return rows[0] || null
     },
-    create: async (nombre, email, id) => {
+    create: async (nombre, apellido, contrasenia, email, estado) => {
         const [usuario] = await pool.query(
-            `INSERT INTO usuarios (nombre, email) 
-            VALUES (?, ?)`, [nombre, email]
+            `INSERT INTO usuarios (nombre, apellido, contrasenia, email, estado) 
+            VALUES (?, ?, ?, ?, ?)`, [nombre, apellido, contrasenia, email, estado]
         )
         return usuario.insertId
     },
