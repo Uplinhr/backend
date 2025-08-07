@@ -51,3 +51,37 @@ export const getUsuarioById = async (req, res) => {
         });
     }
 }
+
+export const createUsuario = async (req, res) => {
+    try{
+        console.log(req.body)
+        const {nombre, email} = req.body
+
+        if(!nombre || !email) {
+            return errorRes(res, {
+                message: 'Se requiere un nombre y un email',
+                statusCode: 404
+            })
+        }
+
+        const idUsuario = await UsuarioModel.create(nombre, email)
+        successRes(res, {
+            data: { id: idUsuario },
+            message: 'Usuario creado exitosamente',
+            statusCode: 201
+        })
+    } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            errorRes(res, {
+                message: 'El email ya está registrado',
+                statusCode: 409
+            });
+        } else {
+            errorRes(res, {
+                message: 'Error al crear usuario',
+                statusCode: 500,
+                errors: error.message
+            });
+        }
+    }
+}
