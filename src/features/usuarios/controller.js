@@ -54,7 +54,6 @@ export const getUsuarioById = async (req, res) => {
 
 export const createUsuario = async (req, res) => {
     try{
-        console.log(req.body)
         const {nombre, email} = req.body
 
         if(!nombre || !email) {
@@ -83,5 +82,35 @@ export const createUsuario = async (req, res) => {
                 errors: error.message
             });
         }
+    }
+}
+
+export const deleteUsuarioById = async (req, res) => {
+    try{
+        const {id} = req.params
+        if(isNaN(id)) {
+            return errorRes(res, {
+                message: 'El id debe ser un numero',
+                statusCode: 404
+            })
+        }
+
+        const deleted = await UsuarioModel.deleteById(id)
+        if(!deleted){
+            return errorRes(res, {
+              message: 'Usuario no encontrado',
+              statusCode: 404
+            });
+        }
+        successRes(res, {
+            message: 'Usuario eliminado exitosamente',
+            statusCode: 201
+        })
+    } catch (error) {
+        errorRes(res, {
+          message: 'Error al eliminar usuario',
+          statusCode: 500,
+          errors: error.message
+        });
     }
 }
