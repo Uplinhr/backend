@@ -1,16 +1,13 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import pool from '../../database.js';
+import AuthModel from './model.js';
 
 export const register = async (req, res) => {
   try {
     const {nombre, apellido, contrasenia, email, estado} = req.body;
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
 
-    const [result] = await pool.query(
-      'INSERT INTO usuarios (nombre, apellido, email, contrasenia, estado) VALUES (?, ?, ?, ?, ?)',
-      [nombre, apellido, email, hashedPassword, estado]
-    );
+    const result = await AuthModel.create(nombre, apellido, hashedPassword, email, estado)
 
     const token = jwt.sign({ id: result.insertId }, process.env.JWT_SECRET, {
       expiresIn: '1h'
@@ -28,8 +25,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [req.body.email]);
-    const user = users[0];
+    const user = await AuthModel.login(req.body.email)
 
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
 
