@@ -13,15 +13,8 @@ const AuthModel = {
             `INSERT INTO usuarios (nombre, apellido, contrasenia, email, estado) 
             VALUES (?, ?, ?, ?, ?)`, [nombre, apellido, hashedPassword, email, estado]
         )
-        return usuario
+        return usuario.insertId
     },
-    deleteById: async (id) => {
-        const [result] = await pool.query(
-            'DELETE FROM usuarios WHERE id = ?',
-            [id]
-        )
-        return result.affectedRows > 0 // Retorna true si eliminó algún registro
-    }
 }
 
 export default AuthModel

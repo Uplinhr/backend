@@ -1,25 +1,43 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import AuthModel from './model.js';
+import { successRes, errorRes } from "../../utils/apiResponse.js";
 
 export const register = async (req, res) => {
   try {
     const {nombre, apellido, contrasenia, email, estado} = req.body;
+    if(!nombre || !apellido || !contrasenia || !email || !estado) {
+        return errorRes(res, {
+            message: 'Se requieren todos los campos',
+            statusCode: 404
+        })
+    }
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
 
-    const result = await AuthModel.create(nombre, apellido, hashedPassword, email, estado)
+    const idUsuario = await AuthModel.create(nombre, apellido, hashedPassword, email, estado)
 
-    const token = jwt.sign({ id: result.insertId }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: idUsuario }, process.env.JWT_SECRET, {
       expiresIn: '1h'
     });
 
     res.cookie('token', token, { httpOnly: true });
-    res.status(201).json({ message: "Usuario registrado" });
+    successRes(res, {
+        data: { id: idUsuario },
+        message: 'Usuario creado exitosamente',
+        statusCode: 201
+    })
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(400).json({ message: "El email ya existe" });
+        errorRes(res, {
+            message: 'El email ya está registrado',
+            statusCode: 409
+        });
     }
-    res.status(500).json({ message: error.message });
+    errorRes(res, {
+        message: 'Error al crear usuario',
+        statusCode: 500,
+        errors: error.message
+    });
   }
 };
 
@@ -27,23 +45,30 @@ export const login = async (req, res) => {
   try {
     const user = await AuthModel.login(req.body.email)
 
-    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+    if (!user) return errorRes(res, {message: 'Usuario no encontrado',statusCode: 404});
 
     const isMatch = await bcrypt.compare(req.body.contrasenia, user.contrasenia);
-    if (!isMatch) return res.status(400).json({ message: "Contraseña incorrecta" });
+    if (!isMatch) return errorRes(res, {message: 'Contraseña incorrecta',statusCode: 400});
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: '1h'
     });
 
     res.cookie('token', token, { httpOnly: true, secure: !process.env.DEV });
-    res.json({ message: "Sesión iniciada", user: { id: user.id, nombre: user.nombre, rol: user.rol } });
+    successRes(res, {
+        data: { id: user.id, nombre: user.nombre, rol: user.rol },
+        message: 'Sesión iniciada',
+        statusCode: 201
+    })
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    errorRes(res, {message: error.message, statusCode: 500});
   }
 };
 
 export const logout = (req, res) => {
-  res.clearCookie('token');
-  res.json({ message: "Sesión cerrada" });
+    res.clearCookie('token');
+    successRes(res, {
+        message: 'Sesión cerrada',
+        statusCode: 201
+    })
 };

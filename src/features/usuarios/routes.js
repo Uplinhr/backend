@@ -1,9 +1,8 @@
 import express from 'express'
 import { 
-  getUsuarioById, 
-  getUsuarios, 
-  createUsuario, 
-  deleteUsuarioById 
+  getUsuarioById,
+  getUsuarios,
+  deleteUsuarioById
 } from './controller.js';
 import { authRequired, checkRole } from '../../middlewares/auth.js';
 const router = express.Router()

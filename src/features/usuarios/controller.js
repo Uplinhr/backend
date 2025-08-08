@@ -15,7 +15,7 @@ export const getUsuarios = async (req, res) => {
           message: 'Usuarios obtenidos correctamente',
         });
     } catch (error){
-        errorRes(res, {
+    errorRes(res, {
       message: 'Error al obtener usuarios',
       statusCode: 500,
       errors: error.message
@@ -49,39 +49,6 @@ export const getUsuarioById = async (req, res) => {
           statusCode: 500,
           errors: error.message
         });
-    }
-}
-
-export const createUsuario = async (req, res) => {
-    try{
-        const {nombre, apellido, contrasenia, email, estado} = req.body
-
-        if(!nombre || !apellido || !contrasenia || !email || !estado) {
-            return errorRes(res, {
-                message: 'Se requieren todos los campos',
-                statusCode: 404
-            })
-        }
-
-        const idUsuario = await UsuarioModel.create(nombre, apellido, contrasenia, email, estado)
-        successRes(res, {
-            data: { id: idUsuario },
-            message: 'Usuario creado exitosamente',
-            statusCode: 201
-        })
-    } catch (error) {
-        if (error.code === 'ER_DUP_ENTRY') {
-            errorRes(res, {
-                message: 'El email ya está registrado',
-                statusCode: 409
-            });
-        } else {
-            errorRes(res, {
-                message: 'Error al crear usuario',
-                statusCode: 500,
-                errors: error.message
-            });
-        }
     }
 }
 

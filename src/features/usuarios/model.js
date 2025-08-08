@@ -20,13 +20,6 @@ const UsuarioModel = {
         );
         return rows[0] || null
     },
-    create: async (nombre, apellido, contrasenia, email, estado) => {
-        const [usuario] = await pool.query(
-            `INSERT INTO usuarios (nombre, apellido, contrasenia, email, estado) 
-            VALUES (?, ?, ?, ?, ?)`, [nombre, apellido, contrasenia, email, estado]
-        )
-        return usuario.insertId
-    },
     deleteById: async (id) => {
         const [result] = await pool.query(
             'DELETE FROM usuarios WHERE id = ?',

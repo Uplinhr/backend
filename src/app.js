@@ -3,7 +3,7 @@ import morgan from 'morgan'
 import config from './config.js'
 import {usuariosRoutes} from './features/usuarios/index.js'
 import cookieParser from 'cookie-parser';
-import authRoutes from './features/auth/routes.js'
+import {authRoutes} from './features/auth/index.js'
 
 const app = express();
 
