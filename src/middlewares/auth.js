@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import pool from '../database.js';
+import pool from '../database/database.js';
 
 export const authRequired = async (req, res, next) => {
   const { token } = req.cookies;
