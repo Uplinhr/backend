@@ -36,8 +36,8 @@ const usuarioModel = {
     },
     deleteById: async (id) => {
         const [result] = await pool.query(
-            'DELETE FROM usuarios WHERE id = ?',
-            [id]
+            'UPDATE usuarios SET estado = ? WHERE id = ?',
+            ['inactivo', id]
         )
         return result.affectedRows > 0 // Retorna true si eliminó algún registro
     }
