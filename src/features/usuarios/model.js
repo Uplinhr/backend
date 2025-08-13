@@ -15,7 +15,7 @@ const UsuarioModel = {
     },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT nombre, email, apellido, fecha_alta FROM usuarios WHERE id = ?', 
+            'SELECT nombre, email, apellido, fecha_alta, estado, rol, id_plan FROM usuarios WHERE id = ?', 
             [id]
         );
         return rows[0] || null

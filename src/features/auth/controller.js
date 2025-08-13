@@ -5,7 +5,7 @@ import { successRes, errorRes } from "../../utils/apiResponse.js";
 
 export const register = async (req, res) => {
   try {
-    const {nombre, apellido, contrasenia, email, estado} = req.body;
+    const {nombre, apellido, contrasenia, email} = req.body;
     if(!nombre || !apellido || !contrasenia || !email || !estado) {
         return errorRes(res, {
             message: 'Se requieren todos los campos',
@@ -14,7 +14,7 @@ export const register = async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
 
-    const idUsuario = await AuthModel.create(nombre, apellido, hashedPassword, email, estado)
+    const idUsuario = await AuthModel.create(nombre, apellido, hashedPassword, email)
 
     const token = jwt.sign({ id: idUsuario }, process.env.JWT_SECRET, {
       expiresIn: '1h'

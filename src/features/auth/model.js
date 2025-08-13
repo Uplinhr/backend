@@ -8,10 +8,10 @@ const AuthModel = {
         );
         return user[0] || null
     },
-    create: async (nombre, apellido, hashedPassword, email, estado) => {
+    create: async (nombre, apellido, hashedPassword, email) => {
         const [usuario] = await pool.query(
-            `INSERT INTO usuarios (nombre, apellido, contrasenia, email, estado) 
-            VALUES (?, ?, ?, ?, ?)`, [nombre, apellido, hashedPassword, email, estado]
+            `INSERT INTO usuarios (nombre, apellido, contrasenia, email)
+            VALUES (?, ?, ?, ?, ?)`, [nombre, apellido, hashedPassword, email]
         )
         return usuario.insertId
     },
