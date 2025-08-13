@@ -1,6 +1,6 @@
 import pool from '../../database/database.js'
 
-const UsuarioModel = {
+const usuarioModel = {
     getAll: async () => {
     const [rows] = await pool.query(
         'SELECT * FROM usuarios'
@@ -20,6 +20,20 @@ const UsuarioModel = {
         );
         return rows[0] || null
     },
+    editFullName: async (id, user) => {
+        const [rows] = await pool.query(
+            'UPDATE usuarios SET nombre = ?, apellido = ? WHERE id = ?',
+            [user.nombre, user.apellido, id]
+        )
+        return rows[0] || null
+    },
+    editUser: async (user) => {
+        const [rows] = await pool.query(
+            'UPDATE usuarios SET nombre = ?, apellido = ?, email = ?, estado = ?, rol = ?, id_plan = ? WHERE id = ?',
+            [user.nombre, user.apellido, user.email, user.estado, user.rol, user.id_plan, user.id]
+        )
+        return rows[0] || null
+    },
     deleteById: async (id) => {
         const [result] = await pool.query(
             'DELETE FROM usuarios WHERE id = ?',
@@ -29,4 +43,4 @@ const UsuarioModel = {
     }
 }
 
-export default UsuarioModel
+export default usuarioModel

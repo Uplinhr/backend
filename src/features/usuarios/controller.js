@@ -1,9 +1,9 @@
 import { successRes, errorRes } from "../../utils/apiResponse.js";
-import UsuarioModel from "./model.js";
+import usuarioModel from "./model.js";
 
 export const getUsuarios = async (req, res) => {
     try{
-        const usuarios = await UsuarioModel.getAll()
+        const usuarios = await usuarioModel.getAll()
         if(usuarios === null){
             errorRes(res, {
                 message: 'No se han encontrado usuarios',
@@ -32,7 +32,7 @@ export const getUsuarioById = async (req, res) => {
                 statusCode: 400
             })
             }
-        const usuario = await UsuarioModel.getById(id)
+        const usuario = await usuarioModel.getById(id)
         if(usuario === null){ // SI NO EXISTE EL USUARIO
             return errorRes(res,{
                 message: 'Usuario no encontrado',
@@ -62,7 +62,7 @@ export const deleteUsuarioById = async (req, res) => {
             })
         }
 
-        const deleted = await UsuarioModel.deleteById(id)
+        const deleted = await usuarioModel.deleteById(id)
         if(!deleted){
             return errorRes(res, {
               message: 'Usuario no encontrado',

@@ -1,12 +1,12 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import AuthModel from './model.js';
+import authModel from './model.js';
 import { successRes, errorRes } from "../../utils/apiResponse.js";
 
 export const register = async (req, res) => {
   try {
     const {nombre, apellido, contrasenia, email} = req.body;
-    if(!nombre || !apellido || !contrasenia || !email || !estado) {
+    if(!nombre || !apellido || !contrasenia || !email) {
         return errorRes(res, {
             message: 'Se requieren todos los campos',
             statusCode: 404
@@ -14,7 +14,7 @@ export const register = async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
 
-    const idUsuario = await AuthModel.create(nombre, apellido, hashedPassword, email)
+    const idUsuario = await authModel.create(nombre, apellido, hashedPassword, email)
 
     const token = jwt.sign({ id: idUsuario }, process.env.JWT_SECRET, {
       expiresIn: '1h'
@@ -43,7 +43,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const user = await AuthModel.login(req.body.email)
+    const user = await authModel.login(req.body.email)
 
     if (!user) return errorRes(res, {message: 'Usuario no encontrado',statusCode: 404});
 
@@ -56,14 +56,50 @@ export const login = async (req, res) => {
 
     res.cookie('token', token, { httpOnly: true, secure: !process.env.DEV });
     successRes(res, {
-        data: { id: user.id, nombre: user.nombre, rol: user.rol },
+        data: { user },
         message: 'Sesión iniciada',
         statusCode: 201
     })
   } catch (error) {
-    errorRes(res, {message: error.message, statusCode: 500});
+    errorRes(res, {
+      message: 'Error al iniciar sesión', 
+      statusCode: 500,
+      errors: error.message
+    });
   }
 };
+
+
+export const editPassword = async (req, res) => {
+  try{
+    const {id} = req.params
+    if(isNaN(id)) {
+        return errorRes(res, {
+            message: 'El id debe ser un numero',
+            statusCode: 404
+        })
+    }
+    if(Number(req.user.id) !== Number(id) && req.user.rol !== 'admin'){
+      return errorRes(res, {
+            message: 'Solo puedes cambiar tu propia contraseña',
+            statusCode: 404
+        })
+    }
+    const {contrasenia} = req.body
+    const hashedPassword = await bcrypt.hash(contrasenia, 10);
+    await authModel.editPassword(id, hashedPassword)
+    successRes(res, {
+        message: 'Contraseña editada exitosamente',
+        statusCode: 201
+    })
+  } catch(error){
+    errorRes(res, {
+        message: 'Error al editar la contraseña',
+        statusCode: 500,
+        errors: error.message
+    });
+  }
+}
 
 export const logout = (req, res) => {
     res.clearCookie('token');
