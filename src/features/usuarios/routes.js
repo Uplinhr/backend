@@ -16,6 +16,6 @@ router.put('/fullName/:id', authRequired, editFullName)
 
 // Rutas solo para admin
 router.delete('/:id', authRequired, checkRole(['admin']), deleteUsuarioById)
-router.put('/:id', /*authRequired, checkRole(['admin']),*/ editUser)
+router.put('/:id', authRequired, checkRole(['admin']), editUser)
 
 export default router
