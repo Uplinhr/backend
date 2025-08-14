@@ -52,6 +52,60 @@ export const getUsuarioById = async (req, res) => {
     }
 }
 
+export const editFullName =  async (req, res) => {
+    try{
+        const {id} = req.params
+        if(isNaN(id)) {
+            return errorRes(res, {
+                message: 'El id debe ser un numero',
+                statusCode: 404
+            })
+        }
+
+        if(Number(id) !== Number(req.user.id)){
+            return errorRes(res, {
+                message: 'Solo puedes editar tu propio usuario',
+                statusCode: 404
+            })
+        }
+        await usuarioModel.editFullName(id, req.body.nombre, req.body.apellido)
+        successRes(res, {
+            message: 'nombre completo editado exitosamente',
+            statusCode: 201
+        })
+    } catch(error){
+        errorRes(res, {
+            message: 'Error al editar el nombre completo',
+            statusCode: 500,
+            errors: error.message
+        });
+    }
+}
+
+export const editUser = async (req, res) => {
+    try{
+        const {id} = req.params
+        if(isNaN(id)) {
+            return errorRes(res, {
+                message: 'El id debe ser un numero',
+                statusCode: 404
+            })
+        }
+
+        await usuarioModel.editUser(id, req.body)
+        successRes(res, {
+            message: 'usuario editado exitosamente',
+            statusCode: 201
+        })
+    } catch(error){
+        errorRes(res, {
+          message: 'Error al editar usuario',
+          statusCode: 500,
+          errors: error.message
+        });
+    }
+}
+
 export const deleteUsuarioById = async (req, res) => {
     try{
         const {id} = req.params

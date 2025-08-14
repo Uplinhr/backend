@@ -20,17 +20,18 @@ const usuarioModel = {
         );
         return rows[0] || null
     },
-    editFullName: async (id, user) => {
+    editFullName: async (id, nombre, apellido) => {
+        console.log(nombre)
         const [rows] = await pool.query(
             'UPDATE usuarios SET nombre = ?, apellido = ? WHERE id = ?',
-            [user.nombre, user.apellido, id]
+            [nombre, apellido, id]
         )
         return rows[0] || null
     },
-    editUser: async (user) => {
+    editUser: async (id, user) => {
         const [rows] = await pool.query(
             'UPDATE usuarios SET nombre = ?, apellido = ?, email = ?, estado = ?, rol = ?, id_plan = ? WHERE id = ?',
-            [user.nombre, user.apellido, user.email, user.estado, user.rol, user.id_plan, user.id]
+            [user.nombre, user.apellido, user.email, user.estado, user.rol, user.id_plan, id]
         )
         return rows[0] || null
     },
