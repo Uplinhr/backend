@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS consulta (
     fecha_consulta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     cantidad_horas INT NOT NULL,
     id_consultoria INT NULL,
+    ADD COLUMN estado ENUM('pendiente', 'en proceso', 'finalizado') NOT NULL DEFAULT 'pendiente',
+    ADD COLUMN observaciones VARCHAR(100) NULL,
     FOREIGN KEY (id_consultoria) 
         REFERENCES consultorias(id)
         ON DELETE RESTRICT

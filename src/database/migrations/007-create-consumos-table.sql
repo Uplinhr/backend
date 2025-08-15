@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS consumos (
     creditos_usados INT DEFAULT 1,
     observaciones VARCHAR(100) NOT NULL,
     id_cred INT NULL,
+    ADD COLUMN estado ENUM('pendiente', 'en proceso', 'finalizado') NOT NULL DEFAULT ('pendiente'),
     FOREIGN KEY (id_cred) 
         REFERENCES creditos(id)
         ON DELETE RESTRICT
