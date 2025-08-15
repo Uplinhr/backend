@@ -9,4 +9,6 @@ router.post('/login', login);
 router.post('/logout', logout);
 router.put('/editPassword/:id', authRequired, editPassword)
 
+//Falta mailRecoverPassword(investigar enviar mails) y recoverPassword(investigar webhooks)
+
 export default router;
