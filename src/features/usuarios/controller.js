@@ -23,6 +23,29 @@ export const getUsuarios = async (req, res) => {
     }
 };
 
+export const getOwnUsuario = async (req, res) => {
+    try{
+        const {id} = req.user
+        const usuario = await usuarioModel.getById(id)
+        if(usuario === null){ // SI NO EXISTE EL USUARIO
+            return errorRes(res,{
+                message: 'Usuario no encontrado',
+                statusCode: 404
+            })
+        }
+        successRes(res, {
+            data: usuario,
+            message: 'Usuario obtenido correctamente'
+        })
+    }catch (error){
+        errorRes(res, {
+          message: 'Error al obtener el usuario',
+          statusCode: 500,
+          errors: error.message
+        });
+    }
+}
+
 export const getUsuarioById = async (req, res) => {
     try{
         const {id} = req.params
@@ -68,10 +91,17 @@ export const editFullName =  async (req, res) => {
                 statusCode: 404
             })
         }
-        await usuarioModel.editFullName(id, req.body.nombre, req.body.apellido)
+        const changed = await usuarioModel.editFullName(id, req.body.nombre, req.body.apellido)
+        if(!changed){
+            return errorRes(res, {
+                message: "No se editó el nombre",
+                statusCode: 500
+            })
+        }
         successRes(res, {
             message: 'nombre completo editado exitosamente',
-            statusCode: 201
+            statusCode: 201,
+            data: changed
         })
     } catch(error){
         errorRes(res, {
@@ -82,7 +112,7 @@ export const editFullName =  async (req, res) => {
     }
 }
 
-export const editUser = async (req, res) => {
+export const editUsuarioById = async (req, res) => {
     try{
         const {id} = req.params
         if(isNaN(id)) {
@@ -92,10 +122,17 @@ export const editUser = async (req, res) => {
             })
         }
 
-        await usuarioModel.editUser(id, req.body)
+        const changed = await usuarioModel.editUsuarioById(id, req.body)
+        if(!changed){
+            return errorRes(res, {
+                message: 'No se editó el usuario',
+                statusCode: 500
+            })
+        }
         successRes(res, {
             message: 'usuario editado exitosamente',
-            statusCode: 201
+            statusCode: 201,
+            data: changed
         })
     } catch(error){
         errorRes(res, {
@@ -116,7 +153,7 @@ export const deleteUsuarioById = async (req, res) => {
             })
         }
 
-        const deleted = await usuarioModel.deleteById(id)
+        const deleted = await usuarioModel.deleteUsuarioById(id)
         if(!deleted){
             return errorRes(res, {
               message: 'Usuario no encontrado',
@@ -125,7 +162,8 @@ export const deleteUsuarioById = async (req, res) => {
         }
         successRes(res, {
             message: 'Usuario eliminado exitosamente',
-            statusCode: 201
+            statusCode: 201,
+            data: deleted
         })
     } catch (error) {
         errorRes(res, {

@@ -8,7 +8,7 @@ const authModel = {
         );
         return user[0] || null
     },
-    create: async (nombre, apellido, hashedPassword, email) => {
+    createUsuario: async (nombre, apellido, hashedPassword, email) => {
         const [usuario] = await pool.query(
             `INSERT INTO usuarios (nombre, apellido, contrasenia, email)
             VALUES (?, ?, ?, ?)`, [nombre, apellido, hashedPassword, email]
@@ -16,11 +16,11 @@ const authModel = {
         return usuario.insertId
     },
     editPassword: async (id, password) => {
-        const [rows] = await pool.query(
+        const [result] = await pool.query(
             'UPDATE usuarios SET contrasenia = ? WHERE id = ?',
             [password, id]
         )
-        return rows
+        return result.affectedRows > 0
     },
 }
 

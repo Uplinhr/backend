@@ -14,7 +14,7 @@ export const register = async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
 
-    const idUsuario = await authModel.create(nombre, apellido, hashedPassword, email)
+    const idUsuario = await authModel.createUsuario(nombre, apellido, hashedPassword, email)
 
     const token = jwt.sign({ id: idUsuario }, process.env.JWT_SECRET, {
       expiresIn: '1h'
@@ -89,10 +89,17 @@ export const editPassword = async (req, res) => {
     }
     const {contrasenia} = req.body
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
-    await authModel.editPassword(id, hashedPassword)
+    const changed = await authModel.editPassword(id, hashedPassword)
+    if(!changed){
+      return errorRes(res, {
+        message: 'No se editó la contraseña',
+        statusCode: 500
+      })
+    }
     successRes(res, {
       message: 'Contraseña editada exitosamente',
-      statusCode: 201
+      statusCode: 201,
+      data: changed
     })
   } catch(error){
     errorRes(res, {

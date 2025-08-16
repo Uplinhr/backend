@@ -22,20 +22,20 @@ const usuarioModel = {
     },
     editFullName: async (id, nombre, apellido) => {
         console.log(nombre)
-        const [rows] = await pool.query(
+        const [result] = await pool.query(
             'UPDATE usuarios SET nombre = ?, apellido = ? WHERE id = ?',
             [nombre, apellido, id]
         )
-        return rows[0] || null
+        return result.affectedRows > 0
     },
-    editUser: async (id, user) => {
-        const [rows] = await pool.query(
+    editUsuarioById: async (id, user) => {
+        const [result] = await pool.query(
             'UPDATE usuarios SET nombre = ?, apellido = ?, email = ?, estado = ?, rol = ?, id_plan = ? WHERE id = ?',
             [user.nombre, user.apellido, user.email, user.estado, user.rol, user.id_plan, id]
         )
-        return rows[0] || null
+        return result.affectedRows > 0
     },
-    deleteById: async (id) => {
+    deleteUsuarioById: async (id) => {
         const [result] = await pool.query(
             'UPDATE usuarios SET estado = ? WHERE id = ?',
             ['inactivo', id]
