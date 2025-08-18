@@ -28,14 +28,14 @@ const usuarioModel = {
         )
         return result.affectedRows > 0
     },
-    editUsuarioById: async (id, user) => {
+    editById: async (id, user) => {
         const [result] = await pool.query(
             'UPDATE usuarios SET nombre = ?, apellido = ?, email = ?, estado = ?, rol = ?, id_plan = ? WHERE id = ?',
             [user.nombre, user.apellido, user.email, user.estado, user.rol, user.id_plan, id]
         )
         return result.affectedRows > 0
     },
-    deleteUsuarioById: async (id) => {
+    deleteById: async (id) => {
         const [result] = await pool.query(
             'UPDATE usuarios SET estado = ? WHERE id = ?',
             ['inactivo', id]

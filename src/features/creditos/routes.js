@@ -1,9 +1,9 @@
 import express from 'express'
 import { 
-  getById,
   getAll,
+  getById,
   deleteById,
-  editFullName,
+  create,
   editById,
   getOwn
 } from './controller.js';
@@ -12,12 +12,12 @@ const router = express.Router()
 
 // Rutas protegidas
 router.get('/self', authRequired, getOwn)
-router.put('/fullName/:id', authRequired, editFullName)
 
 // Rutas solo para admin
 router.get('/', authRequired, checkRole(['admin']), getAll);
 router.get('/:id', authRequired, checkRole(['admin']), getById)
 router.delete('/:id', authRequired, checkRole(['admin']), deleteById)
 router.put('/:id', authRequired, checkRole(['admin']), editById)
+router.post('/', authRequired, checkRole(['admin']), create)
 
 export default router

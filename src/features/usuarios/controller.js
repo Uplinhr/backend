@@ -1,11 +1,11 @@
 import { successRes, errorRes } from "../../utils/apiResponse.js";
 import usuarioModel from "./model.js";
 
-export const getUsuarios = async (req, res) => {
+export const getAll = async (req, res) => {
     try{
         const usuarios = await usuarioModel.getAll()
         if(usuarios === null){
-            errorRes(res, {
+            return errorRes(res, {
                 message: 'No se han encontrado usuarios',
                 statusCode: 404,
             })
@@ -23,7 +23,7 @@ export const getUsuarios = async (req, res) => {
     }
 };
 
-export const getOwnUsuario = async (req, res) => {
+export const getOwn = async (req, res) => {
     try{
         const {id} = req.user
         const usuario = await usuarioModel.getById(id)
@@ -46,7 +46,7 @@ export const getOwnUsuario = async (req, res) => {
     }
 }
 
-export const getUsuarioById = async (req, res) => {
+export const getById = async (req, res) => {
     try{
         const {id} = req.params
         if(isNaN(id)) { // SI ID NO ES NUMERICO
@@ -112,7 +112,7 @@ export const editFullName =  async (req, res) => {
     }
 }
 
-export const editUsuarioById = async (req, res) => {
+export const editById = async (req, res) => {
     try{
         const {id} = req.params
         if(isNaN(id)) {
@@ -122,7 +122,7 @@ export const editUsuarioById = async (req, res) => {
             })
         }
 
-        const changed = await usuarioModel.editUsuarioById(id, req.body)
+        const changed = await usuarioModel.editById(id, req.body)
         if(!changed){
             return errorRes(res, {
                 message: 'No se editó el usuario',
@@ -143,7 +143,7 @@ export const editUsuarioById = async (req, res) => {
     }
 }
 
-export const deleteUsuarioById = async (req, res) => {
+export const deleteById = async (req, res) => {
     try{
         const {id} = req.params
         if(isNaN(id)) {
@@ -153,7 +153,7 @@ export const deleteUsuarioById = async (req, res) => {
             })
         }
 
-        const deleted = await usuarioModel.deleteUsuarioById(id)
+        const deleted = await usuarioModel.deleteById(id)
         if(!deleted){
             return errorRes(res, {
               message: 'Usuario no encontrado',

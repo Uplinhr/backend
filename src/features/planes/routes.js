@@ -1,21 +1,21 @@
 import express from 'express'
 import { 
-  getPlanes,
-  getPlanById,
-  deletePlanById,
-  createPlan,
-  editPlanById
+  getAll,
+  getById,
+  deleteById,
+  create,
+  editById
 } from './controller.js';
 import { authRequired, checkRole } from '../../middlewares/auth.js';
 const router = express.Router()
 
 // Rutas protegidas
-router.get('/', authRequired, getPlanes); 
-router.get('/:id', authRequired, getPlanById)
+router.get('/', authRequired, getAll);
+router.get('/:id', authRequired, getById)
 
 // Rutas solo para admin
-router.delete('/:id', authRequired, checkRole(['admin']), deletePlanById)
-router.put('/:id', authRequired, checkRole(['admin']), editPlanById)
-router.post('/', authRequired, checkRole(['admin']), createPlan)
+router.delete('/:id', authRequired, checkRole(['admin']), deleteById)
+router.put('/:id', authRequired, checkRole(['admin']), editById)
+router.post('/', authRequired, checkRole(['admin']), create)
 
 export default router

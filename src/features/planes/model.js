@@ -13,28 +13,28 @@ const planModel = {
     );
     return rows || null
     },*/
-    getPlanById: async (id) => {
+    getById: async (id) => {
         const [rows] = await pool.query(
             'SELECT nombre, creditos_mes, meses_cred, horas_cons, precio, estado FROM planes WHERE id = ?', 
             [id]
         );
         return rows[0] || null
     },
-    editPlanById: async (id, plan) => {
-        const [rows] = await pool.query(
+    editById: async (id, plan) => {
+        const [result] = await pool.query(
             'UPDATE planes SET nombre = ?, creditos_mes = ?, meses_cred = ?, horas_cons = ?, precio = ?, estado = ? WHERE id = ?',
             [plan.nombre, plan.creditos_mes, plan.meses_cred, plan.horas_cons, plan.precio, plan.estado, id]
         )
-        return rows[0] || null
+        return result.affectedRows > 0
     },
-    createPlan: async (nombre, creditos_mes, meses_cred, horas_cons, precio, estado) => {
+    create: async (nombre, creditos_mes, meses_cred, horas_cons, precio, estado) => {
         const [plan] = await pool.query(
             `INSERT INTO planes (nombre, creditos_mes, meses_cred, horas_cons, precio, estado) 
             VALUES (?, ?, ?, ?, ?, ?)`, [nombre, creditos_mes, meses_cred, horas_cons, precio, estado]
         )
         return plan.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
     },
-    deletePlanById: async (id) => {
+    deleteById: async (id) => {
         const [result] = await pool.query(
             'DELETE FROM planes WHERE id = ?',
             [id]
