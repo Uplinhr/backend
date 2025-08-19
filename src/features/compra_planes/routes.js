@@ -10,10 +10,10 @@ import { authRequired, checkRole } from '../../middlewares/auth.js';
 const router = express.Router()
 
 // Rutas protegidas
-router.get('/', authRequired, getCompra_Planes);
-router.get('/:id', authRequired, getCompra_PlanById)
 
 // Rutas solo para admin
+router.get('/', authRequired, checkRole(['admin']), getCompra_Planes);
+router.get('/:id', authRequired, checkRole(['admin']), getCompra_PlanById)
 router.delete('/:id', authRequired, checkRole(['admin']), deleteCompra_PlanById)
 router.put('/:id', authRequired, checkRole(['admin']), editCompra_PlanById)
 router.post('/', authRequired, checkRole(['admin']), createCompra_Plan)

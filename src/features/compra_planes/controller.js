@@ -83,15 +83,15 @@ export const editCompra_PlanById = async (req, res) => {
 
 export const createCompra_Plan = async (req, res) => {
   try {
-    const {fecha_compra, medio_pago, observaciones, id_plan} = req.body;
-    if(!fecha_compra || !medio_pago || !observaciones || !id_plan) {
+    const {medio_pago, observaciones, id_plan} = req.body;
+    if(!medio_pago || !observaciones || !id_plan) {
       return errorRes(res, {
         message: 'Se requieren todos los campos',
         statusCode: 404
       })
     }
 
-    const idCompra_Plan = await compra_planModel.create(fecha_compra, medio_pago, observaciones, id_plan)
+    const idCompra_Plan = await compra_planModel.create(medio_pago, observaciones, id_plan)
 
     successRes(res, {
       data: { id: idCompra_Plan },

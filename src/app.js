@@ -10,6 +10,7 @@ import { creditosRoutes } from './features/creditos/index.js';
 import { consumosRoutes } from './features/consumos/index.js';
 import { compra_creditosRoutes } from './features/compra_creditos/index.js';
 import { empresasRoutes } from './features/empresa/index.js';
+import { consultoriasRoutes } from './features/consultorias/index.js';
 
 const app = express();
 
@@ -30,5 +31,6 @@ app.use('/api/creditos', creditosRoutes)
 app.use('/api/consumos', consumosRoutes)
 app.use('/api/compra_creditos', compra_creditosRoutes)
 app.use('/api/empresas', empresasRoutes)
+app.use('/api/consultorias', consultoriasRoutes)
 
 export default app

@@ -22,15 +22,15 @@ const compra_planModel = {
     },
     editCompra_PlanById: async (id, plan) => {
         const [result] = await pool.query(
-            'UPDATE compra_planes SET fecha_compra = ?, medio_pago = ?, observaciones = ?, id_plan = ? WHERE id = ?',
-            [plan.fecha_compra, plan.medio_pago, plan.observaciones, plan.id_plan, id]
+            'UPDATE compra_planes SET medio_pago = ?, observaciones = ?, id_plan = ? WHERE id = ?',
+            [plan.medio_pago, plan.observaciones, plan.id_plan, id]
         )
         return result.affectedRows > 0
     },
-    createPlan: async (fecha_compra, medio_pago, observaciones, id_plan) => {
+    create: async (medio_pago, observaciones, id_plan) => {
         const [compra_plan] = await pool.query(
-            `INSERT INTO compra_planes (fecha_compra, medio_pago, observaciones, id_plan) 
-            VALUES (?, ?, ?, ?)`, [fecha_compra, medio_pago, observaciones, id_plan]
+            `INSERT INTO compra_planes (medio_pago, observaciones, id_plan) 
+            VALUES (?, ?, ?)`, [medio_pago, observaciones, id_plan]
         )
         return compra_plan.insertId
     },
