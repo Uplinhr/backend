@@ -8,6 +8,8 @@ import { planesRoutes } from './features/planes/index.js';
 import { compra_planesRoutes } from './features/compra_planes/index.js';
 import { creditosRoutes } from './features/creditos/index.js';
 import { consumosRoutes } from './features/consumos/index.js';
+import { compra_creditosRoutes } from './features/compra_creditos/index.js';
+import { empresasRoutes } from './features/empresa/index.js';
 
 const app = express();
 
@@ -26,5 +28,7 @@ app.use('/api/planes', planesRoutes)
 app.use('/api/compra_planes', compra_planesRoutes)
 app.use('/api/creditos', creditosRoutes)
 app.use('/api/consumos', consumosRoutes)
+app.use('/api/compra_creditos', compra_creditosRoutes)
+app.use('/api/empresas', empresasRoutes)
 
 export default app

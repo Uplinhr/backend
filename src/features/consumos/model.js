@@ -22,8 +22,8 @@ const consumoModel = {
     },
     editById: async (id, consumo) => {
         const [result] = await pool.query(
-            'UPDATE consumos SET fecha_consumo = ?, tipo_busqueda = ?, creditos_usados = ?, observaciones = ?, estado = ?, id_cred = ? WHERE id = ?',
-            [consumo.fecha_consumo, consumo.tipo_busqueda, consumo.creditos_usados, consumo.observaciones, consumo.estado, consumo.id_cred, id]
+            'UPDATE consumos SET tipo_busqueda = ?, creditos_usados = ?, observaciones = ?, estado = ?, id_cred = ? WHERE id = ?',
+            [consumo.tipo_busqueda, consumo.creditos_usados, consumo.observaciones, consumo.estado, consumo.id_cred, id]
         )
         return result.affectedRows > 0
     },

@@ -5,13 +5,15 @@ import {
   deleteById,
   create,
   editById,
-  getOwn
+  getOwn,
+  editOwn
 } from './controller.js';
 import { authRequired, checkRole } from '../../middlewares/auth.js';
 const router = express.Router()
 
 // Rutas protegidas
-router.get('/self', authRequired, getOwn) //todavia no funciona esta ruta
+router.get('/self', authRequired, getOwn)
+router.put('/self', authRequired, editOwn)
 
 // Rutas solo para admin
 router.get('/', authRequired, checkRole(['admin']), getAll);
