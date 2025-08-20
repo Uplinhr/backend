@@ -1,22 +1,22 @@
 import { successRes, errorRes } from "../../utils/apiResponse.js";
-import consumoModel from "./model.js";
+import consultaModel from "./model.js";
 
 export const getAll = async (req, res) => {
   try{
-    const consumos = await consumoModel.getAll()
-    if(consumos === null){
+    const consultas = await consultaModel.getAll()
+    if(consultas === null){
       return errorRes(res, {
-        message: 'No se han encontrado consumos',
+        message: 'No se han encontrado consultas',
         statusCode: 404,
       })
     }
     successRes(res, {
-      data: consumos,
-      message: 'consumos obtenidos correctamente',
+      data: consultas,
+      message: 'consultas obtenidas correctamente',
     });
   } catch (error){
     errorRes(res, {
-      message: 'Error al obtener consumos',
+      message: 'Error al obtener consultas',
       statusCode: 500,
       errors: error.message
     });
@@ -32,20 +32,20 @@ export const getOwn = async (req, res) => { //No puede ser con getById, se debe 
         statusCode: 400
       })
     }
-    const credito = await consumoModel.getById(id)
-    if(credito === null){ // SI NO EXISTE EL credito
+    const consulta = await consultaModel.getById(id)
+    if(consulta === null){ // SI NO EXISTE la consulta
       return errorRes(res,{
-        message: 'consumo no encontrado',
+        message: 'consulta no encontrada',
         statusCode: 404
       })
     }
     successRes(res, {
-      data: credito,
-      message: 'consumo obtenido correctamente'
+      data: consulta,
+      message: 'consulta obtenida correctamente'
     })
   } catch (error){
     errorRes(res, {
-      message: 'Error al obtener la consumo',
+      message: 'Error al obtener la consulta',
       statusCode: 500,
       errors: error.message
     });
@@ -61,20 +61,20 @@ export const getById = async (req, res) => {
         statusCode: 400
       })
     }
-    const consumo = await consumoModel.getById(id)
-    if(consumo === null){ // SI NO EXISTE EL consumo
+    const consulta = await consultaModel.getById(id)
+    if(consulta === null){ // SI NO EXISTE la consulta
       return errorRes(res,{
-        message: 'consumo no encontrado',
+        message: 'consulta no encontrada',
         statusCode: 404
       })
     }
     successRes(res, {
-      data: consumo,
-      message: 'consumo obtenido correctamente'
+      data: consulta,
+      message: 'consulta obtenida correctamente'
     })
   } catch (error){
     errorRes(res, {
-      message: 'Error al obtener el consumo',
+      message: 'Error al obtener la consulta',
       statusCode: 500,
       errors: error.message
     });
@@ -90,20 +90,20 @@ export const editById = async (req, res) => {
             statusCode: 404
         })
     }
-    const changed = await consumoModel.editById(id, req.body)
+    const changed = await consultaModel.editById(id, req.body)
     if(!changed){
       return errorRes(res, {
-        message: 'El consumo no se cambió',
+        message: 'La consulta no se cambió',
         statusCode: 500
       })
     }
     successRes(res, {
-      message: 'consumo editado exitosamente',
+      message: 'consulta editada exitosamente',
       statusCode: 201
     })
   } catch(error){
     errorRes(res, {
-      message: 'Error al editar el consumo',
+      message: 'Error al editar la consulta',
       statusCode: 500,
       errors: error.message
     });
@@ -112,23 +112,23 @@ export const editById = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const {tipo_busqueda, creditos_usados, observaciones, id_cred} = req.body;
-    if(!tipo_busqueda || !creditos_usados || !observaciones || !id_cred) {
+    const {cantidad_horas, observaciones, id_consultoria} = req.body;
+    if(!cantidad_horas || !observaciones || !id_consultoria) {
       return errorRes(res, {
         message: 'Se requieren todos los campos',
         statusCode: 404
       })
     }
 
-    const idCredito = await consumoModel.create(tipo_busqueda, creditos_usados, observaciones, id_cred)
+    const idConsulta = await consultaModel.create(cantidad_horas, observaciones, id_consultoria)
     successRes(res, {
-      data: { id: idCredito },
-      message: 'consumo creado exitosamente',
+      data: { id: idConsulta },
+      message: 'consulta creada exitosamente',
       statusCode: 201
     })
   } catch (error) {
     errorRes(res, {
-      message: 'Error al crear el consumo',
+      message: 'Error al crear la consulta',
       statusCode: 500,
       errors: error.message
     });
@@ -145,20 +145,20 @@ export const deleteById = async (req, res) => {
       })
     }
     
-    const deleted = await consumoModel.deleteById(id)
+    const deleted = await consultaModel.deleteById(id)
     if(!deleted){
       return errorRes(res, {
-        message: 'consumo no encontrado',
+        message: 'consulta no encontrada',
         statusCode: 404
       });
     }
     successRes(res, {
-      message: 'consumo eliminado exitosamente',
+      message: 'consulta eliminada exitosamente',
       statusCode: 201
     })
   } catch (error) {
     errorRes(res, {
-      message: 'Error al eliminar consumo',
+      message: 'Error al eliminar consulta',
       statusCode: 500,
       errors: error.message
     });
