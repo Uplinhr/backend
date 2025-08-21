@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS consultorias (
     horas_totales INT NOT NULL,
     horas_restantes INT NOT NULL,
     vencimiento TIMESTAMP NULL,
-    id_usuario INT NULL,
+    id_usuario INT NULL UNIQUE,
     FOREIGN KEY (id_usuario) 
         REFERENCES usuarios(id)
         ON DELETE RESTRICT

@@ -150,7 +150,7 @@ export const editOwn = async (req, res) => {
 export const create = async (req, res) => {
   try {
     const {nombre, email, id_usuario} = req.body;
-    if(!nombre || !email || !id_usuario) {
+    if(!nombre || !email || !id_usuario) { //si id_usuario es null, da error
       return errorRes(res, {
         message: 'Se requieren todos los campos',
         statusCode: 404
@@ -164,6 +164,13 @@ export const create = async (req, res) => {
       statusCode: 201
     })
   } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return errorRes(res, {
+        message: 'El usuario ya tiene una empresa asociada',
+        statusCode: 409,
+        errors: error.code
+      })
+    }
     errorRes(res, {
       message: 'Error al crear la empresa',
       statusCode: 500,

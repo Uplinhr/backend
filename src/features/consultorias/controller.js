@@ -128,6 +128,13 @@ export const create = async (req, res) => {
       statusCode: 201
     })
   } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return errorRes(res, {
+        message: 'El usuario ya tiene una consultoria asociada',
+        statusCode: 409,
+        errors: error.code
+      })
+    }
     errorRes(res, {
       message: 'Error al crear la consultoria',
       statusCode: 500,

@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS empresas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL,
-    id_usuario INT NULL,
+    id_usuario INT NULL UNIQUE,
     FOREIGN KEY (id_usuario) 
         REFERENCES usuarios(id)
         ON DELETE RESTRICT
