@@ -3,7 +3,41 @@ import pool from '../../database/database.js'
 const authModel = {
     login: async (email) => {
         const [user] = await pool.query(
-            'SELECT * FROM usuarios WHERE email = ?', //posiblemente no deba enviar todo
+            `SELECT 
+            u.*,
+            JSON_OBJECT(
+                'id', p.id,
+                'nombre', p.nombre,
+                'creditos_mes', p.creditos_mes,
+                'meses_cred', p.meses_cred,
+                'horas_cons', p.horas_cons,
+                'precio', p.precio
+                ) AS plan,
+            JSON_OBJECT(
+                'id', c.id,
+                'tipo_credito', c.tipo_credito,
+                'cantidad', c.cantidad,
+                'vencimiento', c.vencimiento
+            ) AS creditos,
+            JSON_OBJECT(
+                'id', cons.id,
+                'horas_totales', cons.horas_totales,
+                'horas_restantes', cons.horas_restantes,
+                'fecha_asignacion', cons.fecha_asignacion,
+                'vencimiento', cons.vencimiento
+            ) AS consultorias,
+            JSON_OBJECT(
+                'id', e.id,
+                'nombre', e.nombre,
+                'email', e.email
+            ) AS empresas
+            FROM usuarios u
+            LEFT JOIN planes p ON u.id_plan = p.id
+            LEFT JOIN creditos c ON c.id_usuario = u.id
+            LEFT JOIN consultorias cons ON cons.id_usuario = u.id
+            LEFT JOIN empresas e ON e.id_usuario = u.id
+            WHERE u.email = ?;
+            `,
             [email]
         );
         return user[0] || null
