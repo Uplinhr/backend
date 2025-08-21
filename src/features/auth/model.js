@@ -13,11 +13,17 @@ const authModel = {
                 'horas_cons', p.horas_cons,
                 'precio', p.precio
                 ) AS plan,
-            JSON_OBJECT(
-                'id', c.id,
-                'tipo_credito', c.tipo_credito,
-                'cantidad', c.cantidad,
-                'vencimiento', c.vencimiento
+            (
+                SELECT JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'id', c.id,
+                        'tipo_credito', c.tipo_credito,
+                        'cantidad', c.cantidad,
+                        'vencimiento', c.vencimiento
+                    )
+                )
+                FROM creditos c 
+                WHERE c.id_usuario = u.id
             ) AS creditos,
             JSON_OBJECT(
                 'id', cons.id,
@@ -33,7 +39,6 @@ const authModel = {
             ) AS empresas
             FROM usuarios u
             LEFT JOIN planes p ON u.id_plan = p.id
-            LEFT JOIN creditos c ON c.id_usuario = u.id
             LEFT JOIN consultorias cons ON cons.id_usuario = u.id
             LEFT JOIN empresas e ON e.id_usuario = u.id
             WHERE u.email = ?;
