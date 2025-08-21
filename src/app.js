@@ -1,5 +1,6 @@
 import express from 'express'
 import morgan from 'morgan'
+import cors from 'cors'
 import config from './config.js'
 import {usuariosRoutes} from './features/usuarios/index.js'
 import cookieParser from 'cookie-parser';
@@ -16,9 +17,11 @@ import { consultasRoutes } from './features/consulta/index.js';
 const app = express();
 
 //middlewares
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'))
+//app.use(express.urlencoded({ extended: true }));
 
 // configuracion
 app.set('port', config.app.port)
