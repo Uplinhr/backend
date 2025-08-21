@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import authModel from './model.js';
 import { successRes, errorRes } from "../../utils/apiResponse.js";
+import { Resend } from "resend";
 
 export const register = async (req, res) => {
   try {
@@ -22,7 +23,7 @@ export const register = async (req, res) => {
 
     res.cookie('token', token, { httpOnly: true });
     successRes(res, {
-      data: { id: idUsuario },
+      data: { id: idUsuario, token },
       message: 'Usuario creado exitosamente',
       statusCode: 201
     })
@@ -58,7 +59,7 @@ export const login = async (req, res) => {
 
     res.cookie('token', token, { httpOnly: true, secure: !process.env.DEV });
     successRes(res, {
-      data: { user },
+      data: { user, token },
       message: 'Sesión iniciada',
       statusCode: 201
     })
@@ -111,9 +112,43 @@ export const editPassword = async (req, res) => {
 }
 
 // Enviar el mail
-export const mailRecoverPassword = async (req, res) => {
+export const requestPasswordReset = async (req, res) => {
+  const resend = new Resend(process.env.MAIL_API_KEY);
+  const {mail} = req.body
   try{
-    const {id} = req.params
+    const user = await authModel.login(mail)
+    if(!user){
+      return errorRes(res, {
+        message: "No se ha encontrado el mail",
+        statusCode: 404
+      })
+    }
+
+    
+    //generar token y hashearlo
+
+    //crear resetPassword
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+
+    const { data, error } = await resend.emails.send({
+      from: `Uplin <${process.env.EMAIL_FROM}>`,
+      to: [mail],
+      subject: "hello world",
+      html: "<strong>Esto deberia tener un link con un token</strong>",
+    });
+    if (error) {
+      return errorRes(res, {
+        message: 'Error de resend',
+        statusCode: error.statusCode,
+        errors: error.message || error.error
+      })
+    }
+    successRes(res, {
+      message: 'Se envió el mail correctamente',
+      statusCode: 200,
+      data: data
+    })
   } catch(error){
     errorRes(res, {
       message: 'Error al enviar el mail para recuperar contraseña',
@@ -125,6 +160,7 @@ export const mailRecoverPassword = async (req, res) => {
 
 // Despues del mail
 export const recoverPassword = async (req, res)=> {
+  const { token } = req.cookies; //Puede ser que no esté en las cookies
   try{
     const {id, contrasenia} = req.body
     if(isNaN(id)) {     //No es necesario este if
