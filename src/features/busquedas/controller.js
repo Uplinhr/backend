@@ -32,7 +32,7 @@ export const getOwn = async (req, res) => { //No puede ser con getById, se debe 
         statusCode: 400
       })
     }
-    const busqueda = await busquedaModel.getById(id)
+    const busqueda = await busquedaModel.getByUserId(id)
     if(busqueda === null){ // SI NO EXISTE EL busqueda
       return errorRes(res,{
         message: 'busqueda no encontrado',

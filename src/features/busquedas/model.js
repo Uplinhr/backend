@@ -20,6 +20,36 @@ const busquedaModel = {
         );
         return rows[0] || null
     },
+    getByUserId: async(id) => {
+        const [rows] = await pool.query(
+            `SELECT 
+                b.*,
+                JSON_OBJECT(
+                'id', c.id,
+                'tipo_credito', c.tipo_credito,
+                'cantidad', c.cantidad,
+                'fecha_alta', c.fecha_alta,
+                'vencimiento', c.vencimiento
+                ) AS creditos,
+                JSON_OBJECT(
+                'id', u.id,
+                'nombre', u.nombre,
+                'apellido', u.apellido,
+                'email', u.email,
+                'fecha_alta', u.fecha_alta,
+                'rol', u.rol,
+                'num_celular', u.num_celular,
+                'active', u.active
+                ) AS usuario
+                FROM busquedas b
+                LEFT JOIN creditos c ON b.id_cred = c.id
+                LEFT JOIN usuarios u ON c.id_usuario = u.id
+                WHERE u.id = ?;
+            `,
+            [id]
+        )
+        return rows || null
+    },
     editById: async (id, busqueda) => {
         const [result] = await pool.query(
             'UPDATE busquedas SET info_busqueda = ?, creditos_usados = ?, observaciones = ?, estado = ?, id_cred = ?, id_tipo = ?, id_proceso = ?, ultima_mod = NOW() WHERE id = ?',

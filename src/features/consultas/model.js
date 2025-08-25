@@ -20,6 +20,36 @@ const consultaModel = {
         );
         return rows[0] || null
     },
+    getByUserId: async(id) => {
+        const [rows] = await pool.query(
+            `SELECT 
+                cons.*,
+                JSON_OBJECT(
+                'id', c.id,
+                'horas_restantes', c.horas_restantes,
+                'horas_totales', c.horas_totales,
+                'fecha_alta', c.fecha_alta,
+                'vencimiento', c.vencimiento
+                ) AS consultorias,
+                JSON_OBJECT(
+                'id', u.id,
+                'nombre', u.nombre,
+                'apellido', u.apellido,
+                'email', u.email,
+                'fecha_alta', u.fecha_alta,
+                'rol', u.rol,
+                'num_celular', u.num_celular,
+                'active', u.active
+                ) AS usuario
+                FROM consultas cons
+                LEFT JOIN consultorias c ON cons.id_consultoria = c.id
+                LEFT JOIN usuarios u ON c.id_usuario = u.id
+                WHERE u.id = ?;
+            `,
+            [id]
+        )
+        return rows || null
+    },
     editById: async (id, consulta) => {
         const [result] = await pool.query(
             'UPDATE consultas SET cantidad_horas = ?, comentarios = ?, observaciones = ?, estado = ?, id_consultoria = ?, ultima_mod = NOW() WHERE id = ?',

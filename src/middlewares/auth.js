@@ -11,6 +11,7 @@ export const authRequired = async (req, res, next) => {
     const [user] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [decoded.id]);
     
     if (!user) return res.status(401).json({ message: "Usuario no existe" });
+    if(!user[0].active) return res.status(401).json({ message: "Usuario desactivado" });
 
     req.user = user[0];
     next();

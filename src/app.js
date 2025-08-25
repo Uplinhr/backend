@@ -12,7 +12,7 @@ import { busquedasRoutes } from './features/busquedas/index.js';
 import { compra_creditosRoutes } from './features/compra_creditos/index.js';
 import { empresasRoutes } from './features/empresa/index.js';
 import { consultoriasRoutes } from './features/consultorias/index.js';
-import { consultasRoutes } from './features/consulta/index.js';
+import { consultasRoutes } from './features/consultas/index.js';
 
 const app = express();
 

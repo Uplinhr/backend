@@ -11,7 +11,7 @@ import { authRequired, checkRole } from '../../middlewares/auth.js';
 const router = express.Router()
 
 // Rutas protegidas
-router.get('/self', authRequired, getOwn) //todavia no funciona esta ruta
+router.get('/self', authRequired, getOwn)
 
 // Rutas solo para admin
 router.get('/', authRequired, checkRole(['admin']), getAll);

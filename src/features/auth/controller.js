@@ -124,6 +124,12 @@ export const requestPasswordReset = async (req, res) => {
         statusCode: 404
       })
     }
+    if(!user.active){
+      return errorRes(res, {
+        message: "Usuario desactivado",
+        statusCode: 409
+      })
+    }
 
     
     //generar token y hashearlo
