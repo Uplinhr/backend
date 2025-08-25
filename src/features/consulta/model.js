@@ -15,15 +15,15 @@ const consultaModel = {
     },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT fecha_consulta, cantidad_horas, observaciones, estado, id_consultoria FROM consultas WHERE id = ?', 
+            'SELECT fecha_alta, ultima_mod, cantidad_horas, comentarios, observaciones, estado, id_consultoria FROM consultas WHERE id = ?', 
             [id]
         );
         return rows[0] || null
     },
     editById: async (id, consulta) => {
         const [result] = await pool.query(
-            'UPDATE consultas SET cantidad_horas = ?, observaciones = ?, estado = ?, id_consultoria = ? WHERE id = ?',
-            [consulta.cantidad_horas, consulta.observaciones, consulta.estado, consulta.id_consultoria, id]
+            'UPDATE consultas SET cantidad_horas = ?, comentarios = ?, observaciones = ?, estado = ?, id_consultoria = ?, ultima_mod = NOW() WHERE id = ?',
+            [consulta.cantidad_horas, consulta.comentarios, consulta.observaciones, consulta.estado, consulta.id_consultoria, id]
         )
         return result.affectedRows > 0
     },
@@ -36,8 +36,8 @@ const consultaModel = {
     },
     deleteById: async (id) => {
         const [result] = await pool.query(
-            'DELETE FROM consultas WHERE id = ?',
-            [id]
+            `UPDATE consultas SET estado = ? WHERE id = ?`,
+            ['Eliminado', id]
         )
         return result.affectedRows > 0 // Retorna true si eliminó algún registro
     }

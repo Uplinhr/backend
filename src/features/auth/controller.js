@@ -6,7 +6,7 @@ import { Resend } from "resend";
 
 export const register = async (req, res) => {
   try {
-    const {nombre, apellido, contrasenia, email} = req.body;
+    const {nombre, apellido, contrasenia, email, num_celular} = req.body;
     if(!nombre || !apellido || !contrasenia || !email) {
       return errorRes(res, {
         message: 'Se requieren todos los campos',
@@ -15,7 +15,7 @@ export const register = async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
 
-    const idUsuario = await authModel.createUsuario(nombre, apellido, hashedPassword, email)
+    const idUsuario = await authModel.createUsuario(nombre, apellido, hashedPassword, email, num_celular)
 
     const token = jwt.sign({ id: idUsuario }, process.env.JWT_SECRET, {
       expiresIn: '1h'
@@ -31,7 +31,8 @@ export const register = async (req, res) => {
     if (error.code === 'ER_DUP_ENTRY') {
       errorRes(res, {
         message: 'El email ya está registrado',
-        statusCode: 409
+        statusCode: 409,
+        errors: error.code
       });
     }
     errorRes(res, {
@@ -51,7 +52,7 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(req.body.contrasenia, user.contrasenia);
     if (!isMatch) return errorRes(res, {message: 'Contraseña incorrecta',statusCode: 400});
 
-    if(user.estado === 'inactivo') return errorRes(res, {message: 'Usuario desactivado',statusCode: 400});
+    if(!user.active) return errorRes(res, {message: 'Usuario desactivado',statusCode: 400});
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: '1h'

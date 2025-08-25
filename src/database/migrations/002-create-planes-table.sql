@@ -5,5 +5,7 @@ CREATE TABLE IF NOT EXISTS planes (
     meses_cred INT NOT NULL,
     horas_cons int NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
-    estado ENUM('activo', 'inactivo') DEFAULT 'activo'
+    active BOOLEAN DEFAULT TRUE,
+    fecha_alta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ultima_mod TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;

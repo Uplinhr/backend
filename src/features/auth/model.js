@@ -11,7 +11,10 @@ const authModel = {
                 'creditos_mes', p.creditos_mes,
                 'meses_cred', p.meses_cred,
                 'horas_cons', p.horas_cons,
-                'precio', p.precio
+                'precio', p.precio,
+                'active', p.active,
+                'fecha_alta', p.fecha_alta,
+                'ultima_mod', p.ultima_mod
                 ) AS plan,
             (
                 SELECT JSON_ARRAYAGG(
@@ -19,7 +22,8 @@ const authModel = {
                         'id', c.id,
                         'tipo_credito', c.tipo_credito,
                         'cantidad', c.cantidad,
-                        'vencimiento', c.vencimiento
+                        'vencimiento', c.vencimiento,
+                        'fecha_alta', c.fecha_alta
                     )
                 )
                 FROM creditos c 
@@ -29,13 +33,16 @@ const authModel = {
                 'id', cons.id,
                 'horas_totales', cons.horas_totales,
                 'horas_restantes', cons.horas_restantes,
-                'fecha_asignacion', cons.fecha_asignacion,
+                'fecha_alta', cons.fecha_alta,
                 'vencimiento', cons.vencimiento
             ) AS consultorias,
             JSON_OBJECT(
                 'id', e.id,
                 'nombre', e.nombre,
-                'email', e.email
+                'email', e.email,
+                'active', e.active,
+                'fecha_alta', e.fecha_alta,
+                'ultima_mod', e.ultima_mod
             ) AS empresas
             FROM usuarios u
             LEFT JOIN planes p ON u.id_plan = p.id
@@ -47,10 +54,10 @@ const authModel = {
         );
         return user[0] || null
     },
-    createUsuario: async (nombre, apellido, hashedPassword, email) => {
+    createUsuario: async (nombre, apellido, hashedPassword, email, num_celular) => {
         const [usuario] = await pool.query(
-            `INSERT INTO usuarios (nombre, apellido, contrasenia, email)
-            VALUES (?, ?, ?, ?)`, [nombre, apellido, hashedPassword, email]
+            `INSERT INTO usuarios (nombre, apellido, contrasenia, email ${num_celular? ', num_celular' : ''})
+            VALUES (?, ?, ?, ?${num_celular? ', ?': ''})`, [nombre, apellido, hashedPassword, email, num_celular]
         )
         return usuario.insertId
     },

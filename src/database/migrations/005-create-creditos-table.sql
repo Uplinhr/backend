@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS creditos (
     vencimiento TIMESTAMP NULL,
     tipo_credito ENUM('plan', 'adicional') DEFAULT 'plan',
     cantidad INT NOT NULL,
+    fecha_alta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_usuario INT NULL,
     FOREIGN KEY (id_usuario) 
         REFERENCES usuarios(id)

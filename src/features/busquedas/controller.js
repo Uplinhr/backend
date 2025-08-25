@@ -1,22 +1,22 @@
 import { successRes, errorRes } from "../../utils/apiResponse.js";
-import consumoModel from "./model.js";
+import busquedaModel from "./model.js";
 
 export const getAll = async (req, res) => {
   try{
-    const consumos = await consumoModel.getAll()
-    if(consumos === null){
+    const busquedas = await busquedaModel.getAll()
+    if(busquedas === null){
       return errorRes(res, {
-        message: 'No se han encontrado consumos',
+        message: 'No se han encontrado busquedas',
         statusCode: 404,
       })
     }
     successRes(res, {
-      data: consumos,
-      message: 'consumos obtenidos correctamente',
+      data: busquedas,
+      message: 'busquedas obtenidos correctamente',
     });
   } catch (error){
     errorRes(res, {
-      message: 'Error al obtener consumos',
+      message: 'Error al obtener busquedas',
       statusCode: 500,
       errors: error.message
     });
@@ -32,20 +32,20 @@ export const getOwn = async (req, res) => { //No puede ser con getById, se debe 
         statusCode: 400
       })
     }
-    const credito = await consumoModel.getById(id)
-    if(credito === null){ // SI NO EXISTE EL credito
+    const busqueda = await busquedaModel.getById(id)
+    if(busqueda === null){ // SI NO EXISTE EL busqueda
       return errorRes(res,{
-        message: 'consumo no encontrado',
+        message: 'busqueda no encontrado',
         statusCode: 404
       })
     }
     successRes(res, {
-      data: credito,
-      message: 'consumo obtenido correctamente'
+      data: busqueda,
+      message: 'busqueda obtenido correctamente'
     })
   } catch (error){
     errorRes(res, {
-      message: 'Error al obtener la consumo',
+      message: 'Error al obtener la busqueda',
       statusCode: 500,
       errors: error.message
     });
@@ -61,20 +61,20 @@ export const getById = async (req, res) => {
         statusCode: 400
       })
     }
-    const consumo = await consumoModel.getById(id)
-    if(consumo === null){ // SI NO EXISTE EL consumo
+    const busqueda = await busquedaModel.getById(id)
+    if(busqueda === null){ // SI NO EXISTE EL busqueda
       return errorRes(res,{
-        message: 'consumo no encontrado',
+        message: 'busqueda no encontrado',
         statusCode: 404
       })
     }
     successRes(res, {
-      data: consumo,
-      message: 'consumo obtenido correctamente'
+      data: busqueda,
+      message: 'busqueda obtenido correctamente'
     })
   } catch (error){
     errorRes(res, {
-      message: 'Error al obtener el consumo',
+      message: 'Error al obtener el busqueda',
       statusCode: 500,
       errors: error.message
     });
@@ -90,20 +90,20 @@ export const editById = async (req, res) => {
             statusCode: 404
         })
     }
-    const changed = await consumoModel.editById(id, req.body)
+    const changed = await busquedaModel.editById(id, req.body)
     if(!changed){
       return errorRes(res, {
-        message: 'El consumo no se cambió',
+        message: 'El busqueda no se cambió',
         statusCode: 500
       })
     }
     successRes(res, {
-      message: 'consumo editado exitosamente',
+      message: 'busqueda editado exitosamente',
       statusCode: 201
     })
   } catch(error){
     errorRes(res, {
-      message: 'Error al editar el consumo',
+      message: 'Error al editar el busqueda',
       statusCode: 500,
       errors: error.message
     });
@@ -120,15 +120,15 @@ export const create = async (req, res) => {
       })
     }
 
-    const idCredito = await consumoModel.create(tipo_busqueda, creditos_usados, observaciones, id_cred)
+    const idCredito = await busquedaModel.create(tipo_busqueda, creditos_usados, observaciones, id_cred)
     successRes(res, {
       data: { id: idCredito },
-      message: 'consumo creado exitosamente',
+      message: 'busqueda creado exitosamente',
       statusCode: 201
     })
   } catch (error) {
     errorRes(res, {
-      message: 'Error al crear el consumo',
+      message: 'Error al crear el busqueda',
       statusCode: 500,
       errors: error.message
     });
@@ -145,20 +145,20 @@ export const deleteById = async (req, res) => {
       })
     }
     
-    const deleted = await consumoModel.deleteById(id)
+    const deleted = await busquedaModel.deleteById(id)
     if(!deleted){
       return errorRes(res, {
-        message: 'consumo no encontrado',
+        message: 'busqueda no encontrado',
         statusCode: 404
       });
     }
     successRes(res, {
-      message: 'consumo eliminado exitosamente',
+      message: 'busqueda eliminado exitosamente',
       statusCode: 201
     })
   } catch (error) {
     errorRes(res, {
-      message: 'Error al eliminar consumo',
+      message: 'Error al eliminar busqueda',
       statusCode: 500,
       errors: error.message
     });

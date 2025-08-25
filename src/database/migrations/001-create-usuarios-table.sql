@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email VARCHAR(100) NOT NULL UNIQUE,
     contrasenia VARCHAR(255) NOT NULL,
     fecha_alta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    estado ENUM('activo', 'inactivo') DEFAULT 'activo',
+    active BOOLEAN DEFAULT TRUE,
+    num_celular VARCHAR(20) NULL,
     rol ENUM('cliente', 'admin') DEFAULT 'cliente'
 ) ENGINE=InnoDB;
