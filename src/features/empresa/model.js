@@ -15,21 +15,21 @@ const empresaModel = {
     },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT nombre, email, id_usuario FROM empresas WHERE id = ?', 
+            'SELECT nombre, email, id_usuario, active, fecha_alta, ultima_mod FROM empresas WHERE id = ?', 
             [id]
         );
         return rows[0] || null
     },
     editById: async (id, empresa) => {
         const [result] = await pool.query(
-            'UPDATE empresas SET nombre = ?, email = ?, id_usuario = ? WHERE id = ?',
+            'UPDATE empresas SET nombre = ?, email = ?, id_usuario = ?, ultima_mod = NOW() WHERE id = ?',
             [empresa.nombre, empresa.email, empresa.id_usuario, id]
         )
         return result.affectedRows > 0
     },
     editOwn: async (empresa) => {
         const [result] = await pool.query(
-            'UPDATE empresas SET nombre = ?, email = ? WHERE id_usuario = ?',
+            'UPDATE empresas SET nombre = ?, email = ?, ultima_mod = NOW() WHERE id_usuario = ?',
             [empresa.nombre, empresa.email, empresa.id_usuario]
         )
         return result.affectedRows > 0
@@ -43,7 +43,7 @@ const empresaModel = {
     },
     deleteById: async (id) => {
         const [result] = await pool.query(
-            'DELETE FROM empresas WHERE id = ?',
+            'UPDATE empresas SET active = false WHERE id = ?',
             [id]
         )
         return result.affectedRows > 0 // Retorna true si eliminó algún registro

@@ -3,7 +3,21 @@ import pool from '../../database/database.js'
 const compra_creditosModel = {
     getAll: async () => {
     const [rows] = await pool.query(
-        'SELECT * FROM compra_creditos'
+        `SELECT 
+        cc.*,
+        CASE 
+            WHEN c.id IS NOT NULL THEN 
+                JSON_OBJECT(
+                    'id', c.id,
+                    'tipo_credito', c.tipo_credito,
+                    'cantidad', c.cantidad,
+                    'vencimiento', c.vencimiento,
+                    'fecha_alta', c.fecha_alta
+                )
+            ELSE NULL 
+        END AS creditos
+        FROM compra_creditos cc
+        LEFT JOIN creditos c ON cc.id_cred = c.id`
     );
     return rows || null
     },/*
@@ -15,7 +29,22 @@ const compra_creditosModel = {
     },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT fecha_compra, medio_pago, costo, observaciones, id_cred FROM compra_creditos WHERE id = ?', 
+            `SELECT 
+            cc.*,
+            CASE 
+                WHEN c.id IS NOT NULL THEN 
+                    JSON_OBJECT(
+                        'id', c.id,
+                        'tipo_credito', c.tipo_credito,
+                        'cantidad', c.cantidad,
+                        'vencimiento', c.vencimiento,
+                        'fecha_alta', c.fecha_alta
+                    )
+                ELSE NULL 
+            END AS creditos
+            FROM compra_creditos cc
+            LEFT JOIN creditos c ON cc.id_cred = c.id
+            WHERE cc.id = ?`, 
             [id]
         );
         return rows[0] || null
