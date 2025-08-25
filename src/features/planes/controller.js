@@ -84,15 +84,15 @@ export const editById = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const {nombre, creditos_mes, meses_cred, horas_cons, precio, estado} = req.body;
-    if(!nombre || !creditos_mes || !meses_cred || !horas_cons || !precio || !estado) {
+    const {nombre, creditos_mes, meses_cred, horas_cons, precio} = req.body;
+    if(!nombre || !creditos_mes || !meses_cred || !horas_cons || !precio) {
       return errorRes(res, {
         message: 'Se requieren todos los campos',
         statusCode: 404
       })
     }
 
-    const idPlan = await planModel.create(nombre, creditos_mes, meses_cred, horas_cons, precio, estado)
+    const idPlan = await planModel.create(nombre, creditos_mes, meses_cred, horas_cons, precio)
 
     successRes(res, {
       data: { id: idPlan },
