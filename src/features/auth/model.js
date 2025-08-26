@@ -4,14 +4,7 @@ const authModel = {
     login: async (email) => {
         const [user] = await pool.query(
             `SELECT 
-                u.id,
-                u.nombre,
-                u.apellido,
-                u.email,
-                u.fecha_alta,
-                u.active,
-                u.num_celular,
-                u.rol,
+                u.*,
                 CASE 
                     WHEN p.id IS NOT NULL THEN 
                         JSON_OBJECT(
@@ -27,6 +20,7 @@ const authModel = {
                         )
                     ELSE NULL 
                 END AS plan,
+                    
                 COALESCE(
                     (
                         SELECT JSON_ARRAYAGG(
@@ -40,10 +34,10 @@ const authModel = {
                         )
                         FROM creditos c 
                         WHERE c.id_usuario = u.id
-                        HAVING COUNT(c.id) > 0
                     ),
                     JSON_ARRAY()
                 ) AS creditos,
+                    
                 CASE 
                     WHEN cons.id IS NOT NULL THEN 
                         JSON_OBJECT(
@@ -55,6 +49,7 @@ const authModel = {
                         )
                     ELSE NULL 
                 END AS consultorias,
+                    
                 CASE 
                     WHEN e.id IS NOT NULL THEN 
                         JSON_OBJECT(
@@ -67,6 +62,7 @@ const authModel = {
                         )
                     ELSE NULL 
                 END AS empresas
+                    
             FROM usuarios u
             LEFT JOIN planes p ON u.id_plan = p.id
             LEFT JOIN consultorias cons ON cons.id_usuario = u.id
