@@ -137,6 +137,7 @@ const usuarioModel = {
                         )
                         FROM creditos c 
                         WHERE c.id_usuario = u.id
+                        AND (c.vencimiento IS NULL OR c.vencimiento >= CURRENT_DATE())
                     ),
                     JSON_ARRAY()
                 ) AS creditos,
@@ -171,6 +172,7 @@ const usuarioModel = {
                         )
                         FROM consultorias cons 
                         WHERE cons.id_usuario = u.id
+                        AND (cons.vencimiento IS NULL OR cons.vencimiento >= CURRENT_DATE())
                     ),
                     JSON_ARRAY()
                 ) AS consultorias,
