@@ -114,26 +114,66 @@ const usuarioModel = {
                                 'tipo_credito', c.tipo_credito,
                                 'cantidad', c.cantidad,
                                 'vencimiento', c.vencimiento,
-                                'fecha_alta', c.fecha_alta
+                                'fecha_alta', c.fecha_alta,
+                                'busquedas', COALESCE(
+                                    (
+                                        SELECT JSON_ARRAYAGG(
+                                            JSON_OBJECT(
+                                                'id', b.id,
+                                                'fecha_alta', b.fecha_alta,
+                                                'ultima_mod', b.ultima_mod,
+                                                'info_busqueda', b.info_busqueda,
+                                                'creditos_usados', b.creditos_usados,
+                                                'observaciones', b.observaciones,
+                                                'estado', b.estado
+                                            )
+                                        )
+                                        FROM busquedas b 
+                                        WHERE b.id_cred = c.id
+                                    ),
+                                    JSON_ARRAY()
+                                )
                             )
                         )
                         FROM creditos c 
                         WHERE c.id_usuario = u.id
-                        HAVING COUNT(c.id) > 0
                     ),
                     JSON_ARRAY()
                 ) AS creditos,
-                CASE 
-                    WHEN cons.id IS NOT NULL THEN 
-                        JSON_OBJECT(
-                            'id', cons.id,
-                            'horas_totales', cons.horas_totales,
-                            'horas_restantes', cons.horas_restantes,
-                            'fecha_alta', cons.fecha_alta,
-                            'vencimiento', cons.vencimiento
+                COALESCE(
+                    (
+                        SELECT JSON_ARRAYAGG(
+                            JSON_OBJECT(
+                                'id', cons.id,
+                                'horas_totales', cons.horas_totales,
+                                'horas_restantes', cons.horas_restantes,
+                                'fecha_alta', cons.fecha_alta,
+                                'vencimiento', cons.vencimiento,
+                                'consultas', COALESCE(
+                                    (
+                                        SELECT JSON_ARRAYAGG(
+                                            JSON_OBJECT(
+                                                'id', cc.id,
+                                                'fecha_alta', cc.fecha_alta,
+                                                'ultima_mod', cc.ultima_mod,
+                                                'comentarios', cc.comentarios,
+                                                'cantidad_horas', cc.cantidad_horas,
+                                                'observaciones', cc.observaciones,
+                                                'estado', cc.estado
+                                            )
+                                        )
+                                        FROM consultas cc
+                                        WHERE cc.id_consultoria = cons.id
+                                    ),
+                                    JSON_ARRAY()
+                                )
+                            )
                         )
-                    ELSE NULL 
-                END AS consultorias,
+                        FROM consultorias cons 
+                        WHERE cons.id_usuario = u.id
+                    ),
+                    JSON_ARRAY()
+                ) AS consultorias,
                 CASE 
                     WHEN e.id IS NOT NULL THEN 
                         JSON_OBJECT(
@@ -148,9 +188,8 @@ const usuarioModel = {
                 END AS empresas
             FROM usuarios u
             LEFT JOIN planes p ON u.id_plan = p.id
-            LEFT JOIN consultorias cons ON cons.id_usuario = u.id
             LEFT JOIN empresas e ON e.id_usuario = u.id 
-            WHERE u.id = ?`, 
+            WHERE u.id = ?;`, 
             [id]
         );
         return rows[0] || null
