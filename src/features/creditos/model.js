@@ -3,7 +3,27 @@ import pool from '../../database/database.js'
 const creditoModel = {
     getAll: async () => {
     const [rows] = await pool.query(
-        'SELECT * FROM creditos'
+        `SELECT 
+            c.*,
+            COALESCE(
+                (
+                    SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'id', b.id,
+                            'fecha_alta', b.fecha_alta,
+                            'ultima_mod', b.ultima_mod,
+                            'info_busqueda', b.info_busqueda,
+                            'creditos_usados', b.creditos_usados,
+                            'observaciones', b.observaciones,
+                            'estado', b.estado
+                        )
+                    )
+                    FROM busquedas b 
+                    WHERE b.id_cred = c.id
+                ),
+                JSON_ARRAY()
+            ) AS busquedas
+        FROM creditos c`
     );
     return rows || null
     },/*
@@ -15,7 +35,28 @@ const creditoModel = {
     },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT tipo_credito, cantidad, vencimiento, id_usuario FROM creditos WHERE id = ?', 
+            `SELECT 
+            c.*,
+            COALESCE(
+                (
+                    SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'id', b.id,
+                            'fecha_alta', b.fecha_alta,
+                            'ultima_mod', b.ultima_mod,
+                            'info_busqueda', b.info_busqueda,
+                            'creditos_usados', b.creditos_usados,
+                            'observaciones', b.observaciones,
+                            'estado', b.estado
+                        )
+                    )
+                    FROM busquedas b 
+                    WHERE b.id_cred = c.id
+                ),
+                JSON_ARRAY()
+            ) AS busquedas
+            FROM creditos c
+            WHERE id = ?`, 
             [id]
         );
         return rows[0] || null

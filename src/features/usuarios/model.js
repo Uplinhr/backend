@@ -40,7 +40,6 @@ const usuarioModel = {
                     )
                     FROM creditos c 
                     WHERE c.id_usuario = u.id
-                    HAVING COUNT(c.id) > 0
                 ),
                 JSON_ARRAY()
             ) AS creditos,
