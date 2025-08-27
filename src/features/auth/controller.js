@@ -17,13 +17,8 @@ export const register = async (req, res) => {
 
     const idUsuario = await authModel.createUsuario(nombre, apellido, hashedPassword, email, num_celular)
 
-    const token = jwt.sign({ id: idUsuario }, process.env.JWT_SECRET, {
-      expiresIn: '1h'
-    });
-
-    res.cookie('token', token, { httpOnly: true });
     successRes(res, {
-      data: { id: idUsuario, token },
+      data: { id: idUsuario},
       message: 'Usuario creado exitosamente',
       statusCode: 201
     })

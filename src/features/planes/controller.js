@@ -84,7 +84,7 @@ export const editById = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const {nombre, creditos_mes, meses_cred, horas_cons, precio} = req.body;
+    const {nombre, creditos_mes, meses_cred, horas_cons, precio, custom} = req.body;
     if(!nombre || !creditos_mes || !meses_cred || !horas_cons || !precio) {
       return errorRes(res, {
         message: 'Se requieren todos los campos',
@@ -92,7 +92,7 @@ export const create = async (req, res) => {
       })
     }
 
-    const idPlan = await planModel.create(nombre, creditos_mes, meses_cred, horas_cons, precio)
+    const idPlan = await planModel.create(nombre, creditos_mes, meses_cred, horas_cons, precio, custom)
 
     successRes(res, {
       data: { id: idPlan },
