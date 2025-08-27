@@ -210,6 +210,13 @@ const usuarioModel = {
         )
         return result.affectedRows > 0
     },
+    enableById: async (id) => {
+        const [result] = await pool.query(
+            'UPDATE usuarios SET active = true WHERE id = ?',
+            [id]
+        )
+        return result.affectedRows > 0
+    },
     deleteById: async (id) => {
         const [result] = await pool.query(
             'UPDATE usuarios SET active = false WHERE id = ?',

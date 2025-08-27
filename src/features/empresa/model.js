@@ -41,6 +41,13 @@ const empresaModel = {
         )
         return empresa.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
     },
+    enableById: async (id) => {
+        const [result] = await pool.query(
+            'UPDATE empresas SET active = true WHERE id = ?',
+            [id]
+        )
+        return result.affectedRows > 0
+    },
     deleteById: async (id) => {
         const [result] = await pool.query(
             'UPDATE empresas SET active = false WHERE id = ?',

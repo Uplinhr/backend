@@ -108,6 +108,37 @@ export const create = async (req, res) => {
   }
 };
 
+export const enableById = async (req,res) => {
+    try{
+        const {id} = req.params
+        if(isNaN(id)) {
+            return errorRes(res, {
+                message: 'El id debe ser un numero',
+                statusCode: 404
+            })
+        }
+
+        const enabled = await planModel.enableById(id)
+        if(!enabled){
+            return errorRes(res, {
+              message: 'plan no encontrado',
+              statusCode: 404
+            });
+        }
+        successRes(res, {
+            message: 'plan habilitado exitosamente',
+            statusCode: 201,
+            data: enabled
+        })
+    } catch(error){
+        errorRes(res, {
+          message: 'Error al habilitar plan',
+          statusCode: 500,
+          errors: error.message
+        });
+    }
+}
+
 export const deleteById = async (req, res) => {
     try{
         const {id} = req.params

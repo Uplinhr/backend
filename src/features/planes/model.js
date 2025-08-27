@@ -34,9 +34,16 @@ const planModel = {
         )
         return plan.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
     },
+    enableById: async (id) => {
+        const [result] = await pool.query(
+            'UPDATE planes SET active = true WHERE id = ?',
+            [id]
+        )
+        return result.affectedRows > 0
+    },
     deleteById: async (id) => {
         const [result] = await pool.query(
-            'DELETE FROM planes WHERE id = ?',
+            'UPDATE planes SET active = false WHERE id = ?',
             [id]
         )
         return result.affectedRows > 0 // Retorna true si eliminó algún registro

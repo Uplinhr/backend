@@ -22,7 +22,23 @@ const creditoModel = {
                     WHERE b.id_cred = c.id
                 ),
                 JSON_ARRAY()
-            ) AS busquedas
+            ) AS busquedas,
+            COALESCE(
+                (
+                    SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'id', cc.id,
+                            'fecha_alta', cc.fecha_alta,
+                            'costo', cc.costo,
+                            'medio_pago', cc.medio_pago,
+                            'observaciones', cc.observaciones
+                        )
+                    )
+                    FROM compra_creditos cc
+                    WHERE cc.id_cred = c.id
+                ),
+                JSON_ARRAY()
+            ) AS compra_creditos
         FROM creditos c`
     );
     return rows || null
@@ -54,7 +70,23 @@ const creditoModel = {
                     WHERE b.id_cred = c.id
                 ),
                 JSON_ARRAY()
-            ) AS busquedas
+            ) AS busquedas,
+            COALESCE(
+                (
+                    SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'id', cc.id,
+                            'fecha_alta', cc.fecha_alta,
+                            'costo', cc.costo,
+                            'medio_pago', cc.medio_pago,
+                            'observaciones', cc.observaciones
+                        )
+                    )
+                    FROM compra_creditos cc
+                    WHERE cc.id_cred = c.id
+                ),
+                JSON_ARRAY()
+            ) AS compra_creditos
             FROM creditos c
             WHERE id = ?`, 
             [id]
