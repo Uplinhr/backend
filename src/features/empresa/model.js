@@ -22,8 +22,8 @@ const empresaModel = {
     },
     editById: async (id, empresa) => {
         const [result] = await pool.query(
-            'UPDATE empresas SET nombre = ?, email = ?, id_usuario = ?, ultima_mod = NOW() WHERE id = ?',
-            [empresa.nombre, empresa.email, empresa.id_usuario, id]
+            'UPDATE empresas SET nombre = ?, email = ?, active = ?, id_usuario = ?, ultima_mod = NOW() WHERE id = ?',
+            [empresa.nombre, empresa.email, empresa.active, empresa.id_usuario, id]
         )
         return result.affectedRows > 0
     },
