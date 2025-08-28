@@ -22,8 +22,8 @@ const planModel = {
     },
     editById: async (id, plan) => {
         const [result] = await pool.query(
-            'UPDATE planes SET nombre = ?, creditos_mes = ?, meses_cred = ?, horas_cons = ?, precio = ?, custom = ?, ultima_mod = NOW() WHERE id = ?',
-            [plan.nombre, plan.creditos_mes, plan.meses_cred, plan.horas_cons, plan.precio, plan.custom, id]
+            'UPDATE planes SET nombre = ?, creditos_mes = ?, meses_cred = ?, horas_cons = ?, precio = ?, custom = ?, active = ?, ultima_mod = NOW() WHERE id = ?',
+            [plan.nombre, plan.creditos_mes, plan.meses_cred, plan.horas_cons, plan.precio, plan.custom, plan.active, id]
         )
         return result.affectedRows > 0
     },
