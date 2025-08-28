@@ -1,5 +1,6 @@
 import { successRes, errorRes } from "../../utils/apiResponse.js";
 import consultaModel from "./model.js";
+import consultoriaModel from "../consultorias/model.js"
 
 export const getAll = async (req, res) => {
   try{
@@ -112,15 +113,34 @@ export const editById = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const {cantidad_horas, observaciones, id_consultoria} = req.body;
-    if(!cantidad_horas || !observaciones || !id_consultoria) {
+    const {cantidad_horas, comentarios, id_consultoria} = req.body;
+    if(!cantidad_horas || !comentarios || !id_consultoria) {
       return errorRes(res, {
         message: 'Se requieren todos los campos',
         statusCode: 404
       })
     }
 
-    const idConsulta = await consultaModel.create(cantidad_horas, observaciones, id_consultoria)
+    const consultoria = await consultoriaModel.getById(id_consultoria)
+    if(consultoria === null){
+      return errorRes(res,{
+        message: 'consultoria no encontrada',
+        statusCode: 404
+      })
+    }
+    if(Number(consultoria.horas_restantes) - Number(cantidad_horas) < 0){
+      return errorRes(res,{
+        message: 'No hay suficientes horas restantes',
+        statusCode: 404
+      })
+    }
+    const idConsulta = await consultaModel.create(cantidad_horas, comentarios, consultoria)
+    if(idConsulta == false){
+      return errorRes(res,{
+        message: 'Error en la resta de horas de consultoria',
+        statusCode: 404
+      })
+    }
     successRes(res, {
       data: { id: idConsulta },
       message: 'consulta creada exitosamente',
@@ -145,7 +165,20 @@ export const deleteById = async (req, res) => {
       })
     }
     
-    const deleted = await consultaModel.deleteById(id)
+    const consulta = await consultaModel.getById(id)
+    if(consulta === null){
+      return errorRes(res,{
+        message: 'consulta no encontrada',
+        statusCode: 404
+      })
+    }
+    if(consulta.estado == "Eliminado"){
+      return errorRes(res,{
+        message: 'La consulta ya se encuentra eliminada',
+        statusCode: 404
+      })
+    }
+    const deleted = await consultaModel.deleteById(consulta.consultorias, consulta)
     if(!deleted){
       return errorRes(res, {
         message: 'consulta no encontrada',

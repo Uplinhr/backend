@@ -61,15 +61,15 @@ export const getById = async (req, res) => {
         statusCode: 400
       })
     }
-    const credito = await consultoriaModel.getById(id)
-    if(credito === null){ // SI NO EXISTE EL credito
+    const consultoria = await consultoriaModel.getById(id)
+    if(consultoria === null){ // SI NO EXISTE EL consultoria
       return errorRes(res,{
         message: 'consultoria no encontrada',
         statusCode: 404
       })
     }
     successRes(res, {
-      data: credito,
+      data: consultoria,
       message: 'consultoria obtenida correctamente'
     })
   } catch (error){
