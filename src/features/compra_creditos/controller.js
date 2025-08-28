@@ -112,15 +112,15 @@ export const editById = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const {medio_pago, costo, observaciones, id_cred} = req.body;
-    if(!medio_pago || !costo || !observaciones || !id_cred) {
+    const {medio_pago, costo, observaciones, cantidad, vencimiento, id_usuario} = req.body;
+    if(!medio_pago || !costo || !observaciones || !cantidad || !vencimiento || !id_usuario) {
       return errorRes(res, {
         message: 'Se requieren todos los campos',
         statusCode: 404
       })
     }
 
-    const idCompra_credito = await compra_creditosModel.create(medio_pago, costo, observaciones, id_cred)
+    const idCompra_credito = await compra_creditosModel.create(medio_pago, costo, observaciones, cantidad, vencimiento, id_usuario)
     successRes(res, {
       data: { id: idCompra_credito },
       message: 'compra de credito creada exitosamente',

@@ -56,10 +56,14 @@ const compra_creditosModel = {
         )
         return result.affectedRows > 0
     },
-    create: async (medio_pago, costo, observaciones, id_cred) => {
+    create: async (medio_pago, costo, observaciones, cantidad, vencimiento, id_usuario) => {
+        const [creditos] = await pool.query(
+            `INSERT INTO creditos (tipo_credito, cantidad, vencimiento, id_usuario) 
+            VALUES (?, ?, ?, ?)`, ['adicional', cantidad, vencimiento, id_usuario]
+        )
         const [compra_credito] = await pool.query(
             `INSERT INTO compra_creditos (medio_pago, costo, observaciones, id_cred) 
-            VALUES (?, ?, ?, ?)`, [medio_pago, costo, observaciones, id_cred]
+            VALUES (?, ?, ?, ?)`, [medio_pago, costo, observaciones, creditos.insertId]
         )
         return compra_credito.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
     },
