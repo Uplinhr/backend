@@ -15,7 +15,7 @@ const planModel = {
     },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT nombre, creditos_mes, meses_cred, horas_cons, precio, active, custom FROM planes WHERE id = ?', 
+            'SELECT * FROM planes WHERE id = ?', 
             [id]
         );
         return rows[0] || null
@@ -49,6 +49,45 @@ const planModel = {
             [id]
         )
         return result.affectedRows > 0 // Retorna true si eliminó algún registro
+    },
+    asignPlan: async (plan, id_usuario) => {
+        try{
+            const usuario = await pool.query(
+                `UPDATE usuarios SET id_plan = ? WHERE id = ?`,
+                [plan.id, id_usuario]
+            )
+            if(usuario[0].affectedRows == 0){
+                return false
+            }
+            const sumarMeses = (meses) => {
+                const fecha = new Date();
+                fecha.setMonth(fecha.getMonth() + meses);
+                return fecha;
+            }
+            const creditos = await pool.query(
+                `INSERT INTO creditos (tipo_credito, cantidad, vencimiento, id_usuario) 
+                VALUES (?, ?, ?, ?)`, ['plan', plan.creditos_mes, sumarMeses(plan.meses_cred), id_usuario]
+            )
+            const consultorias = await pool.query(
+                `INSERT INTO consultorias (horas_totales, horas_restantes, vencimiento, id_usuario) 
+                VALUES (?, ?, ?, ?)`, [plan.horas_cons, plan.horas_cons, sumarMeses(1), id_usuario]
+            )
+            return {
+                success: true,
+                data: {
+                    creditos: creditos,
+                    consultorias: consultorias
+                },
+                message: 'Plan asignado correctamente'
+            }
+        } catch(error){
+            console.error('Error en asignPlan:', error);
+            return {
+                success: false,
+                error: error.message,
+                data: null
+            };
+        }
     }
 }
 

@@ -4,7 +4,7 @@ import { authRequired, checkRole } from '../../middlewares/auth.js';
 
 const router = express.Router();
 
-router.post('/register', register);
+router.post('/register', register, authRequired, checkRole(['admin']));
 router.post('/login', login);
 router.post('/logout', logout);
 router.put('/editPassword/:id', authRequired, editPassword)

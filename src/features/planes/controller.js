@@ -140,31 +140,73 @@ export const enableById = async (req,res) => {
 }
 
 export const deleteById = async (req, res) => {
-    try{
-        const {id} = req.params
-        if(isNaN(id)) {
-            return errorRes(res, {
-                message: 'El id debe ser un numero',
-                statusCode: 404
-            })
-        }
-
-        const deleted = await planModel.deleteById(id)
-        if(!deleted){
-            return errorRes(res, {
-              message: 'Plan no encontrado',
+  try{
+      const {id} = req.params
+      if(isNaN(id)) {
+          return errorRes(res, {
+              message: 'El id debe ser un numero',
               statusCode: 404
-            });
-        }
-        successRes(res, {
-            message: 'Plan eliminado exitosamente',
-            statusCode: 201
-        })
-    } catch (error) {
-        errorRes(res, {
-          message: 'Error al eliminar plan',
-          statusCode: 500,
-          errors: error.message
-        });
+          })
+      }
+
+      const deleted = await planModel.deleteById(id)
+      if(!deleted){
+          return errorRes(res, {
+            message: 'Plan no encontrado',
+            statusCode: 404
+          });
+      }
+      successRes(res, {
+          message: 'Plan eliminado exitosamente',
+          statusCode: 201
+      })
+  } catch (error) {
+      errorRes(res, {
+        message: 'Error al eliminar plan',
+        statusCode: 500,
+        errors: error.message
+      });
+  }
+}
+
+export const buyPlan = async (req, res) => {
+  try{
+    const {id_plan, id_usuario} = req.body
+    if(isNaN(id_plan) || isNaN(id_usuario)){
+      return errorRes(res, {
+          message: 'Los id deben ser un numeros',
+          statusCode: 404
+      })
     }
+    const plan = await planModel.getById(id_plan)
+    if(!plan) {
+      return errorRes(res, {
+        message: 'No se encontró el plan',
+        statusCode: 404
+      })
+    }
+    const buy = await planModel.asignPlan(plan, id_usuario)
+    if(buy === false){
+      return errorRes(res, {
+        message: 'No existe un usuario con esa ID',
+        statusCode: 404
+      })
+    }
+    console.log(buy)
+    if(!buy.success){
+      return errorRes(res, {
+        message: 'Ocurrió un error en la creación de las tablas de creditos y consultorias',
+        statusCode: 500
+      })
+    }
+    successRes(res, {
+        message: 'Compra de plan exitosa',
+        statusCode: 201
+    })
+  } catch(error){
+    errorRes(res,{
+      message: 'ocurrio un error en la compra de plan',
+      statusCode: 500
+    })
+  }
 }

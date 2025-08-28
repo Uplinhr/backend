@@ -5,7 +5,8 @@ import {
   deleteById,
   create,
   editById,
-  enableById
+  enableById,
+  buyPlan
 } from './controller.js';
 import { authRequired, checkRole } from '../../middlewares/auth.js';
 const router = express.Router()
@@ -19,5 +20,6 @@ router.delete('/:id', authRequired, checkRole(['admin']), deleteById)
 router.put('/:id', authRequired, checkRole(['admin']), editById)
 router.post('/', authRequired, checkRole(['admin']), create)
 router.put('/enable/:id', authRequired, checkRole(['admin']), enableById)
+router.post('/buy', authRequired, checkRole(['admin']), buyPlan)
 
 export default router
