@@ -50,13 +50,14 @@ const planModel = {
         )
         return result.affectedRows > 0 // Retorna true si eliminó algún registro
     },
-    asignPlan: async (plan, id_usuario) => {
+    asignPlan: async (plan, id_usuario, medio_pago, observaciones) => {
         try{
-            const usuario = await pool.query(
+            const [usuario] = await pool.query(
                 `UPDATE usuarios SET id_plan = ? WHERE id = ?`,
                 [plan.id, id_usuario]
             )
-            if(usuario[0].affectedRows == 0){
+            console.log(usuario)
+            if(usuario.affectedRows == 0){
                 return false
             }
             const sumarMeses = (meses) => {
@@ -64,19 +65,24 @@ const planModel = {
                 fecha.setMonth(fecha.getMonth() + meses);
                 return fecha;
             }
-            const creditos = await pool.query(
+            const [compra_plan] = await pool.query(
+                `INSERT INTO compra_planes (medio_pago, observaciones, precio_abonado, id_plan, id_usuario) 
+                VALUES (?, ?, ?, ?, ?)`, [medio_pago, observaciones, plan.precio, plan.id, id_usuario]
+            )
+            const [creditos] = await pool.query(
                 `INSERT INTO creditos (tipo_credito, cantidad, vencimiento, id_usuario) 
                 VALUES (?, ?, ?, ?)`, ['plan', plan.creditos_mes, sumarMeses(plan.meses_cred), id_usuario]
             )
-            const consultorias = await pool.query(
+            const [consultorias] = await pool.query(
                 `INSERT INTO consultorias (horas_totales, horas_restantes, vencimiento, id_usuario) 
                 VALUES (?, ?, ?, ?)`, [plan.horas_cons, plan.horas_cons, sumarMeses(1), id_usuario]
             )
             return {
                 success: true,
                 data: {
-                    creditos: creditos,
-                    consultorias: consultorias
+                    compra_plan: compra_plan.insertId,
+                    creditos: creditos.insertId,
+                    consultorias: consultorias.insertId
                 },
                 message: 'Plan asignado correctamente'
             }

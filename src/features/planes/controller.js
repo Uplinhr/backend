@@ -171,7 +171,7 @@ export const deleteById = async (req, res) => {
 
 export const buyPlan = async (req, res) => {
   try{
-    const {id_plan, id_usuario} = req.body
+    const {id_plan, id_usuario, medio_pago, observaciones} = req.body
     if(isNaN(id_plan) || isNaN(id_usuario)){
       return errorRes(res, {
           message: 'Los id deben ser un numeros',
@@ -185,7 +185,7 @@ export const buyPlan = async (req, res) => {
         statusCode: 404
       })
     }
-    const buy = await planModel.asignPlan(plan, id_usuario)
+    const buy = await planModel.asignPlan(plan, id_usuario, medio_pago, observaciones)
     if(buy === false){
       return errorRes(res, {
         message: 'No existe un usuario con esa ID',
