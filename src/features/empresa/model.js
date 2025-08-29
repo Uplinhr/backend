@@ -15,31 +15,189 @@ const empresaModel = {
     },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT nombre, email, id_usuario, active, fecha_alta, ultima_mod FROM empresas WHERE id = ?', 
+            'SELECT * FROM empresas WHERE id = ?', 
             [id]
         );
         return rows[0] || null
     },
     editById: async (id, empresa) => {
-        const [result] = await pool.query(
-            'UPDATE empresas SET nombre = ?, email = ?, active = ?, id_usuario = ?, ultima_mod = NOW() WHERE id = ?',
-            [empresa.nombre, empresa.email, empresa.active, empresa.id_usuario, id]
-        )
-        return result.affectedRows > 0
+        const campos = [];
+        const valores = [];
+        
+        // Campos obligatorios
+        if (empresa.nombre) {
+            campos.push('nombre = ?');
+            valores.push(empresa.nombre);
+        }
+        
+        if (empresa.email) {
+            campos.push('email = ?');
+            valores.push(empresa.email);
+        }
+        
+        // Campos opcionales
+        if (empresa.nombre_fantasia !== undefined) {
+            campos.push('nombre_fantasia = ?');
+            valores.push(empresa.nombre_fantasia);
+        }
+        
+        if (empresa.cuit !== undefined) {
+            campos.push('cuit = ?');
+            valores.push(empresa.cuit);
+        }
+        
+        if (empresa.condicion_iva !== undefined) {
+            campos.push('condicion_iva = ?');
+            valores.push(empresa.condicion_iva);
+        }
+        
+        if (empresa.tipo_societario !== undefined) {
+            campos.push('tipo_societario = ?');
+            valores.push(empresa.tipo_societario);
+        }
+        
+        if (empresa.actividad_principal !== undefined) {
+            campos.push('actividad_principal = ?');
+            valores.push(empresa.actividad_principal);
+        }
+        
+        if (empresa.domicilio_legal_calle_numero !== undefined) {
+            campos.push('domicilio_legal_calle_numero = ?');
+            valores.push(empresa.domicilio_legal_calle_numero);
+        }
+        
+        if (empresa.domicilio_legal_ciudad !== undefined) {
+            campos.push('domicilio_legal_ciudad = ?');
+            valores.push(empresa.domicilio_legal_ciudad);
+        }
+        
+        if (empresa.domicilio_legal_pais !== undefined) {
+            campos.push('domicilio_legal_pais = ?');
+            valores.push(empresa.domicilio_legal_pais);
+        }
+        
+        if (empresa.codigo_postal !== undefined) {
+            campos.push('codigo_postal = ?');
+            valores.push(empresa.codigo_postal);
+        }
+
+        if (empresa.id_usuario !== undefined) {
+            campos.push('id_usuario = ?');
+            valores.push(empresa.id_usuario);
+        }
+        
+        campos.push('ultima_mod = NOW()');
+        
+        // Obligatorio para el WHERE
+        valores.push(id);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE empresas SET ${campos.join(', ')} WHERE id = ?`;
+        const [result] = await pool.query(query, valores);
+        return result.affectedRows > 0;
     },
     editOwn: async (empresa) => {
-        const [result] = await pool.query(
-            'UPDATE empresas SET nombre = ?, email = ?, ultima_mod = NOW() WHERE id_usuario = ?',
-            [empresa.nombre, empresa.email, empresa.id_usuario]
-        )
-        return result.affectedRows > 0
+        const campos = [];
+        const valores = [];
+        
+        // Campos obligatorios
+        if (empresa.nombre) {
+            campos.push('nombre = ?');
+            valores.push(empresa.nombre);
+        }
+        
+        if (empresa.email) {
+            campos.push('email = ?');
+            valores.push(empresa.email);
+        }
+        
+        // Campos opcionales
+        if (empresa.nombre_fantasia !== undefined) {
+            campos.push('nombre_fantasia = ?');
+            valores.push(empresa.nombre_fantasia);
+        }
+        
+        if (empresa.cuit !== undefined) {
+            campos.push('cuit = ?');
+            valores.push(empresa.cuit);
+        }
+        
+        if (empresa.condicion_iva !== undefined) {
+            campos.push('condicion_iva = ?');
+            valores.push(empresa.condicion_iva);
+        }
+        
+        if (empresa.tipo_societario !== undefined) {
+            campos.push('tipo_societario = ?');
+            valores.push(empresa.tipo_societario);
+        }
+        
+        if (empresa.actividad_principal !== undefined) {
+            campos.push('actividad_principal = ?');
+            valores.push(empresa.actividad_principal);
+        }
+        
+        if (empresa.domicilio_legal_calle_numero !== undefined) {
+            campos.push('domicilio_legal_calle_numero = ?');
+            valores.push(empresa.domicilio_legal_calle_numero);
+        }
+        
+        if (empresa.domicilio_legal_ciudad !== undefined) {
+            campos.push('domicilio_legal_ciudad = ?');
+            valores.push(empresa.domicilio_legal_ciudad);
+        }
+        
+        if (empresa.domicilio_legal_pais !== undefined) {
+            campos.push('domicilio_legal_pais = ?');
+            valores.push(empresa.domicilio_legal_pais);
+        }
+        
+        if (empresa.codigo_postal !== undefined) {
+            campos.push('codigo_postal = ?');
+            valores.push(empresa.codigo_postal);
+        }
+        
+        campos.push('ultima_mod = NOW()');
+        
+        // Obligatorio para el WHERE
+        valores.push(empresa.id_usuario);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE empresas SET ${campos.join(', ')} WHERE id_usuario = ?`;
+        const [result] = await pool.query(query, valores);
+        return result.affectedRows > 0;
     },
-    create: async (nombre, email, id_usuario) => {
-        const [empresa] = await pool.query(
-            `INSERT INTO empresas (nombre, email, id_usuario) 
-            VALUES (?, ?, ?)`, [nombre, email, id_usuario]
-        )
-        return empresa.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
+    create: async (empresa) => {
+        const { nombre, email, id_usuario, ...camposOpcionales } = empresa;
+        
+        const [result] = await pool.query(
+            `INSERT INTO empresas 
+            (nombre, email, id_usuario, nombre_fantasia, cuit, condicion_iva, 
+             tipo_societario, actividad_principal, domicilio_legal_calle_numero,
+             domicilio_legal_ciudad, domicilio_legal_pais, codigo_postal) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+            [
+                nombre, 
+                email, 
+                id_usuario,
+                camposOpcionales.nombre_fantasia || null,
+                camposOpcionales.cuit || null,
+                camposOpcionales.condicion_iva || null,
+                camposOpcionales.tipo_societario || null,
+                camposOpcionales.actividad_principal || null,
+                camposOpcionales.domicilio_legal_calle_numero || null,
+                camposOpcionales.domicilio_legal_ciudad || null,
+                camposOpcionales.domicilio_legal_pais || null,
+                camposOpcionales.codigo_postal || null
+            ]
+        );
+        return result.affectedRows > 0 ? result.insertId : false;
     },
     enableById: async (id) => {
         const [result] = await pool.query(

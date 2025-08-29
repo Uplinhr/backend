@@ -175,7 +175,7 @@ export const deleteById = async (req, res) => {
     if(consulta.estado == "Eliminado"){
       return errorRes(res,{
         message: 'La consulta ya se encuentra eliminada',
-        statusCode: 404
+        statusCode: 400
       })
     }
     const deleted = await consultaModel.deleteById(consulta.consultorias, consulta)

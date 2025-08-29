@@ -90,7 +90,7 @@ export const editById = async (req, res) => {
             statusCode: 404
         })
     }
-    
+  
     const changed = await empresaModel.editById(id, req.body)
     if(!changed){
       return errorRes(res, {
@@ -114,7 +114,6 @@ export const editById = async (req, res) => {
 export const editOwn = async (req, res) => {
   try{
     const {id} = req.user
-    const {nombre, email} = req.body
     if(isNaN(id)) {
         return errorRes(res, {
             message: 'El id debe ser un numero',
@@ -122,9 +121,8 @@ export const editOwn = async (req, res) => {
         })
     }
     const empresa = {
-      nombre: nombre,
-      email: email,
-      id_usuario: id
+      id_usuario: id,
+      ...req.body
     }
     
     const changed = await empresaModel.editOwn(empresa)
@@ -149,15 +147,28 @@ export const editOwn = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const {nombre, email, id_usuario} = req.body;
+    const {nombre, email, id_usuario, ...camposOpcionales} = req.body;
     if(!nombre || !email || !id_usuario) { //si id_usuario es null, da error
       return errorRes(res, {
         message: 'Se requieren todos los campos',
         statusCode: 404
       })
     }
+    const empresa = {
+      nombre,
+      email,
+      id_usuario: parseInt(id_usuario),
+      ...camposOpcionales
+    }
 
-    const idEmpresa = await empresaModel.create(nombre, email, id_usuario)
+    const idEmpresa = await empresaModel.create(empresa)
+
+    if(!idEmpresa){
+      return errorRes(res, {
+        message: 'Error al crear la empresa',
+        statusCode: 500
+      });
+    }
     successRes(res, {
       data: { id: idEmpresa },
       message: 'empresa creada exitosamente',
