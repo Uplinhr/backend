@@ -15,7 +15,7 @@ const busquedaModel = {
     },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT fecha_alta, ultima_mod, info_busqueda, creditos_usados, observaciones, estado, id_cred, id_tipo, id_proceso FROM busquedas WHERE id = ?', 
+            'SELECT * FROM busquedas WHERE id = ?', 
             [id]
         );
         return rows[0] || null
@@ -57,16 +57,10 @@ const busquedaModel = {
         )
         return result.affectedRows > 0
     },
-    create: async (info_busqueda, creditos_usados, observaciones, id_cred, id_tipo, id_proceso) => {
+    create: async (info_busqueda, id_cred) => {
         const [busqueda] = await pool.query(
-            `INSERT INTO busquedas (info_busqueda, creditos_usados, observaciones, id_cred 
-            ${id_tipo? ', id_tipo' : ''}
-            ${id_proceso? ', id_proceso' : ''}
-            ) 
-            VALUES (?, ?, ?, ?
-            ${id_tipo? ', ?' : ''}
-            ${id_proceso? ', ?' : ''}
-            )`, [info_busqueda, creditos_usados, observaciones, id_cred, id_tipo, id_proceso]
+            `INSERT INTO busquedas (info_busqueda, id_cred)
+            VALUES (?, ?)`, [info_busqueda, id_cred]
         )
         return busqueda.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
     },

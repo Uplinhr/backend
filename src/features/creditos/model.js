@@ -91,7 +91,15 @@ const creditoModel = {
             WHERE id = ?`, 
             [id]
         );
-        return rows[0] || null
+        return rows || null
+    },
+    getOwn: async (idUsuario) => {
+        const [result] = await pool.query(
+            `SELECT * FROM creditos 
+            WHERE id_usuario = ?`, 
+            [idUsuario]
+        )
+        return result || null
     },
     editById: async (id, credito) => {
         const [result] = await pool.query(

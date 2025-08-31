@@ -1,5 +1,6 @@
 import { successRes, errorRes } from "../../utils/apiResponse.js";
 import busquedaModel from "./model.js";
+import creditoModel from '../creditos/model.js'
 
 export const getAll = async (req, res) => {
   try{
@@ -23,7 +24,7 @@ export const getAll = async (req, res) => {
   }
 };
 
-export const getOwn = async (req, res) => { //No puede ser con getById, se debe crear una nueva funcion
+export const getOwn = async (req, res) => {
   try{
     const {id} = req.user
     if(isNaN(id)) { // SI ID NO ES NUMERICO
@@ -32,15 +33,15 @@ export const getOwn = async (req, res) => { //No puede ser con getById, se debe 
         statusCode: 400
       })
     }
-    const busqueda = await busquedaModel.getByUserId(id)
-    if(busqueda === null){ // SI NO EXISTE EL busqueda
+    const busquedas = await busquedaModel.getByUserId(id)
+    if(busquedas === null){ // SI NO EXISTE EL busqueda
       return errorRes(res,{
         message: 'busqueda no encontrado',
         statusCode: 404
       })
     }
     successRes(res, {
-      data: busqueda,
+      data: busquedas,
       message: 'busqueda obtenido correctamente'
     })
   } catch (error){
@@ -111,18 +112,39 @@ export const editById = async (req, res) => {
 }
 
 export const create = async (req, res) => {
+  const {rol, id} = req.user
   try {
-    const {tipo_busqueda, creditos_usados, observaciones, id_cred} = req.body;
-    if(!tipo_busqueda || !creditos_usados || !observaciones || !id_cred) {
+    const {info_busqueda} = req.body;
+    let id_cred;
+    if(!info_busqueda) {
       return errorRes(res, {
-        message: 'Se requieren todos los campos',
+        message: 'Se requiere la informacion de la busqueda',
         statusCode: 404
       })
     }
 
-    const idCredito = await busquedaModel.create(tipo_busqueda, creditos_usados, observaciones, id_cred)
+    if(rol == 'admin'){
+      id_cred = req.body.id_cred
+    } else{
+      const creditos = await creditoModel.getOwn(id)
+      if(creditos === null){
+        return errorRes(res,{
+          message: 'No tienes una lista de creditos asignada',
+          statusCode: 404
+        })
+      }
+      const prioridades = ['devuelto', 'adicional', 'plan'];
+      for (const prioridad of prioridades) {
+        const creditoEncontrado = creditos.find(credito => credito.tipo_credito === prioridad);
+        if (creditoEncontrado) {
+            id_cred = creditoEncontrado.id;
+            break;
+        }
+      }
+    }
+    const idBusqueda = await busquedaModel.create(info_busqueda, id_cred)
     successRes(res, {
-      data: { id: idCredito },
+      data: { id: idBusqueda },
       message: 'busqueda creado exitosamente',
       statusCode: 201
     })

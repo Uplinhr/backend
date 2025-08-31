@@ -32,7 +32,7 @@ export const getOwn = async (req, res) => {
         statusCode: 400
       })
     }
-    const credito = await creditoModel.getById(id)
+    const credito = await creditoModel.getOwn(id)
     if(credito === null){ // SI NO EXISTE EL credito
       return errorRes(res,{
         message: 'Lista de creditos no encontrado',

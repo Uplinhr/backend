@@ -54,7 +54,7 @@ export const getById = async (req, res) => {
                 message: 'El ID debe ser numerico',
                 statusCode: 400
             })
-            }
+        }
         const usuario = await usuarioModel.getById(id)
         if(usuario === null){ // SI NO EXISTE EL USUARIO
             return errorRes(res,{
