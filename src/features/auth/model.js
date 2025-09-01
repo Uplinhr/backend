@@ -41,9 +41,19 @@ const authModel = {
                                 'fecha_alta', c.fecha_alta
                             )
                         )
-                        FROM creditos c 
-                        WHERE c.id_usuario = u.id
-                        AND c.vencimiento > NOW()  -- ← FILTRO AGREGADO: solo créditos vigentes
+                        FROM (
+                            SELECT c1.*,
+                                   ROW_NUMBER() OVER (
+                                       PARTITION BY c1.id_usuario, c1.tipo_credito 
+                                       ORDER BY 
+                                           CASE WHEN c1.tipo_credito = 'plan' THEN 0 ELSE 1 END,
+                                           c1.fecha_alta DESC
+                                   ) as row_num
+                            FROM creditos c1 
+                            WHERE c1.id_usuario = u.id
+                            AND c1.vencimiento > NOW()
+                        ) c
+                        WHERE c.row_num = 1 OR c.tipo_credito != 'plan'
                     ),
                     JSON_ARRAY()
                 ) AS creditos,
@@ -89,7 +99,7 @@ const authModel = {
                     FROM consultorias c2
                     WHERE c2.id_usuario = c1.id_usuario
                     AND c2.vencimiento > NOW()
-                    ORDER BY c2.vencimiento DESC
+                    ORDER BY c2.fecha_alta DESC  -- ← Ordenar por fecha_alta para la más reciente
                     LIMIT 1
                 )
             ) cons ON cons.id_usuario = u.id
