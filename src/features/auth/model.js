@@ -43,6 +43,7 @@ const authModel = {
                         )
                         FROM creditos c 
                         WHERE c.id_usuario = u.id
+                        AND c.vencimiento > NOW()  -- ← FILTRO AGREGADO: solo créditos vigentes
                     ),
                     JSON_ARRAY()
                 ) AS creditos,
