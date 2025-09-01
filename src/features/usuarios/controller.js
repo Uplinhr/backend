@@ -1,5 +1,6 @@
 import { successRes, errorRes } from "../../utils/apiResponse.js";
 import usuarioModel from "./model.js";
+import planModel from "../planes/model.js";
 
 export const getAll = async (req, res) => {
     try{
@@ -115,6 +116,7 @@ export const editFullName =  async (req, res) => {
 export const editById = async (req, res) => {
     try{
         const {id} = req.params
+        const usuario = await usuarioModel.getById(id)
         if(isNaN(id)) {
             return errorRes(res, {
                 message: 'El id debe ser un numero',
@@ -128,6 +130,23 @@ export const editById = async (req, res) => {
                 message: 'No se editó el usuario',
                 statusCode: 500
             })
+        }
+        if(req.body.id_plan !== usuario.id_plan && req.body.id_plan !== null){ //En caso de necesitar un cambio de plan
+            const plan = await planModel.getById(req.body.id_plan)
+            if(!plan) {
+              return errorRes(res, {
+                message: 'No se encontró el plan',
+                statusCode: 404
+              })
+            }
+            const asigned = await planModel.asignPlan(plan, usuario.id)
+            if(!asigned.success){
+              return errorRes(res, {
+                message: 'Ocurrió un error en la creación de las tablas de creditos y consultorias',
+                statusCode: 500
+              })
+            }
+            return successRes(res, asigned)
         }
         successRes(res, {
             message: 'usuario editado exitosamente',

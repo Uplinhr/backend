@@ -82,14 +82,7 @@ const usuarioModel = {
     getById: async (id) => {
         const [rows] = await pool.query(
             `SELECT 
-                u.id,
-                u.nombre,
-                u.apellido,
-                u.email,
-                u.fecha_alta,
-                u.active,
-                u.num_celular,
-                u.rol,
+                u.*,
                 CASE 
                     WHEN p.id IS NOT NULL THEN 
                         JSON_OBJECT(
@@ -205,8 +198,11 @@ const usuarioModel = {
     },
     editById: async (id, user) => {
         const [result] = await pool.query(
-            'UPDATE usuarios SET nombre = ?, apellido = ?, email = ?, active = ?, rol = ?, num_celular = ?, id_plan = ? WHERE id = ?',
-            [user.nombre, user.apellido, user.email, user.active, user.rol, user.num_celular, user.id_plan, id]
+            `UPDATE usuarios SET 
+            nombre = ?, apellido = ?, email = ?, active = ?, rol = ?, num_celular = ?, id_plan = ? 
+            WHERE id = ?`,
+            [user.nombre, user.apellido, user.email, user.active, user.rol, user.num_celular, user.id_plan, 
+            id]
         )
         return result.affectedRows > 0
     },
