@@ -12,21 +12,31 @@ const usuarioModel = {
             u.active,
             u.num_celular,
             u.rol,
-            CASE 
-                WHEN p.id IS NOT NULL THEN 
-                    JSON_OBJECT(
-                        'id', p.id,
-                        'nombre', p.nombre,
-                        'creditos_mes', p.creditos_mes,
-                        'meses_cred', p.meses_cred,
-                        'horas_cons', p.horas_cons,
-                        'precio', p.precio,
-                        'active', p.active,
-                        'fecha_alta', p.fecha_alta,
-                        'ultima_mod', p.ultima_mod
-                    )
-                ELSE NULL 
-            END AS plan,
+            COALESCE(
+                JSON_OBJECT(
+                    'id', p.id,
+                    'nombre', p.nombre,
+                    'creditos_mes', p.creditos_mes,
+                    'meses_cred', p.meses_cred,
+                    'horas_cons', p.horas_cons,
+                    'precio', p.precio,
+                    'active', p.active,
+                    'fecha_alta', p.fecha_alta,
+                    'ultima_mod', p.ultima_mod
+                ),
+                JSON_OBJECT(
+                    'id', NULL,
+                    'nombre', NULL,
+                    'creditos_mes', NULL,
+                    'meses_cred', NULL,
+                    'horas_cons', NULL,
+                    'precio', NULL,
+                    'active', NULL,
+                    'fecha_alta', NULL,
+                    'ultima_mod', NULL
+                )
+            ) AS plan,
+                
             COALESCE(
                 (
                     SELECT JSON_ARRAYAGG(
@@ -38,22 +48,40 @@ const usuarioModel = {
                             'fecha_alta', c.fecha_alta
                         )
                     )
-                    FROM creditos c 
-                    WHERE c.id_usuario = u.id
+                    FROM (
+                        SELECT c1.*,
+                               ROW_NUMBER() OVER (
+                                   PARTITION BY c1.id_usuario, c1.tipo_credito 
+                                   ORDER BY 
+                                       CASE WHEN c1.tipo_credito = 'plan' THEN 0 ELSE 1 END,
+                                       c1.fecha_alta DESC
+                               ) as row_num
+                        FROM creditos c1 
+                        WHERE c1.id_usuario = u.id
+                        AND c1.vencimiento > NOW()
+                    ) c
+                    WHERE c.row_num = 1 OR c.tipo_credito != 'plan'
                 ),
                 JSON_ARRAY()
             ) AS creditos,
-            CASE 
-                WHEN cons.id IS NOT NULL THEN 
-                    JSON_OBJECT(
-                        'id', cons.id,
-                        'horas_totales', cons.horas_totales,
-                        'horas_restantes', cons.horas_restantes,
-                        'fecha_alta', cons.fecha_alta,
-                        'vencimiento', cons.vencimiento
-                    )
-                ELSE NULL 
-            END AS consultorias,
+                
+            COALESCE(
+                JSON_OBJECT(
+                    'id', cons.id,
+                    'horas_totales', cons.horas_totales,
+                    'horas_restantes', cons.horas_restantes,
+                    'fecha_alta', cons.fecha_alta,
+                    'vencimiento', cons.vencimiento
+                ),
+                JSON_OBJECT(
+                    'id', NULL,
+                    'horas_totales', NULL,
+                    'horas_restantes', NULL,
+                    'fecha_alta', NULL,
+                    'vencimiento', NULL
+                )
+            ) AS consultorias,
+                
             CASE 
                 WHEN e.id IS NOT NULL THEN 
                     JSON_OBJECT(
@@ -66,10 +94,23 @@ const usuarioModel = {
                     )
                 ELSE NULL 
             END AS empresas
-        FROM usuarios u
-        LEFT JOIN planes p ON u.id_plan = p.id
-        LEFT JOIN consultorias cons ON cons.id_usuario = u.id
-        LEFT JOIN empresas e ON e.id_usuario = u.id;`
+                    
+            FROM usuarios u
+            LEFT JOIN planes p ON u.id_plan = p.id
+            LEFT JOIN (
+                SELECT c1.*
+                FROM consultorias c1
+                WHERE c1.vencimiento > NOW()
+                AND c1.id = (
+                    SELECT c2.id
+                    FROM consultorias c2
+                    WHERE c2.id_usuario = c1.id_usuario
+                    AND c2.vencimiento > NOW()
+                    ORDER BY c2.fecha_alta DESC  -- ← Ordenar por fecha_alta para la más reciente
+                    LIMIT 1
+                )
+            ) cons ON cons.id_usuario = u.id
+            LEFT JOIN empresas e ON e.id_usuario = u.id`
     );
     return rows || null
     },/*
@@ -83,21 +124,31 @@ const usuarioModel = {
         const [rows] = await pool.query(
             `SELECT 
                 u.*,
-                CASE 
-                    WHEN p.id IS NOT NULL THEN 
-                        JSON_OBJECT(
-                            'id', p.id,
-                            'nombre', p.nombre,
-                            'creditos_mes', p.creditos_mes,
-                            'meses_cred', p.meses_cred,
-                            'horas_cons', p.horas_cons,
-                            'precio', p.precio,
-                            'active', p.active,
-                            'fecha_alta', p.fecha_alta,
-                            'ultima_mod', p.ultima_mod
-                        )
-                    ELSE NULL 
-                END AS plan,
+                COALESCE(
+                    JSON_OBJECT(
+                        'id', p.id,
+                        'nombre', p.nombre,
+                        'creditos_mes', p.creditos_mes,
+                        'meses_cred', p.meses_cred,
+                        'horas_cons', p.horas_cons,
+                        'precio', p.precio,
+                        'active', p.active,
+                        'fecha_alta', p.fecha_alta,
+                        'ultima_mod', p.ultima_mod
+                    ),
+                    JSON_OBJECT(
+                        'id', NULL,
+                        'nombre', NULL,
+                        'creditos_mes', NULL,
+                        'meses_cred', NULL,
+                        'horas_cons', NULL,
+                        'precio', NULL,
+                        'active', NULL,
+                        'fecha_alta', NULL,
+                        'ultima_mod', NULL
+                    )
+                ) AS plan,
+                    
                 COALESCE(
                     (
                         SELECT JSON_ARRAYAGG(
@@ -127,12 +178,23 @@ const usuarioModel = {
                                 )
                             )
                         )
-                        FROM creditos c 
-                        WHERE c.id_usuario = u.id
-                        AND (c.vencimiento IS NULL OR c.vencimiento >= CURRENT_DATE())
+                        FROM (
+                            SELECT c1.*,
+                                   ROW_NUMBER() OVER (
+                                       PARTITION BY c1.id_usuario, c1.tipo_credito 
+                                       ORDER BY 
+                                           CASE WHEN c1.tipo_credito = 'plan' THEN 0 ELSE 1 END,
+                                           c1.fecha_alta DESC
+                                   ) as row_num
+                            FROM creditos c1 
+                            WHERE c1.id_usuario = u.id
+                            AND (c1.vencimiento IS NULL OR c1.vencimiento >= CURRENT_DATE())
+                        ) c
+                        WHERE (c.row_num = 1 AND c.tipo_credito = 'plan') OR c.tipo_credito != 'plan'
                     ),
                     JSON_ARRAY()
                 ) AS creditos,
+                    
                 COALESCE(
                     (
                         SELECT JSON_ARRAYAGG(
@@ -162,12 +224,21 @@ const usuarioModel = {
                                 )
                             )
                         )
-                        FROM consultorias cons 
-                        WHERE cons.id_usuario = u.id
-                        AND (cons.vencimiento IS NULL OR cons.vencimiento >= CURRENT_DATE())
+                        FROM (
+                            SELECT c1.*,
+                                   ROW_NUMBER() OVER (
+                                       PARTITION BY c1.id_usuario
+                                       ORDER BY c1.fecha_alta DESC
+                                   ) as row_num
+                            FROM consultorias c1 
+                            WHERE c1.id_usuario = u.id
+                            AND (c1.vencimiento IS NULL OR c1.vencimiento >= CURRENT_DATE())
+                        ) cons
+                        WHERE cons.row_num = 1  -- Solo la consultoría más reciente
                     ),
                     JSON_ARRAY()
                 ) AS consultorias,
+                    
                 CASE 
                     WHEN e.id IS NOT NULL THEN 
                         JSON_OBJECT(
