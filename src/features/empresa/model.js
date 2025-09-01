@@ -85,6 +85,11 @@ const empresaModel = {
             campos.push('id_usuario = ?');
             valores.push(empresa.id_usuario);
         }
+
+        if (empresa.active !== undefined) {
+            campos.push('active = ?');
+            valores.push(empresa.active);
+        }
         
         campos.push('ultima_mod = NOW()');
         
