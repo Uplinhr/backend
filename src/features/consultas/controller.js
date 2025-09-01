@@ -134,6 +134,12 @@ export const create = async (req, res) => {
         statusCode: 404
       })
     }
+    if(consultoria.id_usuario !== req.user.id && req.user.rol !== 'admin'){
+      return errorRes(res,{
+        message: 'La tabla de consultas seleccionada no pertenece al usuario',
+        statusCode: 404
+      })
+    }
     const idConsulta = await consultaModel.create(cantidad_horas, comentarios, consultoria)
     if(idConsulta == false){
       return errorRes(res,{
