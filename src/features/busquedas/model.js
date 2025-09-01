@@ -15,7 +15,29 @@ const busquedaModel = {
     },*/
     getById: async (id) => {
         const [rows] = await pool.query(
-            'SELECT * FROM busquedas WHERE id = ?', 
+            `SELECT 
+                b.*,
+                JSON_OBJECT(
+                'id', c.id,
+                'tipo_credito', c.tipo_credito,
+                'cantidad', c.cantidad,
+                'fecha_alta', c.fecha_alta,
+                'vencimiento', c.vencimiento
+                ) AS creditos,
+                JSON_OBJECT(
+                'id', u.id,
+                'nombre', u.nombre,
+                'apellido', u.apellido,
+                'email', u.email,
+                'fecha_alta', u.fecha_alta,
+                'rol', u.rol,
+                'num_celular', u.num_celular,
+                'active', u.active
+                ) AS usuario
+            FROM busquedas b
+            LEFT JOIN creditos c ON b.id_cred = c.id
+            LEFT JOIN usuarios u ON c.id_usuario = u.id
+            WHERE b.id = ?`, 
             [id]
         );
         return rows[0] || null
@@ -59,8 +81,8 @@ const busquedaModel = {
     },
     create: async (info_busqueda, id_cred) => {
         const [busqueda] = await pool.query(
-            `INSERT INTO busquedas (info_busqueda, id_cred)
-            VALUES (?, ?)`, [info_busqueda, id_cred]
+            `INSERT INTO busquedas (info_busqueda, id_cred, creditos_usados)
+            VALUES (?, ?, ?)`, [info_busqueda, id_cred, null]
         )
         return busqueda.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
     },

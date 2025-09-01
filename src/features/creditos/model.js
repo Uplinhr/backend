@@ -95,17 +95,60 @@ const creditoModel = {
     },
     getOwn: async (idUsuario) => {
         const [result] = await pool.query(
-            `SELECT * FROM creditos 
-            WHERE id_usuario = ?`, 
+            `SELECT c.*
+            FROM (
+                SELECT c1.*,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY c1.id_usuario, c1.tipo_credito 
+                           ORDER BY 
+                               CASE WHEN c1.tipo_credito = 'plan' THEN 0 ELSE 1 END,
+                               c1.fecha_alta DESC
+                       ) as row_num
+                FROM creditos c1 
+                WHERE c1.id_usuario = ?
+                AND (c1.vencimiento IS NULL OR c1.vencimiento >= CURRENT_DATE())
+            ) c
+            WHERE (c.row_num = 1 AND c.tipo_credito = 'plan') OR c.tipo_credito != 'plan'
+            ORDER BY c.tipo_credito, c.fecha_alta DESC`, 
             [idUsuario]
         )
         return result || null
     },
     editById: async (id, credito) => {
-        const [result] = await pool.query(
-            'UPDATE creditos SET tipo_credito = ?, cantidad = ?, vencimiento = ?, id_usuario = ? WHERE id = ?',
-            [credito.tipo_credito, credito.cantidad, credito.vencimiento, credito.id_usuario, id]
-        )
+        const campos = [];
+        const valores = [];
+        
+        // Campos obligatorios
+        if (credito.tipo_credito !== undefined) {
+            campos.push('tipo_credito = ?');
+            valores.push(credito.tipo_credito);
+        }
+        
+        if (credito.cantidad !== undefined) {
+            campos.push('cantidad = ?');
+            valores.push(credito.cantidad);
+        }
+        
+        // Campos opcionales
+        if (credito.vencimiento !== undefined) {
+            campos.push('vencimiento = ?');
+            valores.push(credito.vencimiento);
+        }
+        
+        if (credito.id_usuario !== undefined) {
+            campos.push('id_usuario = ?');
+            valores.push(credito.id_usuario);
+        }
+        
+        // Obligatorio para el WHERE
+        valores.push(id);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE creditos SET ${campos.join(', ')} WHERE id = ?`;
+        const [result] = await pool.query(query, valores);
         return result.affectedRows > 0
     },
     create: async (tipo_credito, cantidad, vencimiento, id_usuario) => {
