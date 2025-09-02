@@ -169,7 +169,7 @@ export const deleteById = async (req, res) => {
   }
 }
 
-export const buyPlan = async (req, res) => {// ESTA FUNCION NO SIRVE, PERO SE PODRIA USAR EN EL FUTURO
+export const renewPlan = async (req, res) => {
   try{
     const {id_plan, id_usuario} = req.body
     if(isNaN(id_plan) || isNaN(id_usuario)){
@@ -192,7 +192,6 @@ export const buyPlan = async (req, res) => {// ESTA FUNCION NO SIRVE, PERO SE PO
         statusCode: 404
       })
     }
-    console.log(buy)
     if(!buy.success){
       return errorRes(res, {
         message: 'Ocurrió un error en la creación de las tablas de creditos y consultorias',

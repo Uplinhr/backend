@@ -29,7 +29,7 @@ const authModel = {
                         'ultima_mod', NULL
                     )
                 ) AS plan,
-                    
+
                 COALESCE(
                     (
                         SELECT JSON_ARRAYAGG(
@@ -41,23 +41,21 @@ const authModel = {
                                 'fecha_alta', c.fecha_alta
                             )
                         )
-                        FROM (
-                            SELECT c1.*,
-                                   ROW_NUMBER() OVER (
-                                       PARTITION BY c1.id_usuario, c1.tipo_credito 
-                                       ORDER BY 
-                                           CASE WHEN c1.tipo_credito = 'plan' THEN 0 ELSE 1 END,
-                                           c1.fecha_alta DESC
-                                   ) as row_num
-                            FROM creditos c1 
-                            WHERE c1.id_usuario = u.id
-                            AND c1.vencimiento > NOW()
-                        ) c
-                        WHERE c.row_num = 1 OR c.tipo_credito != 'plan'
+                        FROM creditos c
+                        WHERE c.id_usuario = u.id
+                        AND c.vencimiento > NOW()
+                        AND (c.tipo_credito != 'plan' OR c.id = (
+                            SELECT c2.id 
+                            FROM creditos c2 
+                            WHERE c2.id_usuario = u.id 
+                            AND c2.tipo_credito = 'plan' 
+                            ORDER BY c2.fecha_alta DESC 
+                            LIMIT 1
+                        ))
                     ),
                     JSON_ARRAY()
                 ) AS creditos,
-                    
+
                 COALESCE(
                     JSON_OBJECT(
                         'id', cons.id,
@@ -74,7 +72,7 @@ const authModel = {
                         'vencimiento', NULL
                     )
                 ) AS consultorias,
-                    
+
                 CASE 
                     WHEN e.id IS NOT NULL THEN 
                         JSON_OBJECT(
@@ -87,28 +85,56 @@ const authModel = {
                         )
                     ELSE NULL 
                 END AS empresas
-                    
+
             FROM usuarios u
             LEFT JOIN planes p ON u.id_plan = p.id
-            LEFT JOIN (
-                SELECT c1.*
-                FROM consultorias c1
-                WHERE c1.vencimiento > NOW()
-                AND c1.id = (
-                    SELECT c2.id
-                    FROM consultorias c2
-                    WHERE c2.id_usuario = c1.id_usuario
-                    AND c2.vencimiento > NOW()
-                    ORDER BY c2.fecha_alta DESC  -- ← Ordenar por fecha_alta para la más reciente
-                    LIMIT 1
+            LEFT JOIN consultorias cons ON cons.id_usuario = u.id 
+                AND cons.vencimiento > NOW()
+                AND cons.fecha_alta = (
+                    SELECT MAX(cons2.fecha_alta) 
+                    FROM consultorias cons2 
+                    WHERE cons2.id_usuario = u.id 
+                    AND cons2.vencimiento > NOW()
                 )
-            ) cons ON cons.id_usuario = u.id
             LEFT JOIN empresas e ON e.id_usuario = u.id
             WHERE u.email = ?;
             `,
             [email]
         );
-        return user[0] || null
+
+        // Filtrado de creditos
+        if (user[0] && user[0].creditos) {
+            try {
+                // Verificar si ya es un objeto, sino, parsear
+                let creditos = user[0].creditos;
+                if (typeof creditos === 'string') {
+                    creditos = JSON.parse(creditos);
+                }
+
+                // Solo puede haber un credito de tipo: 'plan'
+                const creditosFiltrados = [];
+                const planCredits = creditos.filter(c => c && c.tipo_credito === 'plan');
+                const otrosCreditos = creditos.filter(c => c && c.tipo_credito !== 'plan');
+                if (planCredits.length > 0) {
+                    const planMasReciente = planCredits.reduce((latest, current) => {
+                        if (!latest) return current;  // en caso de haber un solo credito
+                        return new Date(current.fecha_alta) > new Date(latest.fecha_alta) ? current : latest;
+                    }, null);
+                    creditosFiltrados.push(planMasReciente);
+                }
+                creditosFiltrados.push(...otrosCreditos);
+
+                user[0].creditos = creditosFiltrados;
+            } catch (error) {
+                console.error('Error procesando créditos:', error);
+                user[0].creditos = [];
+            }
+        } else if (user[0]) {
+            // Si no hay créditos, devuelve un array vacío
+            user[0].creditos = [];
+        }
+
+        return user[0] || null;
     },
     createUsuario: async (nombre, apellido, hashedPassword, email, num_celular) => {
         const [usuario] = await pool.query(

@@ -256,6 +256,12 @@ export const deleteById = async (req, res) => {
         statusCode: 404
       })
     }
+    if(busqueda.estado == 'Eliminado'){
+      return errorRes(res, {
+        message: 'La busqueda ya se encuentra eliminada',
+        statusCode: 400
+      })
+    }
     if(busqueda.estado == 'Finalizado' && busqueda.creditos_usados > 0){
       const creditosUsuario = await creditoModel.getOwn(busqueda.usuario.id)
 
@@ -321,7 +327,7 @@ export const deleteById = async (req, res) => {
       });
     }
     successRes(res, {
-      message: 'busqueda eliminado exitosamente',
+      message: 'busqueda eliminada exitosamente',
       statusCode: 201
     })
   } catch (error) {
