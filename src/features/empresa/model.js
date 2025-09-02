@@ -6,13 +6,7 @@ const empresaModel = {
         'SELECT * FROM empresas'
     );
     return rows || null
-    },/*
-    getAllActives: async () => {
-    const [rows] = await pool.query(
-        'SELECT * FROM usuarios WHERE estado = ?', ['activo']
-    );
-    return rows || null
-    },*/
+    },
     getById: async (id) => {
         const [rows] = await pool.query(
             'SELECT * FROM empresas WHERE id = ?', 
@@ -216,7 +210,7 @@ const empresaModel = {
             'UPDATE empresas SET active = false WHERE id = ?',
             [id]
         )
-        return result.affectedRows > 0 // Retorna true si eliminó algún registro
+        return result.affectedRows > 0
     }
 }
 

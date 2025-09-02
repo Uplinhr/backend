@@ -6,13 +6,7 @@ const consultaModel = {
         'SELECT * FROM consultas'
     );
     return rows || null
-    },/*
-    getAllActives: async () => {
-    const [rows] = await pool.query(
-        'SELECT * FROM usuarios WHERE estado = ?', ['activo']
-    );
-    return rows || null
-    },*/
+    },
     getById: async (id) => {
         const [rows] = await pool.query(
             `SELECT 
@@ -69,31 +63,52 @@ const consultaModel = {
         return result.affectedRows > 0
     },
     create: async (cantidad_horas, comentarios, consultoria) => {
-        const [resultConsulta] = await pool.query(
-            `INSERT INTO consultas (cantidad_horas, comentarios, id_consultoria)
-            VALUES (?, ?, ?)`, [cantidad_horas, comentarios, consultoria.id]
-        )
-        
-        const restaHoras = Number(consultoria.horas_restantes) - Number(cantidad_horas)
-        const [resultConsultoria] = await pool.query(
-            `UPDATE consultorias SET horas_restantes = ? WHERE id = ?`,
-            [restaHoras, consultoria.id]
-        )
-        if(resultConsultoria.affectedRows > 0){
+        try{
+            const restaHoras = Number(consultoria.horas_restantes) - Number(cantidad_horas)
+            const [resultConsultoria] = await pool.query(
+                `UPDATE consultorias SET horas_restantes = ? WHERE id = ?`,
+                [restaHoras, consultoria.id]
+            )
+            if (resultConsultoria.affectedRows === 0) {
+                throw new Error('No se pudo actualizar la consultoría');
+            }
+            const [resultConsulta] = await pool.query(
+                `INSERT INTO consultas (cantidad_horas, comentarios, id_consultoria)
+                VALUES (?, ?, ?)`, [cantidad_horas, comentarios, consultoria.id]
+            )
             return resultConsulta.insertId
+        } catch(error){
+            console.error('Error en create:', error);
+            // Revierte la resta de horas si falla la creación de la consulta
+            if (resultConsultoria && resultConsultoria.affectedRows > 0) {
+                const horasOriginales = Number(consultoria.horas_restantes);
+                await pool.query(
+                    `UPDATE consultorias SET horas_restantes = ? WHERE id = ?`,
+                    [horasOriginales, consultoria.id]
+                );
+            }
+            throw error;
         }
-        return false
     },
     deleteById: async (consultoria, consulta) => {
-        const [resultConsulta] = await pool.query(
-            `UPDATE consultas SET estado = ? WHERE id = ?`,
-            ['Eliminado', consulta.id]
-        )
-        const [resultConsultoria] = await pool.query(
-            `UPDATE consultorias SET horas_restantes = ? WHERE id = ?`,
-            [(consultoria.horas_restantes + consulta.cantidad_horas), consultoria.id]
-        )
-        return resultConsulta.affectedRows > 0 && resultConsultoria.affectedRows > 0 // Retorna true si eliminó algún registro
+        try{
+            const [resultConsulta] = await pool.query(
+                `UPDATE consultas SET estado = ? WHERE id = ?`,
+                ['Eliminado', consulta.id]
+            )
+            if (resultConsulta.affectedRows === 0) {
+                throw new Error('No se pudo eliminar la consulta');
+            }
+
+            const [resultConsultoria] = await pool.query(
+                `UPDATE consultorias SET horas_restantes = ? WHERE id = ?`,
+                [(consultoria.horas_restantes + consulta.cantidad_horas), consultoria.id]
+            )
+            return resultConsulta.affectedRows > 0 && resultConsultoria.affectedRows > 0 // Retorna true si eliminó algún registro
+        } catch(error){
+            console.error('Error en deleteById:', error);
+            throw error;
+        }
     },
 }
 

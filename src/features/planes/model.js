@@ -6,13 +6,7 @@ const planModel = {
         'SELECT * FROM planes'
     );
     return rows || null
-    },/*
-    getAllActives: async () => {
-    const [rows] = await pool.query(
-        'SELECT * FROM usuarios WHERE estado = ?', ['activo']
-    );
-    return rows || null
-    },*/
+    },
     getById: async (id) => {
         const [rows] = await pool.query(
             'SELECT * FROM planes WHERE id = ?', 
@@ -34,7 +28,7 @@ const planModel = {
             VALUES (?, ?, ?, ?, ?${custom != null? ', ?' : ''})`, 
             [nombre, creditos_mes, meses_cred, horas_cons, precio, custom]
         )
-        return plan.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
+        return plan.insertId
     },
     enableById: async (id) => {
         const [result] = await pool.query(
@@ -48,7 +42,7 @@ const planModel = {
             'UPDATE planes SET active = false WHERE id = ?',
             [id]
         )
-        return result.affectedRows > 0 // Retorna true si eliminó algún registro
+        return result.affectedRows > 0
     },
     asignPlan: async (plan, id_usuario) => {
         try{
@@ -75,6 +69,13 @@ const planModel = {
             }
         } catch(error){
             console.error('Error en asignPlan:', error);
+            // Eliminar el crédito creado si falla la consultoría
+            if (creditos && creditos.insertId) {
+                await pool.query('DELETE FROM creditos WHERE id = ?', [creditos.insertId]);
+            }
+            if (consultorias && consultorias.insertId) {
+                await pool.query('DELETE FROM consultorias WHERE id = ?', [consultorias.insertId]);
+            }
             return {
                 success: false,
                 error: error.message,

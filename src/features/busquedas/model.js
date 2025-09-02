@@ -6,13 +6,7 @@ const busquedaModel = {
         'SELECT * FROM busquedas'
     );
     return rows || null
-    },/*
-    getAllActives: async () => {
-    const [rows] = await pool.query(
-        'SELECT * FROM usuarios WHERE estado = ?', ['activo']
-    );
-    return rows || null
-    },*/
+    },
     getById: async (id) => {
         const [rows] = await pool.query(
             `SELECT 
@@ -84,14 +78,14 @@ const busquedaModel = {
             `INSERT INTO busquedas (info_busqueda, id_cred, creditos_usados)
             VALUES (?, ?, ?)`, [info_busqueda, id_cred, null]
         )
-        return busqueda.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
+        return busqueda.insertId
     },
     deleteById: async (id) => {
         const [result] = await pool.query(
             'UPDATE busquedas SET estado = ? WHERE id = ?',
             ['Eliminado', id]
         )
-        return result.affectedRows > 0 // Retorna true si eliminó algún registro
+        return result.affectedRows > 0
     }
 }
 

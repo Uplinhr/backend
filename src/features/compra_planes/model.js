@@ -39,13 +39,7 @@ const compra_planModel = {
             LEFT JOIN usuarios u ON cp.id_usuario = u.id;`
     );
     return rows || null
-    },/*
-    getAllActives: async () => {
-    const [rows] = await pool.query(
-        'SELECT * FROM usuarios WHERE estado = ?', ['activo']
-    );
-    return rows || null
-    },*/
+    },
     getCompra_PlanById: async (id) => {
         const [rows] = await pool.query(
             `SELECT 
@@ -106,7 +100,7 @@ const compra_planModel = {
             'DELETE FROM compra_planes WHERE id = ?',
             [id]
         )
-        return result.affectedRows > 0 // Retorna true si eliminó algún registro
+        return result.affectedRows > 0
     }
 }
 

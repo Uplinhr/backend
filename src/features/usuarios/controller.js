@@ -154,6 +154,13 @@ export const editById = async (req, res) => {
             data: changed
         })
     } catch(error){
+        if (error.code === 'ER_DUP_ENTRY') {
+            return errorRes(res, {
+                message: 'El email ya está en uso por otro usuario',
+                statusCode: 409,
+                errors: error.code
+            })
+        }
         errorRes(res, {
           message: 'Error al editar usuario',
           statusCode: 500,

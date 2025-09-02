@@ -96,21 +96,20 @@ const creditoModel = {
     getOwn: async (idUsuario) => {
         const [result] = await pool.query(
             `SELECT c.*
-            FROM (
-                SELECT c1.*,
-                       ROW_NUMBER() OVER (
-                           PARTITION BY c1.id_usuario, c1.tipo_credito 
-                           ORDER BY 
-                               CASE WHEN c1.tipo_credito = 'plan' THEN 0 ELSE 1 END,
-                               c1.fecha_alta DESC
-                       ) as row_num
-                FROM creditos c1 
-                WHERE c1.id_usuario = ?
-                AND (c1.vencimiento IS NULL OR c1.vencimiento >= CURRENT_DATE())
-            ) c
-            WHERE (c.row_num = 1 AND c.tipo_credito = 'plan') OR c.tipo_credito != 'plan'
+            FROM creditos c
+            WHERE c.id_usuario = ?
+            AND (c.vencimiento IS NULL OR c.vencimiento >= CURRENT_DATE())
+            AND (c.tipo_credito != 'plan' OR c.id = (
+                SELECT c2.id 
+                FROM creditos c2 
+                WHERE c2.id_usuario = ? 
+                AND c2.tipo_credito = 'plan'
+                AND (c2.vencimiento IS NULL OR c2.vencimiento >= CURRENT_DATE())
+                ORDER BY c2.fecha_alta DESC 
+                LIMIT 1
+            ))
             ORDER BY c.tipo_credito, c.fecha_alta DESC`, 
-            [idUsuario]
+            [idUsuario, idUsuario]  //Dos parámetros para los dos placeholders
         )
         return result || null
     },
@@ -156,7 +155,7 @@ const creditoModel = {
             `INSERT INTO creditos (tipo_credito, cantidad, vencimiento, id_usuario) 
             VALUES (?, ?, ?, ?)`, [tipo_credito, cantidad, vencimiento, id_usuario]
         )
-        return credito.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
+        return credito.insertId
     },
     deleteById: async (id) => {
         const [result] = await pool.query(

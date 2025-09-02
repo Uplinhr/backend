@@ -26,13 +26,7 @@ const consultoriaModel = {
         FROM consultorias cons`
     );
     return rows || null
-    },/*
-    getAllActives: async () => {
-    const [rows] = await pool.query(
-        'SELECT * FROM usuarios WHERE estado = ?', ['activo']
-    );
-    return rows || null
-    },*/
+    },
     getById: async (id) => {
         const [rows] = await pool.query(
             `SELECT 
@@ -84,7 +78,10 @@ const consultoriaModel = {
                     JSON_ARRAY()
                 ) AS consultas
             FROM consultorias cons
-            WHERE cons.id_usuario = ?`, 
+            WHERE cons.id_usuario = ? 
+            AND (cons.vencimiento IS NULL OR cons.vencimiento > NOW())
+            ORDER BY cons.fecha_alta DESC 
+            LIMIT 1`,
             [id]
         );
         return rows[0] || null
@@ -101,14 +98,14 @@ const consultoriaModel = {
             `INSERT INTO consultorias (horas_totales, horas_restantes, vencimiento, id_usuario) 
             VALUES (?, ?, ?, ?)`, [horas_totales, horas_restantes, vencimiento, id_usuario]
         )
-        return consultoria.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
+        return consultoria.insertId
     },
     deleteById: async (id) => {
         const [result] = await pool.query(
             'DELETE FROM consultorias WHERE id = ?',
             [id]
         )
-        return result.affectedRows > 0 // Retorna true si eliminó algún registro
+        return result.affectedRows > 0
     }
 }
 

@@ -20,13 +20,7 @@ const compra_creditosModel = {
         LEFT JOIN creditos c ON cc.id_cred = c.id`
     );
     return rows || null
-    },/*
-    getAllActives: async () => {
-    const [rows] = await pool.query(
-        'SELECT * FROM usuarios WHERE estado = ?', ['activo']
-    );
-    return rows || null
-    },*/
+    },
     getById: async (id) => {
         const [rows] = await pool.query(
             `SELECT 
@@ -57,22 +51,29 @@ const compra_creditosModel = {
         return result.affectedRows > 0
     },
     create: async (medio_pago, costo, observaciones, cantidad, vencimiento, id_usuario) => {
-        const [creditos] = await pool.query(
-            `INSERT INTO creditos (tipo_credito, cantidad, vencimiento, id_usuario) 
-            VALUES (?, ?, ?, ?)`, ['adicional', cantidad, vencimiento, id_usuario]
-        )
-        const [compra_credito] = await pool.query(
-            `INSERT INTO compra_creditos (medio_pago, costo, observaciones, id_cred) 
-            VALUES (?, ?, ?, ?)`, [medio_pago, costo, observaciones, creditos.insertId]
-        )
-        return compra_credito.insertId // SI HAY UN ERROR EN LA CREACION, SE GENERA EL ID IGUAL, CAMBIAR EN EL FUTURO
+        try{
+            const [creditos] = await pool.query(
+                `INSERT INTO creditos (tipo_credito, cantidad, vencimiento, id_usuario) 
+                VALUES (?, ?, ?, ?)`, ['adicional', cantidad, vencimiento, id_usuario]
+            )
+            const [compra_credito] = await pool.query(
+                `INSERT INTO compra_creditos (medio_pago, costo, observaciones, id_cred) 
+                VALUES (?, ?, ?, ?)`, [medio_pago, costo, observaciones, creditos.insertId]
+            )
+            return compra_credito.insertId
+        } catch(error){
+            if(creditos && creditos.insertId){
+                await pool.query('DELETE FROM creditos WHERE id = ?', [creditos.insertId]);
+            }
+            throw error
+        }
     },
     deleteById: async (id) => {
         const [result] = await pool.query(
             'DELETE FROM compra_creditos WHERE id = ?',
             [id]
         )
-        return result.affectedRows > 0 // Retorna true si eliminó algún registro
+        return result.affectedRows > 0
     }
 }
 
