@@ -123,43 +123,55 @@ export const editById = async (req, res) => {
         });
       }
 
-      // Buscar créditos por tipo
+      // Buscar créditos por tipo en orden de prioridad
+      const creditoDevuelto = creditosUsuario.find(c => c.tipo_credito === 'devuelto');
       const creditoPlan = creditosUsuario.find(c => c.tipo_credito === 'plan');
       const creditoAdicional = creditosUsuario.find(c => c.tipo_credito === 'adicional');
-      const creditoDevuelto = creditosUsuario.find(c => c.tipo_credito === 'devuelto');
 
       const creditosUsados = req.body.creditos_usados;
+      let creditosRestantes = creditosUsados;
 
       // Orden de prioridad: devuelto -> plan -> adicional
-      let creditoSeleccionado = null;
+      const creditosEnOrden = [creditoDevuelto, creditoPlan, creditoAdicional].filter(Boolean);
 
-      if (creditoDevuelto && creditoDevuelto.cantidad >= creditosUsados) {
-        creditoSeleccionado = creditoDevuelto;
-      } else if (creditoPlan && creditoPlan.cantidad >= creditosUsados) {
-        creditoSeleccionado = creditoPlan;
-      } else if (creditoAdicional && creditoAdicional.cantidad >= creditosUsados) {
-        creditoSeleccionado = creditoAdicional;
-      }
-
-      // Validar créditos suficientes
-      if (!creditoSeleccionado) {
+      // Verificar créditos totales disponibles
+      const creditosTotales = creditosEnOrden.reduce((total, cred) => total + (cred?.cantidad || 0), 0);
+      
+      if (creditosTotales < creditosUsados) {
         return errorRes(res, {
           message: 'Créditos insuficientes para finalizar la búsqueda',
           statusCode: 400
         });
       }
 
-      // Restar créditos
-      const nuevaCantidad = creditoSeleccionado.cantidad - creditosUsados;
-      const creditChanged = await creditoModel.editById(creditoSeleccionado.id, {
-        cantidad: nuevaCantidad
-      });
-      console.log('creditChanged: ', creditChanged)
-      console.log('credioSeleccionado: ', creditoSeleccionado)
-      console.log('nuevaCantidad: ', nuevaCantidad)
-      if (!creditChanged) {
+      // Restar créditos en cascada según prioridad
+      for (const credito of creditosEnOrden) {
+        if (creditosRestantes <= 0) break;
+
+        if (credito && credito.cantidad > 0) {
+          const cantidadARestar = Math.min(credito.cantidad, creditosRestantes);
+          const nuevaCantidad = credito.cantidad - cantidadARestar;
+          
+          const creditChanged = await creditoModel.editById(credito.id, {
+            cantidad: nuevaCantidad
+          });
+
+          if (!creditChanged) {
+            return errorRes(res, {
+              message: `Error al restar créditos de tipo ${credito.tipo_credito}`,
+              statusCode: 500
+            });
+          }
+
+          creditosRestantes -= cantidadARestar;
+          console.log(`Restados ${cantidadARestar} créditos de ${credito.tipo_credito}. Restantes: ${creditosRestantes}`);
+        }
+      }
+
+      // Verificar que se restaron todos los créditos
+      if (creditosRestantes > 0) {
         return errorRes(res, {
-          message: 'Error en la resta de créditos',
+          message: 'Error inesperado: no se pudieron restar todos los créditos',
           statusCode: 500
         });
       }
@@ -176,7 +188,7 @@ export const editById = async (req, res) => {
 
     successRes(res, {
       message: 'Búsqueda editada exitosamente',
-      statusCode: 200 // 200 en lugar de 201 (201 es para creación)
+      statusCode: 200
     });
 
   } catch (error) {
