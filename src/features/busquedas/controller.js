@@ -301,7 +301,7 @@ export const deleteById = async (req, res) => {
             tipo_credito: 'devuelto',
             cantidad: busqueda.creditos_usados,
             id_usuario: busqueda.usuario.id,
-            vencimiento: null // o alguna fecha de vencimiento apropiada
+            vencimiento: null
           });
           
           if (!nuevoCredito) {
