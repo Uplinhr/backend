@@ -249,7 +249,70 @@ export const deleteById = async (req, res) => {
         statusCode: 404
       })
     }
-    
+    const busqueda = await busquedaModel.getById(id);
+    if(!busqueda){
+      return errorRes(res, {
+        message: 'No existe una busqueda con esa ID',
+        statusCode: 404
+      })
+    }
+    if(busqueda.estado == 'Finalizado' && busqueda.creditos_usados > 0){
+      const creditosUsuario = await creditoModel.getOwn(busqueda.usuario.id)
+
+      const creditoOriginal = creditosUsuario.find(c => c.id === busqueda.id_cred)
+
+      if(creditoOriginal){
+        const nuevaCantidad = creditoOriginal.cantidad + busqueda.creditos_usados
+        const creditChanged = await creditoModel.editById(creditoOriginal.id,{
+          cantidad: nuevaCantidad
+        })
+        if(!creditChanged){
+          return errorRes(res, {
+            message: 'Error al devolver los créditos',
+            statusCode: 500
+          });
+        }
+        console.log(`Devueltos ${busqueda.creditos_usados} créditos al crédito ID: ${creditoOriginal.id}`);
+      } else {
+        //En caso de no encontrar el credito original, es muy poco posible
+        const creditoDevuelto = creditosUsuario.find(c => c.tipo_credito === 'devuelto');
+        const creditoPlan = creditosUsuario.find(c => c.tipo_credito === 'plan');
+        const creditoAdicional = creditosUsuario.find(c => c.tipo_credito === 'adicional');
+
+        const creditoParaDevolucion = creditoDevuelto || creditoPlan || creditoAdicional;
+
+        if (creditoParaDevolucion) {
+          const nuevaCantidad = creditoParaDevolucion.cantidad + busqueda.creditos_usados;
+          const creditChanged = await creditoModel.editById(creditoParaDevolucion.id, {
+            cantidad: nuevaCantidad
+          });
+
+          if (!creditChanged) {
+            return errorRes(res, {
+              message: 'Error al devolver los créditos',
+              statusCode: 500
+            });
+          }
+          
+          console.log(`Devueltos ${busqueda.creditos_usados} créditos al crédito ID: ${creditoParaDevolucion.id} (tipo: ${creditoParaDevolucion.tipo_credito})`);
+        } else {
+          // Crear un nuevo crédito si no existe ninguno
+          const nuevoCredito = await creditoModel.create({
+            tipo_credito: 'devuelto',
+            cantidad: busqueda.creditos_usados,
+            id_usuario: busqueda.usuario.id,
+            vencimiento: null // o alguna fecha de vencimiento apropiada
+          });
+          
+          if (!nuevoCredito) {
+            return errorRes(res, {
+              message: 'Error al crear nuevo crédito para devolución',
+              statusCode: 500
+            });
+          }
+        }
+      }
+    }
     const deleted = await busquedaModel.deleteById(id)
     if(!deleted){
       return errorRes(res, {
