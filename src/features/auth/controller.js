@@ -150,45 +150,38 @@ export const requestPasswordReset = async (req, res) => {
           <html>
           <head>
               <meta charset="utf-8">
-              <style>
-                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                  .button { 
-                      display: inline-block; 
-                      padding: 12px 24px; 
-                      background-color: #007bff; 
-                      color: white; 
-                      text-decoration: none; 
-                      border-radius: 5px; 
-                      margin: 20px 0; 
-                  }
-                  .footer { 
-                      margin-top: 30px; 
-                      padding-top: 20px; 
-                      border-top: 1px solid #eee; 
-                      color: #666; 
-                      font-size: 12px; 
-                  }
-              </style>
           </head>
-          <body>
-              <div class="container">
-                  <h2>Restablecer tu contraseña</h2>
-                  <p>Hola ${user.nombre},</p>
-                  <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta Uplin.</p>
-                  <p>Haz clic en el siguiente botón para crear una nueva contraseña:</p>
-                  
-                  <a href="${resetLink}" class="button">Restablecer contraseña</a>
-                  
-                  <p>Si no solicitaste este cambio, puedes ignorar este email.</p>
-                  <p>El link expirará en 1 hora por seguridad.</p>
-                  
-                  <div class="footer">
-                      <p>Equipo Uplin</p>
-                      <p>Si tienes problemas con el botón, copia y pega esta URL en tu navegador:</p>
-                      <p>${resetLink}</p>
-                  </div>
-              </div>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin:0; padding:0; background-color:#f9f9f9;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9f9f9; padding: 20px 0;">
+                  <tr>
+                      <td align="center">
+                          <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #FFFFFF; padding: 20px; border-radius: 10px;">
+                              <tr>
+                                  <td>
+                                      <h2 style="color: #502B7D; text-align: center;">Restablecer tu contraseña</h2>
+                                      <p>Hola ${user.nombre},</p>
+                                      <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta Uplin.</p>
+                                      <p>Haz clic en el siguiente botón para crear una nueva contraseña:</p>
+                                      <p style="text-align: center;">
+                                          <a href="${resetLink}"
+                                             style="display: inline-block; padding: 12px 24px; background-color: #6C4099; color: #FFFFFF; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                                             Restablecer contraseña
+                                          </a>
+                                      </p>
+                                      <p>Si no solicitaste este cambio, puedes ignorar este email.</p>
+                                      <p>El link expirará en 1 hora por seguridad.</p>
+                                      <hr style="border:0; border-top:1px solid #eee; margin: 30px 0;">
+                                      <p style="color: #666; font-size: 12px; text-align: center;">
+                                          Equipo Uplin<br>
+                                          Si tienes problemas con el botón, copia y pega esta URL en tu navegador:<br>
+                                          <a href="${resetLink}" style="color: #502B7D; word-break: break-all;">${resetLink}</a>
+                                      </p>
+                                  </td>
+                              </tr>
+                          </table>
+                      </td>
+                  </tr>
+              </table>
           </body>
           </html>
       `
