@@ -117,7 +117,6 @@ const creditoModel = {
         const campos = [];
         const valores = [];
         
-        // Campos obligatorios
         if (credito.tipo_credito !== undefined) {
             campos.push('tipo_credito = ?');
             valores.push(credito.tipo_credito);
@@ -128,7 +127,6 @@ const creditoModel = {
             valores.push(credito.cantidad);
         }
         
-        // Campos opcionales
         if (credito.vencimiento !== undefined) {
             campos.push('vencimiento = ?');
             valores.push(credito.vencimiento);

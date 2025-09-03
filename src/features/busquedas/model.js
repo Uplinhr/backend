@@ -67,10 +67,55 @@ const busquedaModel = {
         return rows || null
     },
     editById: async (id, busqueda) => {
-        const [result] = await pool.query(
-            'UPDATE busquedas SET info_busqueda = ?, creditos_usados = ?, observaciones = ?, estado = ?, id_cred = ?, id_tipo = ?, id_proceso = ?, ultima_mod = NOW() WHERE id = ?',
-            [busqueda.info_busqueda, busqueda.creditos_usados, busqueda.observaciones, busqueda.estado, busqueda.id_cred, busqueda.id_tipo, busqueda.id_proceso, id]
-        )
+        const campos = [];
+        const valores = [];
+        
+        if (busqueda.info_busqueda !== undefined) {
+            campos.push('info_busqueda = ?');
+            valores.push(busqueda.info_busqueda);
+        }
+        
+        if (busqueda.creditos_usados !== undefined) {
+            campos.push('creditos_usados = ?');
+            valores.push(busqueda.creditos_usados);
+        }
+        
+        if (busqueda.observaciones !== undefined) {
+            campos.push('observaciones = ?');
+            valores.push(busqueda.observaciones);
+        }
+        
+        if (busqueda.estado !== undefined) {
+            campos.push('estado = ?');
+            valores.push(busqueda.estado);
+        }
+        
+        if (busqueda.id_cred !== undefined) {
+            campos.push('id_cred = ?');
+            valores.push(busqueda.id_cred);
+        }
+        
+        if (busqueda.id_tipo !== undefined) {
+            campos.push('id_tipo = ?');
+            valores.push(busqueda.id_tipo);
+        }
+        
+        if (busqueda.id_proceso !== undefined) {
+            campos.push('id_proceso = ?');
+            valores.push(busqueda.id_proceso);
+        }
+        
+        campos.push('ultima_mod = NOW()');
+        
+        // Obligatorio para el WHERE
+        valores.push(id);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE busquedas SET ${campos.join(', ')} WHERE id = ?`;
+        const [result] = await pool.query(query, valores);
         return result.affectedRows > 0
     },
     create: async (info_busqueda, id_cred) => {

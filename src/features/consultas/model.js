@@ -56,10 +56,45 @@ const consultaModel = {
         return rows || null
     },
     editById: async (id, consulta) => {
-        const [result] = await pool.query(
-            'UPDATE consultas SET cantidad_horas = ?, comentarios = ?, observaciones = ?, estado = ?, id_consultoria = ?, ultima_mod = NOW() WHERE id = ?',
-            [consulta.cantidad_horas, consulta.comentarios, consulta.observaciones, consulta.estado, consulta.id_consultoria, id]
-        )
+        const campos = [];
+        const valores = [];
+        
+        if (consulta.cantidad_horas !== undefined) {
+            campos.push('cantidad_horas = ?');
+            valores.push(consulta.cantidad_horas);
+        }
+        
+        if (consulta.comentarios !== undefined) {
+            campos.push('comentarios = ?');
+            valores.push(consulta.comentarios);
+        }
+        
+        if (consulta.observaciones !== undefined) {
+            campos.push('observaciones = ?');
+            valores.push(consulta.observaciones);
+        }
+        
+        if (consulta.estado !== undefined) {
+            campos.push('estado = ?');
+            valores.push(consulta.estado);
+        }
+        
+        if (consulta.id_consultoria !== undefined) {
+            campos.push('id_consultoria = ?');
+            valores.push(consulta.id_consultoria);
+        }
+        
+        campos.push('ultima_mod = NOW()');
+        
+        // Obligatorio para el WHERE
+        valores.push(id);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE consultas SET ${campos.join(', ')} WHERE id = ?`;
+        const [result] = await pool.query(query, valores);
         return result.affectedRows > 0
     },
     create: async (cantidad_horas, comentarios, consultoria) => {

@@ -324,22 +324,84 @@ const usuarioModel = {
         }
         return rows[0] || null;
     },
-    editFullName: async (id, nombre, apellido) => {
-        console.log(nombre)
-        const [result] = await pool.query(
-            'UPDATE usuarios SET nombre = ?, apellido = ? WHERE id = ?',
-            [nombre, apellido, id]
-        )
+    editOwn: async (id, usuario) => {
+        const campos = [];
+        const valores = [];
+        
+        if (usuario.nombre !== undefined) {
+            campos.push('nombre = ?');
+            valores.push(nombre);
+        }
+        
+        if (usuario.apellido !== undefined) {
+            campos.push('apellido = ?');
+            valores.push(apellido);
+        }
+
+        if (usuario.num_celular !== undefined) {
+            campos.push('num_celular = ?');
+            valores.push(num_celular);
+        }
+        
+        // Obligatorio para el WHERE
+        valores.push(id);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE usuarios SET ${campos.join(', ')} WHERE id = ?`;
+        const [result] = await pool.query(query, valores);
         return result.affectedRows > 0
     },
-    editById: async (id, user) => {
-        const [result] = await pool.query(
-            `UPDATE usuarios SET 
-            nombre = ?, apellido = ?, email = ?, active = ?, rol = ?, num_celular = ?, id_plan = ? 
-            WHERE id = ?`,
-            [user.nombre, user.apellido, user.email, user.active, user.rol, user.num_celular, user.id_plan, 
-            id]
-        )
+    editById: async (id, usuario) => {
+        const campos = [];
+        const valores = [];
+        
+        if (usuario.nombre !== undefined) {
+            campos.push('nombre = ?');
+            valores.push(usuario.nombre);
+        }
+        
+        if (usuario.apellido !== undefined) {
+            campos.push('apellido = ?');
+            valores.push(usuario.apellido);
+        }
+        
+        if (usuario.email !== undefined) {
+            campos.push('email = ?');
+            valores.push(usuario.email);
+        }
+        
+        if (usuario.active !== undefined) {
+            campos.push('active = ?');
+            valores.push(usuario.active);
+        }
+        
+        if (usuario.rol !== undefined) {
+            campos.push('rol = ?');
+            valores.push(usuario.rol);
+        }
+        
+        if (usuario.num_celular !== undefined) {
+            campos.push('num_celular = ?');
+            valores.push(usuario.num_celular);
+        }
+        
+        if (usuario.id_plan !== undefined) {
+            campos.push('id_plan = ?');
+            valores.push(usuario.id_plan);
+        }
+        
+        // Obligatorio para el WHERE
+        valores.push(id);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE usuarios SET ${campos.join(', ')} WHERE id = ?`;
+        const [result] = await pool.query(query, valores);
         return result.affectedRows > 0
     },
     enableById: async (id) => {

@@ -76,7 +76,7 @@ export const getById = async (req, res) => {
     }
 }
 
-export const editFullName =  async (req, res) => {
+export const editOwn =  async (req, res) => {
     try{
         const {id} = req.params
         if(isNaN(id)) {
@@ -92,7 +92,7 @@ export const editFullName =  async (req, res) => {
                 statusCode: 404
             })
         }
-        const changed = await usuarioModel.editFullName(id, req.body.nombre, req.body.apellido)
+        const changed = await usuarioModel.editOwn(id, req.body)
         if(!changed){
             return errorRes(res, {
                 message: "No se editó el nombre",

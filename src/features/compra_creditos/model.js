@@ -44,10 +44,38 @@ const compra_creditosModel = {
         return rows[0] || null
     },
     editById: async (id, compra_credito) => {
-        const [result] = await pool.query(
-            'UPDATE compra_creditos SET medio_pago = ?, costo = ?, observaciones = ?, id_cred = ? WHERE id = ?',
-            [compra_credito.medio_pago, compra_credito.costo, compra_credito.observaciones, compra_credito.id_cred, id]
-        )
+        const campos = [];
+        const valores = [];
+        
+        if (compra_credito.medio_pago !== undefined) {
+            campos.push('medio_pago = ?');
+            valores.push(compra_credito.medio_pago);
+        }
+        
+        if (compra_credito.costo !== undefined) {
+            campos.push('costo = ?');
+            valores.push(compra_credito.costo);
+        }
+        
+        if (compra_credito.observaciones !== undefined) {
+            campos.push('observaciones = ?');
+            valores.push(compra_credito.observaciones);
+        }
+        
+        if (compra_credito.id_cred !== undefined) {
+            campos.push('id_cred = ?');
+            valores.push(compra_credito.id_cred);
+        }
+        
+        // Obligatorio para el WHERE
+        valores.push(id);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE compra_creditos SET ${campos.join(', ')} WHERE id = ?`;
+        const [result] = await pool.query(query, valores);
         return result.affectedRows > 0
     },
     create: async (medio_pago, costo, observaciones, cantidad, vencimiento, id_usuario) => {

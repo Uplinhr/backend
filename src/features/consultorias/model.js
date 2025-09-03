@@ -87,10 +87,38 @@ const consultoriaModel = {
         return rows[0] || null
     },
     editById: async (id, consultoria) => {
-        const [result] = await pool.query(
-            'UPDATE consultorias SET horas_totales = ?, horas_restantes = ?, vencimiento = ?, id_usuario = ? WHERE id = ?',
-            [consultoria.horas_totales, consultoria.horas_restantes, consultoria.vencimiento, consultoria.id_usuario, id]
-        )
+        const campos = [];
+        const valores = [];
+        
+        if (consultoria.horas_totales !== undefined) {
+            campos.push('horas_totales = ?');
+            valores.push(consultoria.horas_totales);
+        }
+        
+        if (consultoria.horas_restantes !== undefined) {
+            campos.push('horas_restantes = ?');
+            valores.push(consultoria.horas_restantes);
+        }
+        
+        if (consultoria.vencimiento !== undefined) {
+            campos.push('vencimiento = ?');
+            valores.push(consultoria.vencimiento);
+        }
+        
+        if (consultoria.id_usuario !== undefined) {
+            campos.push('id_usuario = ?');
+            valores.push(consultoria.id_usuario);
+        }
+        
+        // Obligatorio para el WHERE
+        valores.push(id);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE consultorias SET ${campos.join(', ')} WHERE id = ?`;
+        const [result] = await pool.query(query, valores);
         return result.affectedRows > 0
     },
     create: async (horas_totales, horas_restantes, vencimiento, id_usuario) => {

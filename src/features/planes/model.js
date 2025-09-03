@@ -15,10 +15,55 @@ const planModel = {
         return rows[0] || null
     },
     editById: async (id, plan) => {
-        const [result] = await pool.query(
-            'UPDATE planes SET nombre = ?, creditos_mes = ?, meses_cred = ?, horas_cons = ?, precio = ?, custom = ?, active = ?, ultima_mod = NOW() WHERE id = ?',
-            [plan.nombre, plan.creditos_mes, plan.meses_cred, plan.horas_cons, plan.precio, plan.custom, plan.active, id]
-        )
+        const campos = [];
+        const valores = [];
+        
+        if (plan.nombre !== undefined) {
+            campos.push('nombre = ?');
+            valores.push(plan.nombre);
+        }
+        
+        if (plan.creditos_mes !== undefined) {
+            campos.push('creditos_mes = ?');
+            valores.push(plan.creditos_mes);
+        }
+        
+        if (plan.meses_cred !== undefined) {
+            campos.push('meses_cred = ?');
+            valores.push(plan.meses_cred);
+        }
+        
+        if (plan.horas_cons !== undefined) {
+            campos.push('horas_cons = ?');
+            valores.push(plan.horas_cons);
+        }
+        
+        if (plan.precio !== undefined) {
+            campos.push('precio = ?');
+            valores.push(plan.precio);
+        }
+        
+        if (plan.custom !== undefined) {
+            campos.push('custom = ?');
+            valores.push(plan.custom);
+        }
+        
+        if (plan.active !== undefined) {
+            campos.push('active = ?');
+            valores.push(plan.active);
+        }
+        
+        campos.push('ultima_mod = NOW()');
+        
+        // Obligatorio para el WHERE
+        valores.push(id);
+        
+        if (campos.length === 0) {
+            return false; // En caso de no tener nada que actualizar
+        }
+        
+        const query = `UPDATE planes SET ${campos.join(', ')} WHERE id = ?`;
+        const [result] = await pool.query(query, valores);
         return result.affectedRows > 0
     },
     create: async (nombre, creditos_mes, meses_cred, horas_cons, precio, custom) => {
