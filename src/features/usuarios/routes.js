@@ -3,7 +3,7 @@ import {
   getById,
   getAll,
   deleteById,
-  editFullName,
+  editOwn,
   editById,
   getOwn,
   enableById
@@ -13,7 +13,7 @@ const router = express.Router()
 
 // Rutas protegidas
 router.get('/self', authRequired, getOwn)
-router.put('/fullName/:id', authRequired, editFullName)
+router.put('/fullName/:id', authRequired, editOwn)
 
 // Rutas solo para admin
 router.get('/', authRequired, checkRole(['admin']), getAll);
