@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import authModel from './model.js';
 import reinicio_contraseniaModel from '../reinicio_contrasenia/model.js';
 import { successRes, errorRes } from "../../utils/apiResponse.js";
