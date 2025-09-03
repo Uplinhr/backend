@@ -129,7 +129,7 @@ export const requestPasswordReset = async (req, res) => {
     }
 
     const token = crypto.randomBytes(32).toString('hex')
-    const fechaExp = newDate(Date.now() + 1 * 60 * 60 * 1000) //Expira en 1 hora
+    const fechaExp = new Date(Date.now() + 1 * 60 * 60 * 1000) //Expira en 1 hora
 
     const registro = await reinicio_contraseniaModel.create(token, email, fechaExp, user.id)
     if(!registro){
