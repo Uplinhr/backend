@@ -8,7 +8,9 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "migrate": "node src/database/run-migrations.js",
-    "seeders": "node src/database/run-seeders.js"
+    "seeders": "node src/database/run-seeders.js",
+    "vercel-build": "npm install",
+    "vercel-dev": "npm run dev"
   },
   "repository": {
     "type": "git",

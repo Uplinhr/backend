@@ -1,0 +1,8 @@
+node_modules
+.git
+.env
+.env.local
+.nyc_output
+coverage
+*.log
+.DS_Store
