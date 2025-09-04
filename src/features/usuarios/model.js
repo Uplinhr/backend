@@ -183,7 +183,7 @@ const usuarioModel = {
                         'ultima_mod', NULL
                     )
                 ) AS plan,
-
+                    
                 COALESCE(
                     (
                         SELECT JSON_ARRAYAGG(
@@ -228,34 +228,32 @@ const usuarioModel = {
                     ),
                     JSON_ARRAY()
                 ) AS creditos,
-
+                    
                 COALESCE(
                     (
-                        SELECT JSON_ARRAYAGG(
-                            JSON_OBJECT(
-                                'id', cons.id,
-                                'horas_totales', cons.horas_totales,
-                                'horas_restantes', cons.horas_restantes,
-                                'fecha_alta', cons.fecha_alta,
-                                'vencimiento', cons.vencimiento,
-                                'consultas', COALESCE(
-                                    (
-                                        SELECT JSON_ARRAYAGG(
-                                            JSON_OBJECT(
-                                                'id', cc.id,
-                                                'fecha_alta', cc.fecha_alta,
-                                                'ultima_mod', cc.ultima_mod,
-                                                'comentarios', cc.comentarios,
-                                                'cantidad_horas', cc.cantidad_horas,
-                                                'observaciones', cc.observaciones,
-                                                'estado', cc.estado
-                                            )
+                        SELECT JSON_OBJECT(
+                            'id', cons.id,
+                            'horas_totales', cons.horas_totales,
+                            'horas_restantes', cons.horas_restantes,
+                            'fecha_alta', cons.fecha_alta,
+                            'vencimiento', cons.vencimiento,
+                            'consultas', COALESCE(
+                                (
+                                    SELECT JSON_ARRAYAGG(
+                                        JSON_OBJECT(
+                                            'id', cc.id,
+                                            'fecha_alta', cc.fecha_alta,
+                                            'ultima_mod', cc.ultima_mod,
+                                            'comentarios', cc.comentarios,
+                                            'cantidad_horas', cc.cantidad_horas,
+                                            'observaciones', cc.observaciones,
+                                            'estado', cc.estado
                                         )
-                                        FROM consultas cc
-                                        WHERE cc.id_consultoria = cons.id
-                                    ),
-                                    JSON_ARRAY()
-                                )
+                                    )
+                                    FROM consultas cc
+                                    WHERE cc.id_consultoria = cons.id
+                                ),
+                                JSON_ARRAY()
                             )
                         )
                         FROM consultorias cons
@@ -270,9 +268,9 @@ const usuarioModel = {
                             LIMIT 1
                         )
                     ),
-                    JSON_ARRAY()
+                    JSON_OBJECT()
                 ) AS consultorias,
-
+                    
                 CASE 
                     WHEN e.id IS NOT NULL THEN 
                         JSON_OBJECT(
