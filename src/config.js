@@ -1,5 +1,5 @@
 export default {
     app: {
-        port: process.env.PORT || 4000
+        port: process.env.SERVER_PORT || 4000
     }
 }

@@ -26,12 +26,12 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'))
-//app.use(express.urlencoded({ extended: true }));
 
 // configuracion
-app.set('port', config.app.port)
+app.set('port', process.env.SERVER_PORT || 4000)
 
 //RUTAS
+
 app.use('/api/usuarios', usuariosRoutes)
 app.use('/api/auth', authRoutes);
 app.use('/api/planes', planesRoutes)
@@ -42,5 +42,26 @@ app.use('/api/compra_creditos', compra_creditosRoutes)
 app.use('/api/empresas', empresasRoutes)
 app.use('/api/consultorias', consultoriasRoutes)
 app.use('/api/consultas', consultasRoutes)
+
+
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Servidor funcionando en puerto 4000',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error('Error:', err.stack);
+  res.status(500).json({ 
+    error: 'Error interno del servidor',
+    message: process.env.DEV ? err.message : 'Ocurrió un error'
+  });
+});
+
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Ruta no encontrada' });
+});
 
 export default app
