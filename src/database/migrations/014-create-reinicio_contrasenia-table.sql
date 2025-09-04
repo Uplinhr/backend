@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS reinicio_contrasenia (
     used BOOLEAN DEFAULT FALSE,
     fecha_alta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_exp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_usuario INT NULL UNIQUE,
+    id_usuario INT NULL,
     FOREIGN KEY (id_usuario) 
         REFERENCES usuarios(id)
         ON DELETE RESTRICT
