@@ -4,7 +4,7 @@ const reinicio_contraseniaModel = {
     create: async (token, email, fechaExp, idUsuario) => {
         const [result] = await pool.query(
             `INSERT INTO reinicio_contrasenia
-            (token, email, fechaExp, idUsuario)
+            (token, email, fecha_exp, id_usuario)
             VALUES (?, ?, ?, ?)`,
             [token, email, fechaExp, idUsuario]
         )
