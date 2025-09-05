@@ -131,7 +131,7 @@ export const editById = async (req, res) => {
                 statusCode: 500
             })
         }
-        if(req.body.id_plan !== usuario.id_plan && req.body.id_plan !== null){ //En caso de necesitar un cambio de plan
+        if(req.body.id_plan !== usuario.plan.id && req.body.id_plan !== undefined){ //En caso de necesitar un cambio de plan
             const plan = await planModel.getById(req.body.id_plan)
             if(!plan) {
               return errorRes(res, {

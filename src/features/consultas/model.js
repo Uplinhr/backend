@@ -3,7 +3,21 @@ import pool from '../../database/database.js'
 const consultaModel = {
     getAll: async () => {
     const [rows] = await pool.query(
-        'SELECT * FROM consultas'
+        `SELECT 
+            cons.*,
+            JSON_OBJECT(
+            'id', u.id,
+            'nombre', u.nombre,
+            'apellido', u.apellido,
+            'email', u.email,
+            'fecha_alta', u.fecha_alta,
+            'rol', u.rol,
+            'num_celular', u.num_celular,
+            'active', u.active
+            ) AS usuario
+        FROM consultas cons
+        LEFT JOIN consultorias c ON cons.id_consultoria = c.id
+        LEFT JOIN usuarios u ON c.id_usuario = u.id`
     );
     return rows || null
     },
