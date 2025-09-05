@@ -1,7 +1,9 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import pool from '../../database/database.js';
 import authModel from './model.js';
+import { getTokenFromRequest } from '../../middlewares/auth.js';
 import reinicio_contraseniaModel from '../reinicio_contrasenia/model.js';
 import { successRes, errorRes } from "../../utils/apiResponse.js";
 import { Resend } from "resend";
@@ -70,6 +72,39 @@ export const login = async (req, res) => {
   }
 };
 
+export const checkToken = async (req, res) => {
+  try{
+    const token = getTokenFromRequest(req)
+  if(!token){
+    return errorRes(res, {
+      message: 'No autorizado',
+      statusCode: 401,
+      success: false
+    })
+  }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const [user] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [decoded.id]);
+  if(!user){
+    return errorRes(res, {
+      message: 'Token invalido',
+      statusCode: 401,
+      success: false
+    })
+  }
+  return successRes(res, {
+    message: 'Token checkeado',
+    statusCode: 201,
+    success: true
+  })
+  } catch(error){
+    console.error(error)
+    return errorRes(res,{
+      message: 'Ocurrio un error al checkear el token',
+      statusCode: 400,
+      success: false
+    })
+  }
+}
 
 export const editPassword = async (req, res) => {
   try{

@@ -82,7 +82,7 @@ export const authRequired = async (req, res, next) => {
       });
     }
 
-    // VALIDACIÓN ADICIONAL DEL TOKEN (MEJORA SOLICITADA)
+    // VALIDACIÓN ADICIONAL DEL TOKEN
     
     // 1. Validar longitud mínima
     if (token.length < 50) {

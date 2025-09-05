@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, logout, editPassword, requestPasswordReset, validateResetToken, resetPassword } from './controller.js';
+import { register, login, logout, editPassword, requestPasswordReset, validateResetToken, resetPassword, checkToken } from './controller.js';
 import { authRequired, checkRole } from '../../middlewares/auth.js';
 
 const router = express.Router();
@@ -9,6 +9,7 @@ router.post('/login', login);
 router.post('/logout', logout);
 router.put('/editPassword/:id', authRequired, editPassword)
 
+router.get('/checkLogin', checkToken)
 
 router.post('/forgotPassword', requestPasswordReset)
 router.post('/validateToken', validateResetToken)
