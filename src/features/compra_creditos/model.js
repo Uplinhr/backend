@@ -78,11 +78,11 @@ const compra_creditosModel = {
         const [result] = await pool.query(query, valores);
         return result.affectedRows > 0
     },
-    create: async (medio_pago, costo, observaciones, cantidad, vencimiento, id_usuario) => {
+    create: async (medio_pago, costo, observaciones, cantidad, id_usuario) => {
         try{
             const [creditos] = await pool.query(
                 `INSERT INTO creditos (tipo_credito, cantidad, vencimiento, id_usuario) 
-                VALUES (?, ?, ?, ?)`, ['adicional', cantidad, vencimiento, id_usuario]
+                VALUES (?, ?, ?, ?)`, ['adicional', cantidad, null, id_usuario]
             )
             const [compra_credito] = await pool.query(
                 `INSERT INTO compra_creditos (medio_pago, costo, observaciones, id_cred) 
