@@ -250,3 +250,33 @@ export const deleteById = async (req, res) => {
     });
   }
 }
+
+export const unlinkUser = async (req, res) => {
+  try{
+    const {id} = req.params
+    if(isNaN(id)) {
+      return errorRes(res, {
+        message: 'El id debe ser un numero',
+        statusCode: 404
+      })
+    }
+
+    const unlinked = await empresaModel.unlinkUserById(id)
+    if(!unlinked){
+      return errorRes(res, {
+        message: 'empresa no encontrada',
+        statusCode: 404
+      });
+    }
+    successRes(res, {
+      message: 'Usuario de empresa desvinculada exitosamente',
+      statusCode: 201
+    })
+  } catch (error){
+    errorRes(res, {
+      message: 'Error al desvincular usuario de empresa',
+      statusCode: 500,
+      errors: error.message
+    });
+  }
+}

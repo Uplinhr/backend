@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS compra_creditos (
     medio_pago ENUM('mercado pago', 'tarjeta') DEFAULT 'tarjeta',
     costo DECIMAL(10, 2) NOT NULL,
     observaciones VARCHAR(100) NOT NULL,
+    moneda ENUM('ARS', 'USD', 'EUR') NULL DEFAULT 'ARS',
     id_cred INT NULL,
     FOREIGN KEY (id_cred) 
         REFERENCES creditos(id)

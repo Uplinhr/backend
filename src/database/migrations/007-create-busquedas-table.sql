@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS busquedas (
     ultima_mod TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     info_busqueda VARCHAR(150) NOT NULL,
     creditos_usados INT NULL,
-    observaciones VARCHAR(100) NULL,
+    observaciones VARCHAR(150) NULL,
     estado ENUM('Pendiente', 'En proceso', 'Finalizado', 'Eliminado') NOT NULL DEFAULT 'Pendiente',
     id_cred INT NULL,
     FOREIGN KEY (id_cred) 

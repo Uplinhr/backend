@@ -211,6 +211,13 @@ const empresaModel = {
             [id]
         )
         return result.affectedRows > 0
+    },
+    unlinkUserById: async (id) => {
+        const [result] = await pool.query(
+            'UPDATE empresas SET id_usuario = null WHERE id = ?',
+            [id]
+        )
+        return result.affectedRows > 0
     }
 }
 

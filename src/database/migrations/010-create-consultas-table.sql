@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS consultas (
     cantidad_horas INT NOT NULL,
     id_consultoria INT NULL,
     estado ENUM('Pendiente', 'En proceso', 'Finalizado', 'Eliminado') NOT NULL DEFAULT 'Pendiente',
-    comentarios VARCHAR(100) NULL,
-    observaciones VARCHAR(100) NULL,
+    comentarios VARCHAR(150) NULL,
+    observaciones VARCHAR(150) NULL,
     FOREIGN KEY (id_consultoria) 
         REFERENCES consultorias(id)
         ON DELETE RESTRICT
