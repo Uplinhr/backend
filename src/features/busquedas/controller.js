@@ -158,19 +158,22 @@ export const editById = async (req, res) => {
         });
       }
 
-      // Buscar créditos por tipo en orden de prioridad
-      const creditoDevuelto = creditosUsuario.find(c => c.tipo_credito === 'devuelto');
-      const creditoPlan = creditosUsuario.find(c => c.tipo_credito === 'plan');
-      const creditoAdicional = creditosUsuario.find(c => c.tipo_credito === 'adicional');
-
       const creditosUsados = req.body.creditos_usados;
-      let creditosRestantes = creditosUsados;
 
-      // Orden de prioridad: devuelto -> plan -> adicional
-      const creditosEnOrden = [creditoDevuelto, creditoPlan, creditoAdicional].filter(Boolean);
+      // Buscar créditos por tipo en orden de prioridad
+      const creditosDevueltos = creditosUsuario
+        .filter(c => c.tipo_credito === 'devuelto' && c.cantidad > 0)
+        .sort((a, b) => b.cantidad - a.cantidad);
+      const creditosPlan = creditosUsuario
+        .filter(c => c.tipo_credito === 'plan' && c.cantidad > 0);
+      const creditosAdicionales = creditosUsuario
+        .filter(c => c.tipo_credito === 'adicional' && c.cantidad > 0)
+        .sort((a, b) => b.cantidad - a.cantidad); // Opcional: ordenar por cantidad
 
       // Verificar créditos totales disponibles
-      const creditosTotales = creditosEnOrden.reduce((total, cred) => total + (cred?.cantidad || 0), 0);
+      const creditosTotales = creditosDevueltos.reduce((sum, c) => sum + c.cantidad, 0) +
+                              creditosPlan.reduce((sum, c) => sum + c.cantidad, 0) +
+                              creditosAdicionales.reduce((sum, c) => sum + c.cantidad, 0);
       
       if (creditosTotales < creditosUsados) {
         return errorRes(res, {
@@ -179,11 +182,13 @@ export const editById = async (req, res) => {
         });
       }
 
-      // Restar créditos en cascada según prioridad
-      for (const credito of creditosEnOrden) {
-        if (creditosRestantes <= 0) break;
+      let creditosRestantes = creditosUsados;
 
-        if (credito && credito.cantidad > 0) {
+      // Restar créditos en cascada según prioridad
+      const restarDeCreditos = async (creditosArray) => {
+        for (const credito of creditosArray) {
+          if (creditosRestantes <= 0) break;
+
           const cantidadARestar = Math.min(credito.cantidad, creditosRestantes);
           const nuevaCantidad = credito.cantidad - cantidadARestar;
           
@@ -192,16 +197,17 @@ export const editById = async (req, res) => {
           });
 
           if (!creditChanged) {
-            return errorRes(res, {
-              message: `Error al restar créditos de tipo ${credito.tipo_credito}`,
-              statusCode: 500
-            });
+            throw new Error(`Error al restar créditos de tipo ${credito.tipo_credito}`);
           }
 
           creditosRestantes -= cantidadARestar;
-          console.log(`Restados ${cantidadARestar} créditos de ${credito.tipo_credito}. Restantes: ${creditosRestantes}`);
+          console.log(`Restados ${cantidadARestar} créditos de ${credito.tipo_credito} (ID: ${credito.id}). Restantes: ${creditosRestantes}`);
         }
-      }
+      };
+
+      await restarDeCreditos(creditosDevueltos)
+      await restarDeCreditos(creditosPlan);
+      await restarDeCreditos(creditosAdicionales);
 
       // Verificar que se restaron todos los créditos
       if (creditosRestantes > 0) {
