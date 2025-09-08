@@ -82,6 +82,41 @@ export const getById = async (req, res) => {
   }
 }
 
+
+/**
+ * Edita una soliticud de búsqueda
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.params.id - ID numérico de la solicitud de búsqueda
+ * @param {string} [req.body.info_busqueda] - Información de la búsqueda provista por el usuario (opcional)
+ * @param {string} [req.body.creditos_usados] - Creditos que consume de la tabla de creditos del usuario (obligatorio si estado es "Finalizado")
+ * @param {string} [req.body.observaciones] - Obseraciones de la búsqueda provista por un administrador (opcional)
+ * @param {string} [req.body.estado] - Estado de la solicitud de búsqueda (opcional)
+ * @param {string} [req.body.id_cred] - ID numérico de la tabla de créditos del usuario (opcional)
+ * @param {string} [req.body.id_tipo] - ID numérico del tipo de solicitud de búsqueda (opcional)
+ * @param {string} [req.body.id_proceso] - ID numérico del proceso de solicitud de búsqueda (opcional)
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTML
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Edita los datos de la solicitud de búsqueda de la base de datos
+ * 
+ * 1. **Validaciones iniciales**:
+ *    - ID debe ser numérico
+ *    - La búsqueda debe existir
+ *    - No se puede editar búsquedas ya finalizadas
+ * 
+ * 2. **Gestión de créditos** (solo si se cambia estado a 'Finalizado'):
+ *    - Valida que se envíen créditos usados
+ *    - Obtiene todos los créditos del usuario
+ *    - Aplica prioridad de uso: créditos devueltos → plan → adicionales
+ *    - Verifica suficiencia de créditos
+ *    - Resta créditos en cascada según prioridad
+ *    - Actualiza cada tipo de crédito en la base de datos
+ * 
+ * 3. **Actualización final**:
+ *    - Edita la búsqueda con los datos proporcionados
+ *    - Retorna respuesta apropiada
+ */
 export const editById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -240,6 +275,33 @@ export const create = async (req, res) => {
   }
 };
 
+
+/**
+ * Elimina una solicitud de búsqueda (Borrado lógico)
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.params.id - ID numérico de la solicitud de búsqueda
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTML
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Edita el estado de una solicitud de búsqueda a "Eliminado" y devuelve los créditos si corresponde
+ * 
+ * 1. **Validaciones iniciales**:
+ * - ID debe ser numérico
+ * - La búsqueda debe existir
+ * - La búsqueda no debe tener el estado: "Eliminado" con anterioridad
+ * 
+ * 2. **Devolución de créditos** (solo si la búsqueda estaba finalizada y usó créditos):
+ * - Intenta devolver créditos al crédito original usado
+ * - Si no encuentra el crédito original, busca en orden de prioridad:
+ * - Créditos devueltos → Créditos de plan → Créditos adicionales
+ * - Si no existe ningún crédito, crea uno nuevo de tipo 'devuelto'
+ * - Maneja múltiples escenarios de fallo en la devolución
+ * 
+ * * 3. **Eliminación final**:
+ * - Elimina la búsqueda de la base de datos
+ * - Retorna respuesta apropiada
+ */
 export const deleteById = async (req, res) => {
   try{
     const {id} = req.params

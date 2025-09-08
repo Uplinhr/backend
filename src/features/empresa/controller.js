@@ -251,6 +251,17 @@ export const deleteById = async (req, res) => {
   }
 }
 
+/**
+ * Desvincula al usuario dentro de la empresa
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.params.id - ID numérico de la empresa
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTML
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Setea en null el id_usuario dentro del registro de la empresa
+ * - ID debe ser numérico
+ */
 export const unlinkUser = async (req, res) => {
   try{
     const {id} = req.params

@@ -9,7 +9,7 @@ export const getTokenFromRequest = (req) => {
   let tokenSource = 'none';
   let token = null;
 
-  // 1. Cookies (HttpOnly - más seguro para aplicaciones web)
+  // 1. Cookies
   if (req.cookies && req.cookies.token) {
     token = req.cookies.token;
     tokenSource = 'cookie';
@@ -29,7 +29,7 @@ export const getTokenFromRequest = (req) => {
       console.log(`Audit: Token obtenido desde headers - Ruta: ${req.path}, IP: ${req.ip}`);
     }
   }
-  // 3. Query parameters (CON SEGURIDAD MEJORADA)
+  // 3. Query parameters
   else if (req.query && req.query.token) {
     // Solo permitir query tokens en endpoints específicos no sensibles
     const allowedPaths = [
@@ -63,7 +63,8 @@ export const getTokenFromRequest = (req) => {
 };
 
 /**
- * Middleware de autenticación requerida con validación mejorada
+ * Middleware de autenticación requerida
+ * Verifica el token y el usuario, setea la información del usuario dentro de req.user, y ejecuta next()
  */
 export const authRequired = async (req, res, next) => {
   const startTime = Date.now();
@@ -93,7 +94,7 @@ export const authRequired = async (req, res, next) => {
       });
     }
 
-    // 2. Validar formato básico (JWT typically has 3 parts separated by dots)
+    // 2. Validar formato básico
     const tokenParts = token.split('.');
     if (tokenParts.length !== 3) {
       console.warn(`AUTH FAIL: Invalid token format - Parts: ${tokenParts.length}, IP: ${req.ip}`);
@@ -165,7 +166,6 @@ export const authRequired = async (req, res, next) => {
     
     next();
   } catch (error) {
-    // LOGGING MEJORADO PARA AUDITORÍA (MEJORA SOLICITADA)
     const errorDetails = {
       error: error.name,
       message: error.message,

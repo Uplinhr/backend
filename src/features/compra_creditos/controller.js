@@ -23,7 +23,7 @@ export const getAll = async (req, res) => {
   }
 };
 
-export const getOwn = async (req, res) => { //No puede ser con getById, se debe crear una nueva funcion
+export const getOwn = async (req, res) => {
   try{
     const {id} = req.user
     if(isNaN(id)) { // SI ID NO ES NUMERICO

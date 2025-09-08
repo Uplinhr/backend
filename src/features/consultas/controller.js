@@ -111,6 +111,36 @@ export const editById = async (req, res) => {
   }
 }
 
+
+/**
+ * Crea una solicitud de consultoría
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.body.cantidad_horas - Información de la búsqueda provista por el usuario
+ * @param {string} req.body.comentarios - Creditos que consume de la tabla de creditos del usuario
+ * @param {string} req.body.observaciones - Obseraciones de la búsqueda provista por un administrador 
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTML junto con el id del registro
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Crea una solicitud de consulta y resta de la cantidad de horas del usuario
+ * 
+ * 1. **Validaciones iniciales**:
+ *    - Campos obligatorios presentes (cantidad_horas, comentarios, id_consultori
+ *    - La tabla de consultoría de usuario debe existir en la base de datos
+ * 
+ * 2. **Gestión de consultoria**:
+ *    - Horas suficientes disponibles en la consultoría
+ *    - Permisos de usuario: solo el dueño o un admin pueden usar la tabla de consultoría
+ * 
+ * 3. **Creación y actualización**:
+ *    - Crea el registro de consulta
+ *    - Resta las horas utilizadas de la consultoría (implementado en el modelo)
+ *    - Retorna el ID de la consulta creada
+ * 
+ * @security
+ * - Solo el propietario de la consultoría o un administrador pueden crear consultas
+ * - Validación de horas previene uso excesivo de horas disponibles
+ */
 export const create = async (req, res) => {
   try {
     const {cantidad_horas, comentarios, id_consultoria} = req.body;
@@ -161,6 +191,19 @@ export const create = async (req, res) => {
   }
 };
 
+
+/**
+ * Elimina una solicitud de consultoría (Borrado lógico)
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.params.id - ID numérico de la solicitud de búsqueda
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTML
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Elimina una consulta y devuelve las horas de consultoría a la tabla del usuario
+ * - ID debe ser numérico
+ * - Debe existir la consulta y no estar eliminada con anterioridad
+ */
 export const deleteById = async (req, res) => {
   try{
     const {id} = req.params

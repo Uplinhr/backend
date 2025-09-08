@@ -50,7 +50,7 @@ const usuarioModel = {
                         )
                         FROM creditos c
                         WHERE c.id_usuario = u.id
-                        AND c.vencimiento > NOW()
+                        AND (c.vencimiento IS NULL OR c.vencimiento > NOW())
                         AND (c.tipo_credito != 'plan' OR c.id = (
                             SELECT c2.id 
                             FROM creditos c2 

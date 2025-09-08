@@ -8,6 +8,24 @@ import reinicio_contraseniaModel from '../reinicio_contrasenia/model.js';
 import { successRes, errorRes } from "../../utils/apiResponse.js";
 import { Resend } from "resend";
 
+
+/**
+ * Registra un nuevo usuario en la base de datos
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.body.nombre - Nombre del usuario
+ * @param {string} req.body.apellido - Apellido del usuario
+ * @param {string} req.body.contrasenia - Contraseña sin hashear del usuario
+ * @param {string} req.body.email - Correo electrónico válido
+ * @param {string} [req.body.num_celular] - Correo electrónico válido (opcional)
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} No retorna valor directamente, pero sí su ID junto con la respuesta HTTP
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Crea un nuevo usuario en la base de datos con los datos proporcionados.
+ * - Hashea la contraseña antes de almacenarla
+ * - Valida que los campos obligatorios estén presentes
+ * - Maneja errores de duplicado de email (ER_DUP_ENTRY)
+ */
 export const register = async (req, res) => {
   try {
     const {nombre, apellido, contrasenia, email, num_celular} = req.body;
@@ -42,6 +60,20 @@ export const register = async (req, res) => {
   }
 };
 
+
+/**
+ * Inicia sesión al usuario
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.body.email - Correo electrónico válido
+ * @param {string} req.body.contrasenia - Contraseña sin hashear del usuario
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} retorna un usuario con sus tablas relacionadas, y el token
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Verifica las credenciales proporcionadas del usuario y crea un token con expiración de 1 hora
+ * - Compara la contrasenia hasheada del usuario con la proporcionada en los parámetros
+ * - Verifica que exista un usuario con el mail proporcionado en los parámetros
+ */
 export const login = async (req, res) => {
   try {
     const user = await authModel.login(req.body.email)
@@ -72,6 +104,17 @@ export const login = async (req, res) => {
   }
 };
 
+/**
+ * Verifica si el token del usuario sigue siendo válido
+ * @param {Object} req - Objeto de petición de Express
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} retorna una respuesta HTML
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Verifica el token del usuario almacenado en sus cookies
+ * - Verifica que tenga un token almacenado
+ * - Verifica que el token coincida con un usuario dentro de la base de datos
+ */
 export const checkToken = async (req, res) => {
   try{
     const token = getTokenFromRequest(req)
@@ -106,6 +149,19 @@ export const checkToken = async (req, res) => {
   }
 }
 
+/**
+ * Edita la contraseña del usuario
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.params.id - ID numérico del usuario
+ * @param {string} req.body.contrasenia - Contraseña sin hashear del usuario
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTML
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Modifica la contraseña del usuario, solo deja cambiar la suya propia en caso de no poseer el rol de admin
+ * - Hashea la contraseña antes de modificar el registro en la base de datos
+ * - Verifica que el ID sea numérico
+ */
 export const editPassword = async (req, res) => {
   try{
     const {id} = req.params
@@ -144,7 +200,21 @@ export const editPassword = async (req, res) => {
   }
 }
 
-// Enviar el mail
+/**
+ * Envía un correo al usuario para restablecer su contraseña
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.body.email - Correo electrónico del usuario
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTML
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Procesa la solicitud de restablecimiento de contraseña:
+ * 1. Valida que el usuario exista y esté activo
+ * 2. Genera un token seguro de un solo uso con expiración de 1 hora
+ * 3. Crea un registro en la base de datos para el reinicio
+ * 4. Envía un email con enlace de restablecimiento usando Resend
+ * 5. Maneja errores específicos de validación y envío de email
+ */
 export const requestPasswordReset = async (req, res) => {
   const resend = new Resend(process.env.MAIL_API_KEY);
   const {email} = req.body
@@ -244,7 +314,18 @@ export const requestPasswordReset = async (req, res) => {
   }
 }
 
-//chequear token
+/**
+ * Verifica si el token de cambio de contraseña es válido
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.body.token - Token de cambio de contraseña
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} retorna una respuesta HTML junto con el mail del usuario
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Verifica el token de cambio de contraseña
+ * - Verifica que tenga un token almacenado
+ * - Verifica que el token se encuentre en la base de datos, que no esté usado ni expirado
+ */
 export const validateResetToken = async (req, res) => {
   const {token} = req.body
 
@@ -294,7 +375,20 @@ export const validateResetToken = async (req, res) => {
   }
 }
 
-// Despues del mail
+/**
+ * Edita la contraseña del usuario
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.body.contrasenia - Contraseña sin hashear del usuario
+ * @param {string} req.body.token - Token de cambio de contraseña
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTML
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Modifica la contraseña del usuario, realiza verificaciones del token por segunda vez
+ * - Hashea la contraseña antes de modificar el registro en la base de datos
+ * - Verifica que el token exista, sea válido y no esté usado
+ * - Marca el registro de cambio de contraseña como usado
+ */
 export const resetPassword = async (req, res)=> {
   try{
     const {contrasenia, token} = req.body
@@ -351,6 +445,13 @@ export const resetPassword = async (req, res)=> {
   }
 }
 
+/**
+ * Desloguea al usuario
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} retorna una respuesta HTML
+ * @description
+ * Elimina el token del usuario almacenado en sus cookies
+ */
 export const logout = (req, res) => {
     res.clearCookie('token');
     successRes(res, {

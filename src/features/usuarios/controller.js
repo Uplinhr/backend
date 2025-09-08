@@ -113,6 +113,35 @@ export const editOwn =  async (req, res) => {
     }
 }
 
+/**
+ * Edita un usuario por ID y gestiona el cambio de plan si es necesario
+ * @async
+ * @function editById
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.params.id - ID del usuario a editar (debe ser numérico)
+ * @param {number} [req.body.id_plan] - ID del nuevo plan a asignar (opcional)
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTTP
+ * @throws {Error} Si ocurre un error inesperado en el procesamiento
+ * @description
+ * Edita la información de un usuario existente con funcionalidad especial para cambio de plan:
+ * 
+ * 1. **Validaciones iniciales**:
+ *    - ID debe ser numérico
+ *    - El usuario debe existir en la base de datos
+ * 
+ * 2. **Edición básica del usuario**:
+ *    - Actualiza los campos proporcionados en req.body
+ *    - Maneja errores de duplicado de email (ER_DUP_ENTRY)
+ * 
+ * 3. **Gestión de cambio de plan** (si se proporciona id_plan y es diferente al actual):
+ *    - Valida que el nuevo plan exista
+ *    - Ejecuta el proceso de asignación de plan
+ *    - Retorna la respuesta del proceso de asignación
+ * 
+ * 4. **Respuesta final**:
+ *    - Retorna éxito con los datos actualizados
+ */
 export const editById = async (req, res) => {
     try{
         const {id} = req.params

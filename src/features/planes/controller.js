@@ -169,6 +169,20 @@ export const deleteById = async (req, res) => {
   }
 }
 
+
+/**
+ * Renueva el plan del usuario
+ * @param {Object} req - Objeto de petición de Express
+ * @param {string} req.body.id_plan - ID numérico del plan a renovar
+ * @param {string} req.body.id_usuario - ID numérico del usuario
+ * @param {Object} res - Objeto de respuesta de Express
+ * @returns {Promise<void>} Retorna una respuesta HTML
+ * @throws {Error} Si ocurre un error inesperado en el servidor
+ * @description
+ * Setea el id_plan del usuario y crea las tablas de créditos y de consultorías y las asocia al usuario
+ * - Los IDs deben ser numéricos
+ * - El plan debe existir
+ */
 export const renewPlan = async (req, res) => {
   try{
     const {id_plan, id_usuario} = req.body
