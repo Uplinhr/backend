@@ -123,7 +123,7 @@ export const register = async (req, res) => {
 
                                 <div class="info-box">
                                     <p><strong>Nombre:</strong></p>
-                                    <p>${nombre + '' + apellido}</p>
+                                    <p>${nombre + ' ' + apellido}</p>
                                     <p><strong>Correo electrónico del nuevo usuario:</strong></p>
                                     <p>${email}</p>
                                 </div>
