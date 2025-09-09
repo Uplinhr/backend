@@ -1,6 +1,7 @@
 import { successRes, errorRes } from "../../utils/apiResponse.js";
 import busquedaModel from "./model.js";
 import creditoModel from '../creditos/model.js'
+import { Resend } from "resend";
 
 export const getAll = async (req, res) => {
   try{
@@ -267,6 +268,129 @@ export const create = async (req, res) => {
       })
     }
     const idBusqueda = await busquedaModel.create(info_busqueda, id_cred)
+
+    const resend = new Resend(process.env.MAIL_API_KEY);
+    const { data, error } = await resend.emails.send({
+      from: `UplinHR <${process.env.EMAIL_FROM}>`,
+      to: ["contacto@uplinhr.com"],
+      subject: "Nueva solicitud de búsqueda - UplinHR",
+      html: `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Nueva Solicitud de Búsqueda - UplinHR</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f9f9f9;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background-color: #FFFFFF;
+                    border-radius: 10px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                }
+                .header {
+                    background-color: #502B7D;
+                    padding: 20px;
+                    text-align: center;
+                }
+                .header h1 {
+                    color: #FFFFFF;
+                    margin: 0;
+                    font-size: 24px;
+                }
+                .content {
+                    padding: 30px;
+                }
+                .footer {
+                    background-color: #f5f5f5;
+                    padding: 20px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #666;
+                }
+                .button {
+                    display: inline-block;
+                    padding: 12px 24px;
+                    background-color: #6C4099;
+                    color: #FFFFFF;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    margin: 20px 0;
+                }
+                .info-box {
+                    background-color: #f9f5ff;
+                    border-left: 4px solid #6C4099;
+                    padding: 15px;
+                    margin: 20px 0;
+                    border-radius: 0 4px 4px 0;
+                }
+            </style>
+        </head>
+        <body>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9f9f9; padding: 20px 0;">
+                <tr>
+                    <td align="center">
+                        <div class="container">
+                            <div class="header">
+                                <h1>UplinHR</h1>
+                            </div>
+
+                            <div class="content">
+                                <h2 style="color: #502B7D; margin-top: 0;">Nueva Solicitud de Búsqueda</h2>
+                                <p>Hola equipo UplinHR,</p>
+                                <p>El usuario ${req.user.nombre + ' ' + req.user.apellido} ha solicitado una búsqueda en la plataforma.</p>
+
+                                <div class="info-box">
+                                    <p><strong>Información de la búsqueda:</strong></p>
+                                    <p>${info_busqueda}</p>
+                                    <p><strong>Email del usuario:</strong></p>
+                                    <p>${req.user.email}</p>
+                                </div>
+
+                                <p>Para revisar los detalles completos de esta solicitud, accede al sistema administrativo:</p>
+
+                                <p style="text-align: center;">
+                                    <a href="https://www.uplinhr.com/login" class="button">
+                                        Acceder al sistema
+                                    </a>
+                                </p>
+
+                                <p>Este es un mensaje automático, por favor no responder directamente a este correo.</p>
+                            </div>
+
+                            <div class="footer">
+                                <p>Equipo UplinHR<br>
+                                <a href="https://www.uplinhr.com" style="color: #502B7D;">www.uplinhr.com</a></p>
+                                <p>© 2023 UplinHR. Todos los derechos reservados.</p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+      `
+    });
+    if (error) {
+      console.error('Error enviando email:', error)
+      return errorRes(res, {
+        message: 'Error al enviar el email de recuperación',
+        statusCode: error.statusCode,
+        errors: error.message
+      })
+    }
+
     successRes(res, {
       data: { id: idBusqueda },
       message: 'busqueda creado exitosamente',
