@@ -6,7 +6,7 @@ Este repositorio contiene el código fuente del backend del proyecto **UPLIN**. 
 
 ## 📌 Objetivo
 
-Este proyecto tiene como objetivo ser un complemento de las funcionalidades backend limitadas de systeme.io, utilizando al mismo para la pasarela de pagos e información de contacto de clientes, y brindando beneficios como la posibilidad de loguearse en la plataforma, guardar la información específica de cada usuario y permitir realizar solicitudes de búsqueda y de consultoría. El segundo objetivo es que, una vez finalizado el tiempo de desarrollo impuesto en el startup, quede en un estado funcional, y a la vez, legible y escalable para el equipo que se encargue de seguir desarrollándolo en una segunda instancia
+Este proyecto tiene como objetivo ser un complemento de las funcionalidades backend limitadas de <a href="http://systeme.io">systeme.io</a>, utilizando al mismo para la pasarela de pagos e información de contacto de clientes, y brindando beneficios como la posibilidad de loguearse en la plataforma, guardar la información específica de cada usuario y permitir realizar solicitudes de búsqueda y de consultoría. El segundo objetivo es que, una vez finalizado el tiempo de desarrollo impuesto en el startup, quede en un estado funcional, y a la vez, legible y escalable para el equipo que se encargue de seguir desarrollándolo en una segunda instancia
 
 --- 
 
@@ -28,19 +28,31 @@ En caso de querer iniciar el proyecto, instalar <a href="https://dev.mysql.com/d
 
 Antes de iniciar el backend, asegurarse de tener configuradas las variables de entorno, para eso debe generar el archivo: “.env” con la siguiente información:
 
+
 DB_HOST=localhost
+
 DB_USER=root
+
 DB_PASSWORD=admin
+
 DB_NAME=uplindb
+
 PORT=4000
+
 JWT_SECRET=claveAuthPista
+
 DEV=true
+
 MAIL_API_KEY=re_aDh93bUh_DbsA2Lc4wwYk3VKVBwonAHcY
+
 EMAIL_FROM=noreply@noreply.uplinhr.com
+
 FRONTEND_URL=http://localhost:3000
+
 SERVER_PORT=4000
 
-Tenga en cuenta que “DB_USER” y “DB_PASSWORD” debe coincidir con los datos de su cuenta al momento de instalar MySQL en forma local, y “DB_NAME” es el nombre que tendrá la base de datos en su sistema cuando ejecute las migraciones
+
+Tenga en cuenta que “DB_USER” y “DB_PASSWORD” debe coincidir con los datos de su cuenta al momento de instalar <a href="https://dev.mysql.com/downloads/installer">MySQL</a> en forma local, y “DB_NAME” es el nombre que tendrá la base de datos en su sistema cuando ejecute las migraciones
 
 
 En caso de necesitar reiniciar la base de datos localmente, debe eliminar el archivo con la dirección: “src/database/seeders/executed.json” ejecutar los siguientes comandos:
