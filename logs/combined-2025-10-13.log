@@ -1,0 +1,655 @@
+2025-10-13 16:04:25 [info]: [object Object]
+2025-10-13 16:04:25 [info]: [object Object]
+2025-10-13 16:04:38 [info]: [object Object]
+2025-10-13 16:04:38 [info]: [object Object]
+2025-10-13 16:04:52 [info]: [object Object]
+2025-10-13 16:04:52 [info]: [object Object]
+2025-10-13 16:05:43 [info]: [object Object]
+2025-10-13 16:05:43 [info]: [object Object]
+2025-10-13 16:05:43 [info]: [object Object]
+2025-10-13 16:05:43 [info]: [object Object]
+2025-10-13 16:07:00 [info]: [object Object]
+2025-10-13 16:07:00 [info]: [object Object]
+2025-10-13 16:07:00 [info]: [object Object]
+2025-10-13 16:07:00 [info]: [object Object]
+2025-10-13 16:07:36 [info]: [object Object]
+2025-10-13 16:07:36 [info]: [object Object]
+2025-10-13 16:07:36 [info]: [object Object]
+2025-10-13 16:07:36 [info]: [object Object]
+2025-10-13 16:10:14 [info]: [object Object]
+2025-10-13 16:10:14 [info]: [object Object]
+2025-10-13 16:10:14 [info]: [object Object]
+2025-10-13 16:10:14 [info]: [object Object]
+2025-10-13 16:13:09 [info]: [object Object]
+2025-10-13 16:13:09 [info]: [object Object]
+2025-10-13 16:13:35 [info]: [object Object]
+2025-10-13 16:13:35 [info]: [object Object]
+2025-10-13 16:19:16 [info]: [object Object]
+2025-10-13 16:19:16 [info]: [object Object]
+2025-10-13 16:19:22 [info]: [object Object]
+2025-10-13 16:19:22 [info]: [object Object]
+2025-10-13 16:19:29 [info]: [object Object]
+2025-10-13 16:19:29 [info]: [object Object]
+2025-10-13 16:22:30 [info]: [object Object]
+2025-10-13 16:22:30 [info]: [object Object]
+2025-10-13 16:22:33 [info]: [object Object]
+2025-10-13 16:22:33 [error]: Error: Table 'uplindb.shopping_cart' doesn't exist
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 16:22:33 [error]: Error: Table 'uplindb.shopping_cart' doesn't exist
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 16:22:33 [info]: [object Object]
+2025-10-13 16:23:10 [info]: [object Object]
+2025-10-13 16:23:10 [error]: Error: Table 'uplindb.shopping_cart' doesn't exist
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 16:23:10 [error]: Error: Table 'uplindb.shopping_cart' doesn't exist
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 16:23:10 [info]: [object Object]
+2025-10-13 16:23:11 [info]: [object Object]
+2025-10-13 16:23:11 [error]: Error: Table 'uplindb.shopping_cart' doesn't exist
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 16:23:11 [error]: Error: Table 'uplindb.shopping_cart' doesn't exist
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 16:23:11 [info]: [object Object]
+2025-10-13 16:23:18 [info]: [object Object]
+2025-10-13 16:23:18 [info]: [object Object]
+2025-10-13 16:23:30 [info]: [object Object]
+2025-10-13 16:23:30 [info]: [object Object]
+2025-10-13 16:28:11 [info]: [object Object]
+2025-10-13 16:28:11 [info]: [object Object]
+2025-10-13 16:28:19 [info]: [object Object]
+2025-10-13 16:28:19 [info]: [object Object]
+2025-10-13 16:28:19 [info]: [object Object]
+2025-10-13 16:28:19 [info]: [object Object]
+2025-10-13 16:30:03 [info]: [object Object]
+2025-10-13 16:30:03 [info]: [object Object]
+2025-10-13 16:30:14 [info]: [object Object]
+2025-10-13 16:30:14 [info]: [object Object]
+2025-10-13 16:31:33 [info]: [object Object]
+2025-10-13 16:31:33 [info]: [object Object]
+2025-10-13 16:31:42 [info]: [object Object]
+2025-10-13 16:31:42 [info]: [object Object]
+2025-10-13 16:31:42 [info]: [object Object]
+2025-10-13 16:31:42 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:44 [info]: [object Object]
+2025-10-13 16:31:46 [info]: [object Object]
+2025-10-13 16:31:46 [info]: [object Object]
+2025-10-13 16:32:14 [info]: [object Object]
+2025-10-13 16:32:14 [info]: [object Object]
+2025-10-13 16:32:14 [info]: [object Object]
+2025-10-13 16:32:14 [info]: [object Object]
+2025-10-13 18:10:36 [info]: [object Object]
+2025-10-13 18:10:36 [info]: [object Object]
+2025-10-13 18:19:04 [info]: [object Object]
+2025-10-13 18:19:04 [info]: [object Object]
+2025-10-13 18:19:31 [info]: [object Object]
+2025-10-13 18:19:31 [info]: [object Object]
+2025-10-13 18:19:31 [info]: [object Object]
+2025-10-13 18:19:31 [info]: [object Object]
+2025-10-13 18:19:34 [info]: [object Object]
+2025-10-13 18:19:34 [info]: [object Object]
+2025-10-13 18:19:34 [info]: [object Object]
+2025-10-13 18:19:34 [info]: [object Object]
+2025-10-13 18:19:36 [info]: [object Object]
+2025-10-13 18:19:36 [info]: [object Object]
+2025-10-13 18:19:36 [info]: [object Object]
+2025-10-13 18:19:36 [info]: [object Object]
+2025-10-13 18:19:36 [info]: [object Object]
+2025-10-13 18:19:36 [info]: [object Object]
+2025-10-13 18:19:36 [info]: [object Object]
+2025-10-13 18:19:36 [info]: [object Object]
+2025-10-13 18:19:37 [info]: [object Object]
+2025-10-13 18:19:37 [info]: [object Object]
+2025-10-13 18:19:37 [info]: [object Object]
+2025-10-13 18:19:37 [info]: [object Object]
+2025-10-13 18:19:37 [info]: [object Object]
+2025-10-13 18:19:37 [info]: [object Object]
+2025-10-13 18:19:37 [info]: [object Object]
+2025-10-13 18:19:37 [info]: [object Object]
+2025-10-13 18:19:52 [info]: [object Object]
+2025-10-13 18:19:52 [info]: [object Object]
+2025-10-13 18:19:52 [info]: [object Object]
+2025-10-13 18:19:52 [info]: [object Object]
+2025-10-13 18:19:54 [info]: [object Object]
+2025-10-13 18:19:54 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:19:54 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:19:54 [info]: [object Object]
+2025-10-13 18:22:04 [info]: [object Object]
+2025-10-13 18:22:04 [info]: [object Object]
+2025-10-13 18:22:04 [info]: [object Object]
+2025-10-13 18:22:04 [info]: [object Object]
+2025-10-13 18:22:10 [info]: [object Object]
+2025-10-13 18:22:10 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:22:10 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:22:10 [info]: [object Object]
+2025-10-13 18:22:28 [info]: [object Object]
+2025-10-13 18:22:28 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:22:28 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:22:28 [info]: [object Object]
+2025-10-13 18:25:53 [info]: [object Object]
+2025-10-13 18:25:53 [info]: [object Object]
+2025-10-13 18:26:00 [info]: [object Object]
+2025-10-13 18:26:00 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:26:00 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:26:00 [info]: [object Object]
+2025-10-13 18:26:34 [info]: [object Object]
+2025-10-13 18:26:34 [info]: [object Object]
+2025-10-13 18:27:01 [info]: [object Object]
+2025-10-13 18:27:01 [info]: [object Object]
+2025-10-13 18:27:01 [info]: [object Object]
+2025-10-13 18:27:12 [info]: [object Object]
+2025-10-13 18:27:12 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:210:27)
+2025-10-13 18:27:12 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:210:27)
+2025-10-13 18:27:12 [info]: [object Object]
+2025-10-13 18:27:18 [info]: [object Object]
+2025-10-13 18:27:18 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:210:27)
+2025-10-13 18:27:18 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:210:27)
+2025-10-13 18:27:18 [info]: [object Object]
+2025-10-13 18:29:59 [info]: [object Object]
+2025-10-13 18:29:59 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:210:27)
+2025-10-13 18:29:59 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:210:27)
+2025-10-13 18:29:59 [info]: [object Object]
+2025-10-13 18:30:05 [info]: [object Object]
+2025-10-13 18:30:05 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:210:27)
+2025-10-13 18:30:05 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:210:27)
+2025-10-13 18:30:05 [info]: [object Object]
+2025-10-13 18:32:28 [info]: [object Object]
+2025-10-13 18:32:28 [info]: [object Object]
+2025-10-13 18:32:28 [info]: [object Object]
+2025-10-13 18:32:34 [info]: [object Object]
+2025-10-13 18:32:34 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:32:34 [error]: Error: Incorrect integer value: 'single-hire' for column `uplindb`.`cart_items`.`item_id` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:137:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:32:34 [info]: [object Object]
+2025-10-13 18:33:37 [info]: [object Object]
+2025-10-13 18:33:37 [error]: Error: Column 'item_type' cannot be null
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:135:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:33:37 [error]: Error: Column 'item_type' cannot be null
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:135:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:33:37 [info]: [object Object]
+2025-10-13 18:33:46 [info]: [object Object]
+2025-10-13 18:33:46 [error]: Error: Column 'item_type' cannot be null
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:135:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:33:46 [error]: Error: Column 'item_type' cannot be null
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:135:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:33:46 [info]: [object Object]
+2025-10-13 18:35:38 [info]: [object Object]
+2025-10-13 18:35:39 [info]: [object Object]
+2025-10-13 18:35:39 [info]: [object Object]
+2025-10-13 18:35:48 [info]: [object Object]
+2025-10-13 18:35:48 [error]: Error: Column 'item_type' cannot be null
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:135:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:35:48 [error]: Error: Column 'item_type' cannot be null
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:135:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:35:48 [info]: [object Object]
+2025-10-13 18:35:59 [info]: [object Object]
+2025-10-13 18:35:59 [error]: Error: Column 'item_type' cannot be null
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:135:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:35:59 [error]: Error: Column 'item_type' cannot be null
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.addItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:86:35)
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:135:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 18:35:59 [info]: [object Object]
+2025-10-13 18:36:17 [info]: [object Object]
+2025-10-13 18:36:17 [info]: [object Object]
+2025-10-13 18:36:17 [info]: [object Object]
+2025-10-13 18:36:24 [info]: [object Object]
+2025-10-13 18:36:24 [info]: [object Object]
+2025-10-13 18:36:31 [info]: [object Object]
+2025-10-13 18:36:31 [info]: [object Object]
+2025-10-13 18:36:39 [info]: [object Object]
+2025-10-13 18:36:39 [info]: [object Object]
+2025-10-13 18:36:46 [info]: [object Object]
+2025-10-13 18:36:46 [info]: [object Object]
+2025-10-13 18:36:53 [info]: [object Object]
+2025-10-13 18:36:53 [info]: [object Object]
+2025-10-13 18:39:50 [info]: [object Object]
+2025-10-13 18:39:50 [info]: [object Object]
+2025-10-13 18:40:00 [info]: [object Object]
+2025-10-13 18:40:00 [info]: [object Object]
+2025-10-13 18:40:52 [info]: [object Object]
+2025-10-13 18:40:52 [error]: Error: Error creando pago en PayPal: Cannot read properties of undefined (reading 'toString')
+    at PayPalAdapter.createPayment (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/adapters/paypal.adapter.js:118:13)
+    at PaymentService.createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.service.js:581:36)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:239:22)
+2025-10-13 18:40:52 [info]: [object Object]
+2025-10-13 18:41:45 [info]: [object Object]
+2025-10-13 18:41:45 [error]: Error: Error creando pago en PayPal: orderData.total_amount.toFixed is not a function
+    at PayPalAdapter.createPayment (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/adapters/paypal.adapter.js:118:13)
+    at PaymentService.createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.service.js:582:36)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:239:22)
+2025-10-13 18:41:45 [info]: [object Object]
+2025-10-13 18:41:52 [info]: [object Object]
+2025-10-13 18:41:52 [info]: [object Object]
+2025-10-13 18:42:19 [info]: [object Object]
+2025-10-13 18:42:21 [error]: Error: Error creando pago en PayPal: {"error":"invalid_client","error_description":"Client Authentication failed"}
+    at PayPalAdapter.createPayment (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/adapters/paypal.adapter.js:118:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PaymentService.createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.service.js:582:22)
+    at async createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:239:22)
+2025-10-13 18:42:21 [info]: [object Object]
+2025-10-13 18:42:35 [info]: [object Object]
+2025-10-13 18:42:36 [error]: Error: Error creando pago en PayPal: {"error":"invalid_client","error_description":"Client Authentication failed"}
+    at PayPalAdapter.createPayment (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/adapters/paypal.adapter.js:118:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PaymentService.createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.service.js:582:22)
+    at async createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:239:22)
+2025-10-13 18:42:36 [info]: [object Object]
+2025-10-13 18:42:45 [info]: [object Object]
+2025-10-13 18:42:47 [error]: Error: Error creando pago en PayPal: {"error":"invalid_client","error_description":"Client Authentication failed"}
+    at PayPalAdapter.createPayment (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/adapters/paypal.adapter.js:118:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PaymentService.createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.service.js:582:22)
+    at async createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:239:22)
+2025-10-13 18:42:47 [info]: [object Object]
+2025-10-13 18:42:55 [info]: [object Object]
+2025-10-13 18:42:55 [info]: [object Object]
+2025-10-13 18:42:55 [info]: [object Object]
+2025-10-13 18:43:04 [info]: [object Object]
+2025-10-13 18:43:04 [info]: [object Object]
+2025-10-13 18:43:04 [info]: [object Object]
+2025-10-13 18:43:12 [info]: [object Object]
+2025-10-13 18:43:12 [info]: [object Object]
+2025-10-13 18:43:12 [info]: [object Object]
+2025-10-13 18:43:19 [info]: [object Object]
+2025-10-13 18:43:19 [info]: [object Object]
+2025-10-13 18:43:27 [info]: [object Object]
+2025-10-13 18:43:28 [error]: Error: Error creando pago en PayPal: {"error":"invalid_client","error_description":"Client Authentication failed"}
+    at PayPalAdapter.createPayment (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/adapters/paypal.adapter.js:118:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PaymentService.createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.service.js:582:22)
+    at async createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:239:22)
+2025-10-13 18:43:28 [info]: [object Object]
+2025-10-13 18:43:34 [info]: [object Object]
+2025-10-13 18:43:36 [error]: Error: Error creando pago en PayPal: {"error":"invalid_client","error_description":"Client Authentication failed"}
+    at PayPalAdapter.createPayment (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/adapters/paypal.adapter.js:118:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PaymentService.createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.service.js:582:22)
+    at async createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:239:22)
+2025-10-13 18:43:36 [info]: [object Object]
+2025-10-13 18:43:56 [info]: [object Object]
+2025-10-13 18:43:57 [error]: Error: Error creando pago en PayPal: {"error":"invalid_client","error_description":"Client Authentication failed"}
+    at PayPalAdapter.createPayment (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/adapters/paypal.adapter.js:118:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PaymentService.createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.service.js:582:22)
+    at async createPayPalOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:239:22)
+2025-10-13 18:43:57 [info]: [object Object]
+2025-10-13 18:44:05 [info]: [object Object]
+2025-10-13 18:44:05 [info]: [object Object]
+2025-10-13 18:44:24 [info]: [object Object]
+2025-10-13 18:44:24 [info]: [object Object]
+2025-10-13 18:45:38 [info]: [object Object]
+2025-10-13 18:45:38 [info]: [object Object]
+2025-10-13 18:45:38 [info]: [object Object]
+2025-10-13 18:45:38 [info]: [object Object]
+2025-10-13 18:45:44 [info]: [object Object]
+2025-10-13 18:45:44 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:45:44 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:45:44 [info]: [object Object]
+2025-10-13 18:45:55 [info]: [object Object]
+2025-10-13 18:45:55 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:45:55 [error]: Error: Incorrect integer value: 'test-user-123' for column `uplindb`.`shopping_cart`.`id_usuario` at row 1
+    at PromisePool.query (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at CartModel.createCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/model.js:10:35)
+    at CartService.createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:69:38)
+    at createTestCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:180:38)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/layer.js:95:5)
+    at /home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/omar/Pasantias/Uplin/Repositorios/back/back/node_modules/express/lib/router/index.js:346:12)
+2025-10-13 18:45:55 [info]: [object Object]
+2025-10-13 18:47:59 [info]: [object Object]
+2025-10-13 18:47:59 [info]: [object Object]
+2025-10-13 18:48:08 [info]: [object Object]
+2025-10-13 18:48:08 [info]: [object Object]
+2025-10-13 18:48:17 [info]: [object Object]
+2025-10-13 18:48:17 [info]: [object Object]
+2025-10-13 18:48:26 [info]: [object Object]
+2025-10-13 18:48:26 [info]: [object Object]
+2025-10-13 18:48:26 [info]: [object Object]
+2025-10-13 18:48:36 [info]: [object Object]
+2025-10-13 18:48:36 [info]: [object Object]
+2025-10-13 18:48:36 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:53:06 [info]: [object Object]
+2025-10-13 18:56:49 [info]: [object Object]
+2025-10-13 18:56:49 [info]: [object Object]
+2025-10-13 18:59:10 [info]: [object Object]
+2025-10-13 18:59:10 [info]: [object Object]
+2025-10-13 18:59:10 [info]: [object Object]
+2025-10-13 18:59:10 [info]: [object Object]
+2025-10-13 18:59:15 [info]: [object Object]
+2025-10-13 18:59:15 [info]: [object Object]
+2025-10-13 18:59:15 [info]: [object Object]
+2025-10-13 18:59:20 [info]: [object Object]
+2025-10-13 18:59:20 [info]: [object Object]
+2025-10-13 18:59:20 [info]: [object Object]
+2025-10-13 18:59:23 [info]: [object Object]
+2025-10-13 18:59:23 [info]: [object Object]
+2025-10-13 18:59:27 [info]: [object Object]
+2025-10-13 18:59:27 [info]: [object Object]
+2025-10-13 18:59:49 [info]: [object Object]
+2025-10-13 18:59:49 [info]: [object Object]
+2025-10-13 18:59:54 [info]: [object Object]
+2025-10-13 18:59:54 [info]: [object Object]
+2025-10-13 18:59:59 [info]: [object Object]
+2025-10-13 18:59:59 [info]: [object Object]
+2025-10-13 19:00:06 [info]: [object Object]
+2025-10-13 19:00:06 [info]: [object Object]
+2025-10-13 19:08:28 [info]: [object Object]
+2025-10-13 19:08:28 [info]: [object Object]
+2025-10-13 19:12:57 [info]: [object Object]
+2025-10-13 19:12:57 [info]: [object Object]
+2025-10-13 19:12:57 [info]: [object Object]
+2025-10-13 19:31:04 [info]: [object Object]
+2025-10-13 19:31:04 [info]: [object Object]
+2025-10-13 19:31:04 [info]: [object Object]
+2025-10-13 19:31:43 [info]: [object Object]
+2025-10-13 19:31:43 [info]: [object Object]
+2025-10-13 19:33:38 [info]: [object Object]
+2025-10-13 19:33:38 [info]: [object Object]
+2025-10-13 19:33:38 [info]: [object Object]
+2025-10-13 19:35:58 [info]: [object Object]
+2025-10-13 19:35:58 [error]: Error: Carrito no encontrado
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:93:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 19:35:58 [info]: [object Object]
+2025-10-13 19:36:46 [info]: [object Object]
+2025-10-13 19:36:46 [error]: Error: Carrito no encontrado
+    at CartService.addTestItemToCart (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:93:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addTestItem (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/controller.js:209:27)
+2025-10-13 19:36:46 [info]: [object Object]
+2025-10-13 19:36:58 [info]: [object Object]
+2025-10-13 19:36:58 [info]: [object Object]
+2025-10-13 19:36:58 [info]: [object Object]
+2025-10-13 21:31:46 [info]: [object Object]
+2025-10-13 21:31:46 [info]: [object Object]
+2025-10-13 21:31:46 [info]: [object Object]
+2025-10-13 21:39:10 [info]: [object Object]
+2025-10-13 21:39:10 [info]: [object Object]
+2025-10-13 21:39:10 [info]: [object Object]
+2025-10-13 21:51:13 [info]: [object Object]
+2025-10-13 21:51:13 [info]: [object Object]
+2025-10-13 21:51:13 [info]: [object Object]
+2025-10-13 23:02:39 [info]: [object Object]
+2025-10-13 23:02:39 [info]: [object Object]
+2025-10-13 23:02:39 [info]: [object Object]

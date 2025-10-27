@@ -1,0 +1,155 @@
+// prisma/schema.prisma - Esquema inicial con mejoras de seguridad
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo User (integración con Auth0)
+model User {
+  id        String   @id @default(cuid())
+  auth0Id   String?  @unique // Para integración con Auth0
+  email     String   @unique
+  name      String?
+  role      Role     @default(CLIENTE) // Enum para roles
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Relaciones
+  transactions Transaction[]
+  plans        UserPlan[]
+  consultants  Consultant[] @relation("UserConsultants")
+
+  @@map("users")
+}
+
+// Modelo Plan/Subscription
+model Plan {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  currency    String   @default("USD")
+  features    Json?    // Para características flexibles
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  subscriptions UserPlan[]
+  transactions  Transaction[]
+
+  @@map("plans")
+}
+
+// Modelo Transaction/Payment
+model Transaction {
+  id                  String            @id @default(cuid())
+  userId              String
+  planId              String?
+  amount              Float
+  currency            String            @default("USD")
+  status              TransactionStatus @default(PENDING)
+  gateway             PaymentGateway
+  gatewayTransactionId String?          // ID de la pasarela (MP, PayPal, etc.)
+  metadata            Json?            // Datos adicionales encriptados
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan? @relation(fields: [planId], references: [id])
+
+  @@map("transactions")
+}
+
+// Modelo TaxConfig
+model TaxConfig {
+  id        String   @id @default(cuid())
+  name      String   // Nombre del impuesto
+  rate      Float    // Tasa (ej: 0.21 para 21%)
+  country   String?  // País aplicable
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tax_configs")
+}
+
+// Modelo Consultant
+model Consultant {
+  id          String   @id @default(cuid())
+  userId      String   // Relacionado con User
+  name        String
+  email       String
+  phone       String?
+  bio         String?
+  skills      Json?    // Habilidades como array
+  hourlyRate  Float?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  user User @relation("UserConsultants", fields: [userId], references: [id])
+
+  @@map("consultants")
+}
+
+// Modelo TalentSearchService
+model TalentSearchService {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  currency    String   @default("USD")
+  category    String?  // Categoría del servicio
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("talent_search_services")
+}
+
+// Modelo UserPlan (para suscripciones de usuarios)
+model UserPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  planId    String
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id])
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@unique([userId, planId, startDate])
+  @@map("user_plans")
+}
+
+// Enums para seguridad y consistencia
+enum Role {
+  ADMINISTRADOR
+  CLIENTE
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentGateway {
+  MERCADO_PAGO
+  PAYPAL
+  PAYONEER
+}

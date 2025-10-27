@@ -31,15 +31,19 @@ dotenv.config();
  * - Nunca se hardcodean credenciales en el código
  */
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'admin',
+  database: process.env.DB_NAME || 'uplindb',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 60000
+  connectTimeout: 60000,
+  // Intentar diferentes métodos de autenticación
+  authPlugins: {
+    mysql_native_password: () => require('mysql2/lib/auth_41.js')()
+  }
 });
 
 export default pool;

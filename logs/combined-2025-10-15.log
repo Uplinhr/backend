@@ -1,0 +1,16 @@
+2025-10-15 10:28:44 [info]: [object Object]
+2025-10-15 10:28:44 [info]: [object Object]
+2025-10-15 10:28:53 [info]: [object Object]
+2025-10-15 10:28:53 [info]: [object Object]
+2025-10-15 10:31:25 [info]: [object Object]
+2025-10-15 10:31:25 [error]: Error: Carrito no encontrado
+    at CartService.getCartWithItems (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:203:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async createMercadoPagoOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:306:20)
+2025-10-15 10:31:25 [info]: [object Object]
+2025-10-15 10:31:51 [info]: [object Object]
+2025-10-15 10:31:51 [error]: Error: Carrito no encontrado
+    at CartService.getCartWithItems (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/cart/service.js:203:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async createMercadoPagoOrder (file:///home/omar/Pasantias/Uplin/Repositorios/back/back/src/features/payments/payment.controller.js:306:20)
+2025-10-15 10:31:51 [info]: [object Object]

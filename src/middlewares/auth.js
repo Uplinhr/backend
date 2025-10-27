@@ -221,3 +221,6 @@ export const checkRole = (rolesPermitidos) => {
     next();
   };
 };
+
+// Alias para compatibilidad con nuevos módulos
+export const verifyToken = authRequired;

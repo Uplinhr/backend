@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pruebas del Sistema de Pagos - PayPal</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+        }
+        .success { border-left: 4px solid #10b981; }
+        .warning { border-left: 4px solid #f59e0b; }
+        .error { border-left: 4px solid #ef4444; }
+        .info { border-left: 4px solid #3b82f6; }
+        h1, h2, h3 {
+            color: #1f2937;
+        }
+        .code {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover { background: #2563eb; }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .status.success { background: #dcfce7; color: #166534; }
+        .status.warning { background: #fef3c7; color: #92400e; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Página de Pruebas - Sistema de Pagos PayPal</h1>
+
+        <div class="section info">
+            <h3>📋 Estado del Sistema</h3>
+            <div id="system-status" class="status">Cargando...</div>
+        </div>
+
+        <div class="section success">
+            <h3>✅ Configuración PayPal</h3>
+            <p><strong>Modo:</strong> <span id="paypal-mode">sandbox</span></p>
+            <p><strong>Cliente ID:</strong> <span id="paypal-client-id">Configurado</span></p>
+            <p><strong>Estado:</strong> <span id="paypal-status">Verificando...</span></p>
+        </div>
+
+        <div class="section warning">
+            <h3>🛒 Pruebas de Carrito</h3>
+            <button class="button" onclick="testCart()">Crear Carrito de Prueba</button>
+            <button class="button" onclick="addTestItem()">Agregar Item de Prueba</button>
+            <button class="button" onclick="calculateTotal()">Calcular Total</button>
+            <div id="cart-status" class="status">No inicializado</div>
+        </div>
+
+        <div class="section info">
+            <h3>💰 Pruebas de Pago</h3>
+            <button class="button" onclick="testPayPalPayment()">Procesar Pago PayPal</button>
+            <div id="payment-status" class="status">Listo para pruebas</div>
+        </div>
+
+        <div class="section error">
+            <h3>🔍 Pruebas de Webhooks</h3>
+            <button class="button" onclick="testWebhook()">Simular Webhook PayPal</button>
+            <button class="button" onclick="checkWebhookStatus()">Ver Estado Webhooks</button>
+            <div id="webhook-status" class="status">No hay webhooks recientes</div>
+        </div>
+
+        <div class="section success">
+            <h3>📊 Estadísticas</h3>
+            <button class="button" onclick="getPaymentStats()">Ver Estadísticas de Pagos</button>
+            <div id="stats-container" class="status">Datos no cargados</div>
+        </div>
+
+        <div class="section info">
+            <h3>🔐 Pruebas de Seguridad</h3>
+            <button class="button" onclick="testSecurity()">Verificar Seguridad</button>
+            <div id="security-status" class="status">Verificación pendiente</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración base
+        const API_BASE = window.location.origin + '/api';
+        let cartId = null;
+
+        // Estado del sistema
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                document.getElementById('system-status').innerHTML =
+                    `<div class="status success">✅ Sistema operativo - Database: ${data.database}</div>`;
+            } catch (error) {
+                document.getElementById('system-status').innerHTML =
+                    `<div class="status error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        // Configuración PayPal
+        async function checkPayPalConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/payments/config/paypal`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const config = result.data;
+                    document.getElementById('paypal-mode').textContent = config.mode || 'sandbox';
+                    document.getElementById('paypal-client-id').textContent =
+                        config.clientId ? 'Configurado' : 'No configurado';
+
+                    const status = config.isConfigured ? 'Configurado correctamente' : 'Falta configuración';
+                    document.getElementById('paypal-status').textContent = status;
+
+                    // Cambiar color según estado
+                    const statusElement = document.getElementById('paypal-status');
+                    if (config.isConfigured) {
+                        statusElement.className = 'status success';
+                    } else {
+                        statusElement.className = 'status error';
+                    }
+                } else {
+                    document.getElementById('paypal-status').textContent = 'Error en la respuesta';
+                    document.getElementById('paypal-status').className = 'status error';
+                }
+            } catch (error) {
+                document.getElementById('paypal-status').textContent = 'Error de verificación';
+                document.getElementById('paypal-status').className = 'status error';
+            }
+        }
+
+        // Pruebas de carrito
+        async function testCart() {
+            try {
+                const response = await fetch(`${API_BASE}/cart/test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: 1,
+                        currency: 'USD'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.cartId) {
+                    cartId = result.data.cartId;
+                    document.getElementById('cart-status').innerHTML =
+                        `<div class="status success">✅ Carrito creado: ${cartId}</div>`;
+                } else {
+                    document.getElementById('cart-status').innerHTML =
+                        `<div class="status error">❌ Error: ${JSON.stringify(result)}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('cart-status').innerHTML =
+                    `<div class="status error">❌ Error creando carrito: ${error.message}</div>`;
+            }
+        }
+
+        async function addTestItem() {
+            if (!cartId) {
+                alert('Primero crea un carrito');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/cart/${cartId}/test/items`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        serviceType: 'talent_search',
+                        serviceId: 1,
+                        quantity: 1
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('cart-status').innerHTML +=
+                        `<div class="status success">✅ Item agregado correctamente</div>`;
+                } else {
+                    document.getElementById('cart-status').innerHTML +=
+                        `<div class="status error">❌ Error: ${result.error ? result.error.message : JSON.stringify(result)}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('cart-status').innerHTML +=
+                    `<div class="status error">❌ Error agregando item: ${error.message}</div>`;
+            }
+        }
+
+        async function calculateTotal() {
+            if (!cartId) {
+                alert('Primero crea un carrito con items');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/cart/${cartId}/test/total`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const data = result.data;
+                    document.getElementById('cart-status').innerHTML +=
+                        `<div class="status info">💰 Subtotal: $${data.subtotal} + IVA (${data.tax_amount}): $${data.tax_amount} = Total: $${data.total}</div>`;
+                } else {
+                    document.getElementById('cart-status').innerHTML +=
+                        `<div class="status error">❌ Error: ${JSON.stringify(result)}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('cart-status').innerHTML +=
+                    `<div class="status error">❌ Error calculando total: ${error.message}</div>`;
+            }
+        }
+
+        // Pruebas de pago
+        async function testPayPalPayment() {
+            if (!cartId) {
+                alert('Necesitas un carrito con items para probar pagos');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/payments/paypal/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cartId: cartId,
+                        currency: 'USD',
+                        returnUrl: `${window.location.origin}/payment/success`,
+                        cancelUrl: `${window.location.origin}/payment/cancel`
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const order = result.data;
+                    document.getElementById('payment-status').innerHTML =
+                        `<div class="status success">✅ Orden PayPal creada: ${order.paypalOrderId}<br>💰 Total: $${order.totalAmount}</div>`;
+
+                    // Mostrar URL de aprobación
+                    document.getElementById('payment-status').innerHTML +=
+                        `<div class="status info">🔗 URL PayPal: <a href="${order.approvalUrl}" target="_blank">Abrir PayPal Sandbox</a></div>`;
+                } else {
+                    document.getElementById('payment-status').innerHTML =
+                        `<div class="status error">❌ Error: ${result.error ? result.error.message : JSON.stringify(result)}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('payment-status').innerHTML =
+                    `<div class="status error">❌ Error de pago: ${error.message}</div>`;
+            }
+        }
+
+        // Pruebas de webhooks
+        async function testWebhook() {
+            try {
+                const response = await fetch(`${API_BASE}/payments/webhook/test/paypal`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        eventType: 'PAYMENT.CAPTURE.COMPLETED',
+                        orderId: 'test-order-123'
+                    })
+                });
+
+                const result = await response.json();
+                document.getElementById('webhook-status').innerHTML =
+                    `<div class="status success">✅ Webhook simulado: ${result.status}</div>`;
+            } catch (error) {
+                document.getElementById('webhook-status').innerHTML =
+                    `<div class="status error">❌ Error webhook: ${error.message}</div>`;
+            }
+        }
+
+        async function checkWebhookStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/payments/webhooks/status`);
+                const status = await response.json();
+
+                document.getElementById('webhook-status').innerHTML =
+                    `<div class="status info">📊 Pendientes: ${status.pending}, Procesados: ${status.processed}</div>`;
+            } catch (error) {
+                document.getElementById('webhook-status').innerHTML =
+                    `<div class="status error">❌ Error verificando webhooks: ${error.message}</div>`;
+            }
+        }
+
+        // Estadísticas
+        async function getPaymentStats() {
+            try {
+                const response = await fetch(`${API_BASE}/payments/stats`);
+                const stats = await response.json();
+
+                document.getElementById('stats-container').innerHTML =
+                    `<div class="status info">
+                        💳 Total pagos: ${stats.totalPayments}<br>
+                        💰 Monto total: $${stats.totalAmount}<br>
+                        📊 Éxito: ${stats.successRate}%
+                    </div>`;
+            } catch (error) {
+                document.getElementById('stats-container').innerHTML =
+                    `<div class="status error">❌ Error cargando estadísticas: ${error.message}</div>`;
+            }
+        }
+
+        // Seguridad
+        async function testSecurity() {
+            try {
+                const response = await fetch(`${API_BASE}/payments/security/test`);
+                const security = await response.json();
+
+                document.getElementById('security-status').innerHTML =
+                    `<div class="status success">
+                        🔒 Encriptación: ${security.encryption}<br>
+                        🚫 Rate limiting: ${security.rateLimiting}<br>
+                        📝 Auditoría: ${security.audit}
+                    </div>`;
+            } catch (error) {
+                document.getElementById('security-status').innerHTML =
+                    `<div class="status error">❌ Error verificación seguridad: ${error.message}</div>`;
+            }
+        }
+
+        // Inicializar
+        window.onload = function() {
+            checkSystemStatus();
+            checkPayPalConfig();
+        };
+    </script>
+</body>
+</html>

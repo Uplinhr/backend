@@ -1,0 +1,23 @@
+2025-10-22 02:07:57 [info]: Iniciando migración de datos de seeders
+2025-10-22 02:14:24 [INFO] Iniciando migración de datos de seeders
+2025-10-22 02:14:25 [INFO] TaxConfig migrado {"name":"IVA"}
+2025-10-22 02:14:25 [INFO] TaxConfig migrado {"name":"IGV"}
+2025-10-22 02:14:25 [INFO] TalentSearchService migrado {"name":"Búsqueda Básica"}
+2025-10-22 02:14:25 [INFO] TalentSearchService migrado {"name":"Búsqueda Avanzada"}
+2025-10-22 02:14:25 [ERROR] Error migrando Consultant {"error":"\nInvalid `prisma.consultant.create()` invocation:\n\n{\n  data: {\n    name: \"Juan Pérez\",\n    email: \"juan@example.com\",\n    phone: \"123456789\",\n    bio: \"Experto en IT\",\n    skills: [\n      \"JavaScript\",\n      \"React\"\n    ],\n    hourlyRate: 50,\n    isActive: true,\n+   user: {\n+     create: UserCreateWithoutConsultantsInput | UserUncheckedCreateWithoutConsultantsInput,\n+     connectOrCreate: UserCreateOrConnectWithoutConsultantsInput,\n+     connect: UserWhereUniqueInput\n+   }\n  }\n}\n\nArgument `user` is missing."}
+2025-10-22 02:14:25 [ERROR] Error migrando Consultant {"error":"\nInvalid `prisma.consultant.create()` invocation:\n\n{\n  data: {\n    name: \"María López\",\n    email: \"maria@example.com\",\n    phone: \"987654321\",\n    bio: \"Especialista en datos\",\n    skills: [\n      \"Python\",\n      \"SQL\"\n    ],\n    hourlyRate: 60,\n    isActive: true,\n+   user: {\n+     create: UserCreateWithoutConsultantsInput | UserUncheckedCreateWithoutConsultantsInput,\n+     connectOrCreate: UserCreateOrConnectWithoutConsultantsInput,\n+     connect: UserWhereUniqueInput\n+   }\n  }\n}\n\nArgument `user` is missing."}
+2025-10-22 02:14:25 [INFO] Plan migrado {"name":"Básico"}
+2025-10-22 02:14:25 [INFO] Plan migrado {"name":"Premium"}
+2025-10-22 02:14:25 [INFO] Migración de datos completada
+2025-10-22 02:34:02 [INFO] Iniciando migración de datos de seeders
+2025-10-22 02:34:03 [INFO] User migrado {"name":"Juan Pérez"}
+2025-10-22 02:34:03 [INFO] User migrado {"name":"María López"}
+2025-10-22 02:34:03 [INFO] TaxConfig migrado {"name":"IVA"}
+2025-10-22 02:34:03 [INFO] TaxConfig migrado {"name":"IGV"}
+2025-10-22 02:34:03 [INFO] TalentSearchService migrado {"name":"Búsqueda Básica"}
+2025-10-22 02:34:03 [INFO] TalentSearchService migrado {"name":"Búsqueda Avanzada"}
+2025-10-22 02:34:03 [INFO] Consultant migrado {"name":"Juan Pérez"}
+2025-10-22 02:34:03 [INFO] Consultant migrado {"name":"María López"}
+2025-10-22 02:34:03 [INFO] Plan migrado {"name":"Básico"}
+2025-10-22 02:34:03 [INFO] Plan migrado {"name":"Premium"}
+2025-10-22 02:34:03 [INFO] Migración de datos completada

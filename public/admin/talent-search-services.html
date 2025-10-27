@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏢 Panel Administrativo - Servicios de Búsqueda</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #64748b;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .service-header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .service-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-description {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .service-body {
+            padding: 1.5rem;
+        }
+
+        .price-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .price-item {
+            text-align: center;
+        }
+
+        .price-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+        }
+
+        .price-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #059669;
+            font-family: 'Courier New', monospace;
+        }
+
+        .discount-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .service-details {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-label {
+            color: #64748b;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .service-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .edit-btn {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #d97706;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .add-service-card {
+            border: 2px dashed #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-service-card:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .add-service-content {
+            text-align: center;
+            color: #64748b;
+        }
+
+        .add-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Panel Administrativo</h1>
+            <p>Gestión de Servicios de Búsqueda de Talento</p>
+        </div>
+
+        <div class="stats-section">
+            <h2 style="margin-bottom: 1.5rem; color: #1e293b;">📊 Estadísticas Generales</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-services">0</div>
+                    <div class="stat-label">Total Servicios</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="active-services">0</div>
+                    <div class="stat-label">Servicios Activos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-revenue">$0.00</div>
+                    <div class="stat-label">Ingresos (30 días)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-usage">0</div>
+                    <div class="stat-label">Usos Totales</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 1.5rem; color: #1e293b;">🎯 Servicios Disponibles</h2>
+
+        <div class="services-grid" id="services-container">
+            <div class="loading">Cargando servicios...</div>
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar servicio -->
+    <div id="service-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <h2 id="modal-title">Crear Servicio</h2>
+
+            <form id="service-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="service-name">Nombre del Servicio:</label>
+                        <input type="text" id="service-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hires-included">Contrataciones Incluidas:</label>
+                        <input type="number" id="hires-included" name="hiresIncluded" min="1" value="1" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="base-price">Precio Base (USD):</label>
+                        <input type="number" id="base-price" name="basePrice" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="discount-percentage">Descuento (%):</label>
+                        <input type="number" id="discount-percentage" name="discountPercentage" step="0.01" min="0" max="100" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descripción:</label>
+                    <textarea id="description" name="description" placeholder="Describe las características del servicio..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">💾 Guardar Servicio</button>
+                    <button type="button" class="btn-secondary" onclick="closeModal()">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        let currentEditId = null;
+
+        // Función para requests autenticados
+        async function makeAuthenticatedRequest(url, options = {}) {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        }
+                    });
+                    return response;
+                } catch (error) {
+                    console.log('Acceso directo falló, intentando con autenticación básica');
+                }
+            }
+
+            const username = prompt('Usuario administrador:');
+            const password = prompt('Contraseña:');
+
+            if (!username || !password) {
+                throw new Error('Credenciales requeridas');
+            }
+
+            const credentials = btoa(`${username}:${password}`);
+            return fetch(url, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${credentials}`,
+                    ...options.headers
+                }
+            });
+        }
+
+        // Cargar servicios al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadServices();
+            loadStats();
+        });
+
+        // Cargar servicios
+        async function loadServices() {
+            try {
+                const response = await makeAuthenticatedRequest(`${API_BASE}/admin/talent-search-services`);
+                const result = await response.json();
+
+                if (result.success) {
+                    displayServices(result.data);
+                } else {
+                    showError('Error cargando servicios: ' + result.error.message);
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+        }
+
+        // Mostrar servicios
+        function displayServices(services) {
+            const container = document.getElementById('services-container');
+
+            if (services.length === 0) {
+                container.innerHTML = '<div class="loading">No hay servicios configurados</div>';
+                return;
+            }
+
+            const servicesHTML = services.map(service => `
+                <div class="service-card">
+                    <div class="service-header">
+                        <div class="service-name">${service.name}</div>
+                        <div class="service-description">${service.description || 'Sin descripción'}</div>
+                    </div>
+                    <div class="service-body">
+                        ${service.discountPercentage > 0 ? `<div class="discount-badge">🎉 ${service.discountPercentage}% de descuento</div>` : ''}
+
+                        <div class="price-info">
+                            <div class="price-item">
+                                <div class="price-label">Precio Base</div>
+                                <div class="price-value">$${service.basePrice.toFixed(2)}</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-label">Precio Final</div>
+                                <div class="price-value">$${service.finalPrice.toFixed(2)}</div>
+                            </div>
+                        </div>
+
+                        <div class="service-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Contrataciones:</span>
+                                <span class="detail-value">${service.hiresIncluded}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Estado:</span>
+                                <span class="detail-value">${service.active ? '✅ Activo' : '❌ Inactivo'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Ahorro:</span>
+                                <span class="detail-value">$${(service.basePrice - service.finalPrice).toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        <div class="service-actions">
+                            <button class="action-btn edit-btn" onclick="editService(${service.id})">✏️ Editar</button>
+                            <button class="action-btn delete-btn" onclick="deleteService(${service.id})">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Agregar tarjeta para crear nuevo servicio
+            const addCardHTML = `
+                <div class="service-card add-service-card" onclick="showCreateModal()">
+                    <div class="add-service-content">
+                        <div class="add-icon">➕</div>
+                        <div>Agregar Nuevo Servicio</div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = addCardHTML + servicesHTML;
+        }
+
+        // Cargar estadísticas
+        async function loadStats() {
+            try {
+                const response = await makeAuthenticatedRequest(`${API_BASE}/admin/talent-search-services/stats`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const stats = result.data;
+                    const totalServices = stats.length;
+                    const activeServices = stats.filter(s => s.timesUsed > 0).length;
+                    const totalRevenue = stats.reduce((sum, s) => sum + s.totalRevenue, 0);
+                    const totalUsage = stats.reduce((sum, s) => sum + s.timesUsed, 0);
+
+                    document.getElementById('total-services').textContent = totalServices;
+                    document.getElementById('active-services').textContent = activeServices;
+                    document.getElementById('total-revenue').textContent = `$${totalRevenue.toFixed(2)}`;
+                    document.getElementById('total-usage').textContent = totalUsage;
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+
+        // Mostrar modal para crear servicio
+        function showCreateModal() {
+            currentEditId = null;
+            document.getElementById('modal-title').textContent = 'Crear Nuevo Servicio';
+            document.getElementById('service-form').reset();
+            document.getElementById('service-modal').style.display = 'block';
+        }
+
+        // Editar servicio
+        function editService(serviceId) {
+            makeAuthenticatedRequest(`${API_BASE}/admin/talent-search-services`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const service = result.data.find(s => s.id === serviceId);
+                        if (service) {
+                            fillForm(service);
+                            currentEditId = serviceId;
+                            document.getElementById('modal-title').textContent = 'Editar Servicio';
+                            document.getElementById('service-modal').style.display = 'block';
+                        }
+                    }
+                })
+                .catch(error => showError('Error cargando servicio: ' + error.message));
+        }
+
+        // Llenar formulario
+        function fillForm(service) {
+            document.getElementById('service-name').value = service.name;
+            document.getElementById('base-price').value = service.basePrice;
+            document.getElementById('discount-percentage').value = service.discountPercentage;
+            document.getElementById('hires-included').value = service.hiresIncluded;
+            document.getElementById('description').value = service.description || '';
+        }
+
+        // Cerrar modal
+        function closeModal() {
+            document.getElementById('service-modal').style.display = 'none';
+            document.getElementById('service-form').reset();
+            currentEditId = null;
+        }
+
+        // Guardar servicio
+        document.getElementById('service-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const serviceData = {
+                name: formData.get('name'),
+                basePrice: parseFloat(formData.get('basePrice')),
+                discountPercentage: parseFloat(formData.get('discountPercentage')),
+                hiresIncluded: parseInt(formData.get('hiresIncluded')),
+                description: formData.get('description')
+            };
+
+            try {
+                let response;
+                if (currentEditId) {
+                    response = await makeAuthenticatedRequest(`${API_BASE}/admin/talent-search-services/${currentEditId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(serviceData)
+                    });
+                } else {
+                    response = await makeAuthenticatedRequest(`${API_BASE}/admin/talent-search-services`, {
+                        method: 'POST',
+                        body: JSON.stringify(serviceData)
+                    });
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    closeModal();
+                    loadServices();
+                    loadStats();
+                    showSuccess(currentEditId ? 'Servicio actualizado exitosamente' : 'Servicio creado exitosamente');
+                } else {
+                    showError(result.error.message || 'Error guardando servicio');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+        });
+
+        // Eliminar servicio
+        async function deleteService(serviceId) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
+                return;
+            }
+
+            try {
+                const response = await makeAuthenticatedRequest(`${API_BASE}/admin/talent-search-services/${serviceId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    loadServices();
+                    loadStats();
+                    showSuccess('Servicio eliminado exitosamente');
+                } else {
+                    showError(result.error.message || 'Error eliminando servicio');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+        }
+
+        // Funciones auxiliares
+        function showSuccess(message) {
+            alert('✅ ' + message);
+        }
+
+        function showError(message) {
+            alert('❌ Error: ' + message);
+        }
+    </script>
+</body>
+</html>
