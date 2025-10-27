@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import pool from '../../database/database.js';
+import prisma from '../../database/prisma.js';
 import authModel from './model.js';
 import { getTokenFromRequest } from '../../middlewares/auth.js';
 import reinicio_contraseniaModel from '../reinicio_contrasenia/model.js';
@@ -28,16 +28,28 @@ import { Resend } from "resend";
  */
 export const register = async (req, res) => {
   try {
-    const {nombre, apellido, contrasenia, email, num_celular} = req.body;
-    if(!nombre || !apellido || !contrasenia || !email) {
+    // Soporte para campos legacy y nuevos
+    const nombre = req.body.nombre || req.body.name;
+    const apellido = req.body.apellido;
+    const contrasenia = req.body.contrasenia || req.body.password;
+    const email = req.body.email;
+    const num_celular = req.body.num_celular;
+
+    if(!nombre || !contrasenia || !email) {
       return errorRes(res, {
-        message: 'Se requieren todos los campos',
-        statusCode: 404
+        message: 'Se requieren nombre, email y contraseña',
+        statusCode: 400
       })
     }
+
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
 
     const idUsuario = await authModel.createUsuario(nombre, apellido, hashedPassword, email, num_celular)
+
+    // Generar token para onboarding fluido
+    const token = jwt.sign({ id: idUsuario }, process.env.JWT_SECRET, {
+      expiresIn: '1h'
+    });
 
     const resend = new Resend(process.env.MAIL_API_KEY);
     const { data, error } = await resend.emails.send({
@@ -123,7 +135,7 @@ export const register = async (req, res) => {
 
                                 <div class="info-box">
                                     <p><strong>Nombre:</strong></p>
-                                    <p>${nombre + ' ' + apellido}</p>
+                                    <p>${[nombre, apellido].filter(Boolean).join(' ')}</p>
                                     <p><strong>Correo electrónico del nuevo usuario:</strong></p>
                                     <p>${email}</p>
                                 </div>
@@ -155,8 +167,9 @@ export const register = async (req, res) => {
     if (error) {
       console.error('Error enviando email:', error)
     }
+
     successRes(res, {
-      data: { id: idUsuario},
+      data: { id: idUsuario, token },
       message: 'Usuario creado exitosamente',
       statusCode: 201
     })
@@ -165,18 +178,19 @@ export const register = async (req, res) => {
       console.error('Error después de enviar respuesta:', error);
       return;
     }
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === 'P2002') { // Prisma unique constraint error
       errorRes(res, {
         message: 'El email ya está registrado',
         statusCode: 409,
         errors: error.code
       });
+    } else {
+      errorRes(res, {
+        message: 'Error al crear usuario',
+        statusCode: 500,
+        errors: error.message
+      });
     }
-    errorRes(res, {
-      message: 'Error al crear usuario',
-      statusCode: 500,
-      errors: error.message
-    });
   }
 };
 
@@ -196,11 +210,22 @@ export const register = async (req, res) => {
  */
 export const login = async (req, res) => {
   try {
-    const user = await authModel.login(req.body.email)
+    // Soporte para campos legacy y nuevos
+    const email = req.body.email;
+    const contrasenia = req.body.contrasenia || req.body.password;
+
+    if (!email || !contrasenia) {
+      return errorRes(res, {
+        message: 'Email y contraseña son requeridos',
+        statusCode: 400
+      });
+    }
+
+    const user = await authModel.login(email)
 
     if (!user) return errorRes(res, {message: 'Usuario no encontrado',statusCode: 404});
 
-    const isMatch = await bcrypt.compare(req.body.contrasenia, user.contrasenia);
+    const isMatch = await bcrypt.compare(contrasenia, user.contrasenia);
     if (!isMatch) return errorRes(res, {message: 'Contraseña incorrecta',statusCode: 400});
 
     if(!user.active) return errorRes(res, {message: 'Usuario desactivado',statusCode: 400});
@@ -217,7 +242,7 @@ export const login = async (req, res) => {
     })
   } catch (error) {
     errorRes(res, {
-      message: 'Error al iniciar sesión', 
+      message: 'Error al iniciar sesión',
       statusCode: 500,
       errors: error.message
     });
@@ -246,8 +271,11 @@ export const checkToken = async (req, res) => {
     })
   }
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const [user] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [decoded.id]);
-  if(!user){
+  const user = await prisma.user.findUnique({
+    where: { id: decoded.id },
+    select: { id: true, email: true, name: true, role: true, deletedAt: true }
+  });
+  if(!user || user.deletedAt){
     return errorRes(res, {
       message: 'Token invalido',
       statusCode: 401,

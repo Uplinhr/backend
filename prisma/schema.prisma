@@ -1,4 +1,4 @@
-// prisma/schema.prisma - Esquema inicial con mejoras de seguridad
+// prisma/schema.prisma - Esquema completo con todos los modelos
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -24,6 +24,11 @@ model User {
   transactions Transaction[]
   plans        UserPlan[]
   consultants  Consultant[] @relation("UserConsultants")
+  credits      Credit[]
+  consultations Consultation[]
+  planPurchases PlanPurchase[]
+  empresas      Empresa[]
+  shoppingCarts ShoppingCart[]
 
   @@map("users")
 }
@@ -43,6 +48,7 @@ model Plan {
   // Relaciones
   subscriptions UserPlan[]
   transactions  Transaction[]
+  purchases     PlanPurchase[]
 
   @@map("plans")
 }
@@ -116,6 +122,186 @@ model TalentSearchService {
   @@map("talent_search_services")
 }
 
+// Modelo Credit (créditos de usuarios)
+model Credit {
+  id          String   @id @default(cuid())
+  userId      String
+  type        CreditType
+  amount      Int      // Cantidad de créditos
+  expiryDate  DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  searches    Search[]
+  purchases   CreditPurchase[]
+
+  @@map("credits")
+}
+
+// Modelo Search (búsquedas de talento)
+model Search {
+  id          String   @id @default(cuid())
+  creditId    String
+  searchInfo  Json     // Información de la búsqueda
+  creditsUsed Int      @default(1)
+  status      SearchStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  credit      Credit   @relation(fields: [creditId], references: [id], onDelete: Cascade)
+
+  @@map("searches")
+}
+
+// Modelo Consultation (consultorías/horas de consulta)
+model Consultation {
+  id            String   @id @default(cuid())
+  userId        String
+  totalHours    Int      // Horas totales contratadas
+  remainingHours Int     // Horas restantes
+  expiryDate    DateTime?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relaciones
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions      ConsultationSession[]
+
+  @@map("consultations")
+}
+
+// Modelo ConsultationSession (sesiones individuales de consultoría)
+model ConsultationSession {
+  id              String   @id @default(cuid())
+  consultationId  String
+  startTime       DateTime
+  endTime         DateTime?
+  duration        Int?     // Duración en minutos
+  cost            Float?   // Costo de la sesión
+  paymentMethod   String?
+  notes           String?
+  status          ConsultationStatus @default(SCHEDULED)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  consultation    Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@map("consultation_sessions")
+}
+
+// Modelo Empresa (datos de empresas de usuarios)
+model Empresa {
+  id                   String   @id @default(cuid())
+  userId               String?
+  name                 String
+  email                String
+  fantasyName          String?
+  cuit                 String?
+  taxCondition         String?
+  legalType            String?
+  mainActivity         String?
+  legalStreet          String?
+  legalCity            String?
+  legalCountry         String?
+  postalCode           String?
+  active               Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relaciones
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("empresas")
+}
+
+// Modelo ShoppingCart (carrito de compras)
+model ShoppingCart {
+  id              String      @id @default(cuid())
+  cartUuid        String      @unique
+  userId          String?
+  sessionId       String?
+  status          CartStatus  @default(active)
+  currency        String      @default("USD")
+  countryCode     String?
+  expiresAt       DateTime?
+  convertedAt     DateTime?
+  subtotal        Float?
+  taxAmount       Float?
+  discountAmount  Float?
+  totalAmount     Float?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relaciones
+  user  User?      @relation(fields: [userId], references: [id])
+  items CartItem[]
+
+  @@map("shopping_cart")
+}
+
+// Modelo CartItem (items del carrito)
+model CartItem {
+  id                  String        @id @default(cuid())
+  cartId              String
+  itemType            String
+  itemId              String?
+  itemName            String
+  quantity            Int           @default(1)
+  unitPrice           Float
+  discountPercentage  Float?        @default(0)
+  taxRate             Float?        @default(0)
+  subtotal            Float
+  taxAmount           Float?        @default(0)
+  total               Float
+  metadata            Json?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  // Relaciones
+  cart ShoppingCart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@map("cart_items")
+}
+
+// Modelo CreditPurchase (compras de créditos)
+model CreditPurchase {
+  id          String   @id @default(cuid())
+  creditId    String
+  amount      Float    // Costo de la compra
+  paymentMethod String
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  // Relaciones
+  credit      Credit   @relation(fields: [creditId], references: [id], onDelete: Cascade)
+
+  @@map("credit_purchases")
+}
+
+// Modelo PlanPurchase (compras de planes)
+model PlanPurchase {
+  id              String   @id @default(cuid())
+  userId          String
+  planId          String
+  amount          Float    // Precio pagado
+  paymentMethod   String   // Medio de pago
+  notes           String?
+  createdAt       DateTime @default(now())
+
+  // Relaciones
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan            Plan     @relation(fields: [planId], references: [id])
+
+  @@map("plan_purchases")
+}
+
 // Modelo UserPlan (para suscripciones de usuarios)
 model UserPlan {
   id        String   @id @default(cuid())
@@ -152,4 +338,32 @@ enum PaymentGateway {
   MERCADO_PAGO
   PAYPAL
   PAYONEER
+}
+
+enum CreditType {
+  PLAN      // Créditos que vienen con un plan
+  PURCHASE  // Créditos comprados adicionalmente
+  BONUS     // Créditos de regalo/bonus
+}
+
+enum SearchStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ConsultationStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// Estados del carrito de compras
+enum CartStatus {
+  active
+  converted
+  expired
+  abandoned
 }

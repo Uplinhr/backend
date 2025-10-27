@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
+import logger from '../config/logger.config.js';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
@@ -6,6 +8,7 @@ const SALT_LENGTH = 64;
 const TAG_LENGTH = 16;
 const KEY_LENGTH = 32;
 const ITERATIONS = 100000;
+const BCRYPT_SALT_ROUNDS = 12;
 
 /**
  * Deriva una clave de cifrado desde la clave maestra
@@ -141,14 +144,242 @@ export function maskSensitiveData(data, visibleStart = 4, visibleEnd = 4) {
 }
 
 /**
- * Encripta datos de tarjeta para almacenamiento seguro
+ * Encripta datos de tarjeta para almacenamiento seguro (compatibilidad)
  */
 export function encryptCardData(cardData) {
+  if (!cardData || typeof cardData !== 'object') return null;
   return {
-    last_four: cardData.last_four || cardData.number?.slice(-4),
-    brand: cardData.brand,
+    last_four: cardData.last_four || cardData.number?.slice(-4) || null,
+    brand: cardData.brand || null,
     encrypted_full_number: cardData.number ? encrypt(cardData.number) : null,
-    expiry_month: cardData.expiry_month,
-    expiry_year: cardData.expiry_year,
+    expiry_month: cardData.expiry_month || null,
+    expiry_year: cardData.expiry_year || null,
   };
 }
+
+/**
+ * Hash de contraseñas usando bcrypt (según prompt Día 2)
+ * @param {string} password - Contraseña en texto plano
+ * @returns {Promise<string>} - Hash bcrypt
+ */
+export async function hashPassword(password) {
+  try {
+    if (!password || typeof password !== 'string') {
+      throw new Error('Contraseña inválida');
+    }
+
+    if (password.length < 8) {
+      throw new Error('Contraseña debe tener al menos 8 caracteres');
+    }
+
+    const hash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+
+    logger.info('Contraseña hasheada exitosamente', logger.sanitize({
+      length: password.length,
+      hashLength: hash.length
+    }));
+
+    return hash;
+
+  } catch (error) {
+    logger.error('Error hasheando contraseña', logger.sanitize({
+      error: error.message,
+      length: password ? password.length : 0
+    }));
+    throw new Error('Error procesando contraseña');
+  }
+}
+
+/**
+ * Verifica contraseña contra hash bcrypt
+ * @param {string} password - Contraseña en texto plano
+ * @param {string} hash - Hash bcrypt
+ * @returns {Promise<boolean>} - True si coincide
+ */
+export async function verifyPassword(password, hash) {
+  try {
+    if (!password || !hash) {
+      return false;
+    }
+
+    const isValid = await bcrypt.compare(password, hash);
+
+    logger.debug('Verificación de contraseña completada', logger.sanitize({
+      isValid,
+      passwordLength: password.length
+    }));
+
+    return isValid;
+
+  } catch (error) {
+    logger.error('Error verificando contraseña', logger.sanitize({
+      error: error.message
+    }));
+    return false;
+  }
+}
+
+/**
+ * Encripta datos de pago según prompt Día 2
+ * Para tokens temporales y datos de transacción
+ */
+export function encryptPaymentData(paymentData) {
+  try {
+    if (!paymentData || typeof paymentData !== 'object') {
+      throw new Error('Datos de pago inválidos');
+    }
+
+    const jsonData = JSON.stringify({
+      ...paymentData,
+      encryptedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    });
+
+    const encrypted = encrypt(jsonData);
+
+    logger.info('Datos de pago encriptados', logger.sanitize({
+      gateway: paymentData.gateway,
+      expiresIn: '24h'
+    }));
+
+    return encrypted;
+
+  } catch (error) {
+    logger.error('Error encriptando datos de pago', logger.sanitize({
+      error: error.message
+    }));
+    throw new Error('Error procesando datos de pago');
+  }
+}
+
+/**
+ * Verifica si datos de pago han expirado
+ */
+export function isPaymentDataExpired(encryptedData) {
+  try {
+    const decrypted = decrypt(encryptedData);
+    const data = JSON.parse(decrypted);
+
+    if (!data.expiresAt) {
+      return true;
+    }
+
+    const isExpired = new Date() > new Date(data.expiresAt);
+
+    if (isExpired) {
+      logger.warn('Datos de pago expirados', logger.sanitize({
+        expiredAt: data.expiresAt
+      }));
+    }
+
+    return isExpired;
+
+  } catch (error) {
+    logger.error('Error verificando expiración', logger.sanitize({
+      error: error.message
+    }));
+    return true;
+  }
+}
+
+/**
+ * Encripta metadatos de transacción para auditoría
+ */
+export function encryptTransactionMetadata(transactionData) {
+  try {
+    const auditData = {
+      ...transactionData,
+      encryptedAt: new Date().toISOString(),
+      encryptionVersion: '2.0',
+      sensitiveFields: ['cardData', 'personalInfo', 'securityTokens']
+    };
+
+    return encrypt(JSON.stringify(auditData));
+
+  } catch (error) {
+    logger.error('Error encriptando metadatos de transacción', logger.sanitize({
+      error: error.message
+    }));
+    throw error;
+  }
+}
+
+/**
+ * Documentación de estrategia de encriptación según prompt Día 2
+ */
+export const ENCRYPTION_STRATEGY = {
+  // Configuración principal
+  algorithm: ALGORITHM,
+  keyDerivation: {
+    method: 'PBKDF2',
+    iterations: ITERATIONS,
+    keyLength: KEY_LENGTH,
+    hash: 'sha512'
+  },
+
+  // Configuración de bcrypt
+  bcrypt: {
+    saltRounds: BCRYPT_SALT_ROUNDS,
+    minPasswordLength: 8
+  },
+
+  // Campos sensibles que se encriptan
+  sensitiveFields: [
+    'cardNumber',
+    'cvv',
+    'expiryDate',
+    'cardHolderName',
+    'personalData',
+    'securityCode',
+    'token',
+    'apiKey',
+    'secret',
+    'paymentTokens'
+  ],
+
+  // Campos que solo se hashean (unidireccional)
+  hashOnlyFields: [
+    'password',
+    'passwordHash',
+    'confirmPassword',
+    'webhookSignature'
+  ],
+
+  // Estrategia de manejo de claves
+  keyManagement: {
+    environmentVariable: 'ENCRYPTION_KEY',
+    minimumLength: 32,
+    rotationPolicy: '6 months',
+    backupStrategy: 'multiple keys with versioning'
+  },
+
+  // Configuración de tokens de pago
+  paymentTokens: {
+    defaultExpiration: '24 hours',
+    maxExpiration: '7 days',
+    renewalThreshold: '2 hours'
+  },
+
+  // Configuración de auditoría
+  audit: {
+    encryptTransactionData: true,
+    logEncryptionEvents: true,
+    retainEncryptionLogs: '90 days'
+  }
+};
+
+export default {
+  encrypt,
+  decrypt,
+  hashData,
+  validateSignature,
+  generateSecureToken,
+  maskSensitiveData,
+  encryptCardData,
+  hashPassword,
+  verifyPassword,
+  encryptPaymentData,
+  isPaymentDataExpired,
+  encryptTransactionMetadata,
+  ENCRYPTION_STRATEGY
+};

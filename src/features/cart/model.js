@@ -1,4 +1,4 @@
-import pool from '../../database/database.js';
+import prisma from '../../database/prisma.js';
 import logger from '../../config/logger.config.js';
 
 class CartModel {
@@ -7,21 +7,18 @@ class CartModel {
    */
   static async createCart(cartData) {
     try {
-      const [result] = await pool.query(
-        `INSERT INTO shopping_cart 
-        (cart_uuid, id_usuario, session_id, status, currency, country_code, expires_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          cartData.cart_uuid,
-          cartData.id_usuario || null,
-          cartData.session_id || null,
-          cartData.status || 'active',
-          cartData.currency || 'USD',
-          cartData.country_code,
-          cartData.expires_at
-        ]
-      );
-      return result.insertId;
+      const created = await prisma.shoppingCart.create({
+        data: {
+          cartUuid: cartData.cart_uuid,
+          userId: cartData.id_usuario || null,
+          sessionId: cartData.session_id || null,
+          status: (cartData.status || 'active'),
+          currency: cartData.currency || 'USD',
+          countryCode: cartData.country_code || null,
+          expiresAt: cartData.expires_at || null,
+        }
+      });
+      return created.id;
     } catch (error) {
       logger.error('Error creando carrito:', error);
       throw error;
@@ -33,11 +30,8 @@ class CartModel {
    */
   static async getCartByUUID(cartUUID) {
     try {
-      const [rows] = await pool.query(
-        'SELECT * FROM shopping_cart WHERE cart_uuid = ?',
-        [cartUUID]
-      );
-      return rows[0] || null;
+      const cart = await prisma.shoppingCart.findUnique({ where: { cartUuid: cartUUID } });
+      return cart || null;
     } catch (error) {
       logger.error('Error obteniendo carrito:', error);
       throw error;
@@ -49,13 +43,11 @@ class CartModel {
    */
   static async getActiveCartByUser(userId) {
     try {
-      const [rows] = await pool.query(
-        `SELECT * FROM shopping_cart 
-         WHERE id_usuario = ? AND status = 'active' 
-         ORDER BY fecha_alta DESC LIMIT 1`,
-        [userId]
-      );
-      return rows[0] || null;
+      const cart = await prisma.shoppingCart.findFirst({
+        where: { userId: userId, status: 'active' },
+        orderBy: { createdAt: 'desc' }
+      });
+      return cart || null;
     } catch (error) {
       logger.error('Error obteniendo carrito activo:', error);
       throw error;
@@ -67,10 +59,10 @@ class CartModel {
    */
   static async getCartItems(cartId) {
     try {
-      const [rows] = await pool.query(
-        'SELECT * FROM cart_items WHERE id_cart = ? ORDER BY fecha_alta',
-        [cartId]
-      );
+      const rows = await prisma.cartItem.findMany({
+        where: { cartId },
+        orderBy: { createdAt: 'asc' }
+      });
       return rows;
     } catch (error) {
       logger.error('Error obteniendo items del carrito:', error);
@@ -83,27 +75,23 @@ class CartModel {
    */
   static async addItemToCart(cartId, itemData) {
     try {
-      const [result] = await pool.query(
-        `INSERT INTO cart_items 
-        (id_cart, item_type, item_id, item_name, quantity, unit_price, 
-         discount_percentage, tax_rate, subtotal, tax_amount, total, metadata) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
+      const created = await prisma.cartItem.create({
+        data: {
           cartId,
-          itemData.item_type,
-          itemData.item_id || null,
-          itemData.item_name,
-          itemData.quantity || 1,
-          itemData.unit_price,
-          itemData.discount_percentage || 0,
-          itemData.tax_rate || 0,
-          itemData.subtotal,
-          itemData.tax_amount || 0,
-          itemData.total,
-          JSON.stringify(itemData.metadata || {})
-        ]
-      );
-      return result.insertId;
+          itemType: itemData.item_type,
+          itemId: itemData.item_id || null,
+          itemName: itemData.item_name,
+          quantity: itemData.quantity || 1,
+          unitPrice: itemData.unit_price,
+          discountPercentage: itemData.discount_percentage || 0,
+          taxRate: itemData.tax_rate || 0,
+          subtotal: itemData.subtotal,
+          taxAmount: itemData.tax_amount || 0,
+          total: itemData.total,
+          metadata: itemData.metadata || null,
+        }
+      });
+      return created.id;
     } catch (error) {
       logger.error('Error agregando item al carrito:', error);
       throw error;
@@ -115,13 +103,11 @@ class CartModel {
    */
   static async updateItemQuantity(itemId, quantity, subtotal, taxAmount, total) {
     try {
-      const [result] = await pool.query(
-        `UPDATE cart_items 
-         SET quantity = ?, subtotal = ?, tax_amount = ?, total = ?
-         WHERE id = ?`,
-        [quantity, subtotal, taxAmount, total, itemId]
-      );
-      return result.affectedRows > 0;
+      await prisma.cartItem.update({
+        where: { id: itemId },
+        data: { quantity, subtotal, taxAmount, total }
+      });
+      return true;
     } catch (error) {
       logger.error('Error actualizando cantidad de item:', error);
       throw error;
@@ -133,11 +119,8 @@ class CartModel {
    */
   static async removeItem(itemId) {
     try {
-      const [result] = await pool.query(
-        'DELETE FROM cart_items WHERE id = ?',
-        [itemId]
-      );
-      return result.affectedRows > 0;
+      await prisma.cartItem.delete({ where: { id: itemId } });
+      return true;
     } catch (error) {
       logger.error('Error eliminando item del carrito:', error);
       throw error;
@@ -149,13 +132,16 @@ class CartModel {
    */
   static async updateCartTotals(cartId, totals) {
     try {
-      const [result] = await pool.query(
-        `UPDATE shopping_cart 
-         SET subtotal = ?, tax_amount = ?, discount_amount = ?, total_amount = ?
-         WHERE id = ?`,
-        [totals.subtotal, totals.tax_amount, totals.discount_amount, totals.total_amount, cartId]
-      );
-      return result.affectedRows > 0;
+      await prisma.shoppingCart.update({
+        where: { id: cartId },
+        data: {
+          subtotal: totals.subtotal,
+          taxAmount: totals.tax_amount,
+          discountAmount: totals.discount_amount,
+          totalAmount: totals.total_amount,
+        }
+      });
+      return true;
     } catch (error) {
       logger.error('Error actualizando totales del carrito:', error);
       throw error;
@@ -167,13 +153,11 @@ class CartModel {
    */
   static async updateCartStatus(cartId, status, convertedAt = null) {
     try {
-      const [result] = await pool.query(
-        `UPDATE shopping_cart 
-         SET status = ?, converted_at = COALESCE(?, converted_at)
-         WHERE id = ?`,
-        [status, convertedAt, cartId]
-      );
-      return result.affectedRows > 0;
+      await prisma.shoppingCart.update({
+        where: { id: cartId },
+        data: { status, convertedAt: convertedAt || undefined }
+      });
+      return true;
     } catch (error) {
       logger.error('Error actualizando estado del carrito:', error);
       throw error;
@@ -185,11 +169,8 @@ class CartModel {
    */
   static async clearCart(cartId) {
     try {
-      const [result] = await pool.query(
-        'DELETE FROM cart_items WHERE id_cart = ?',
-        [cartId]
-      );
-      return result.affectedRows;
+      const result = await prisma.cartItem.deleteMany({ where: { cartId } });
+      return result.count;
     } catch (error) {
       logger.error('Error limpiando carrito:', error);
       throw error;
@@ -201,11 +182,8 @@ class CartModel {
    */
   static async getCartItem(itemId) {
     try {
-      const [rows] = await pool.query(
-        'SELECT * FROM cart_items WHERE id = ?',
-        [itemId]
-      );
-      return rows[0] || null;
+      const item = await prisma.cartItem.findUnique({ where: { id: itemId } });
+      return item || null;
     } catch (error) {
       logger.error('Error obteniendo item:', error);
       throw error;
@@ -217,12 +195,10 @@ class CartModel {
    */
   static async findExistingItem(cartId, itemType, itemId) {
     try {
-      const [rows] = await pool.query(
-        `SELECT * FROM cart_items 
-         WHERE id_cart = ? AND item_type = ? AND item_id = ?`,
-        [cartId, itemType, itemId]
-      );
-      return rows[0] || null;
+      const item = await prisma.cartItem.findFirst({
+        where: { cartId, itemType, itemId }
+      });
+      return item || null;
     } catch (error) {
       logger.error('Error buscando item existente:', error);
       throw error;
@@ -234,11 +210,8 @@ class CartModel {
    */
   static async countCartItems(cartId) {
     try {
-      const [rows] = await pool.query(
-        'SELECT COUNT(*) as count FROM cart_items WHERE id_cart = ?',
-        [cartId]
-      );
-      return rows[0].count;
+      const count = await prisma.cartItem.count({ where: { cartId } });
+      return count;
     } catch (error) {
       logger.error('Error contando items:', error);
       throw error;
@@ -250,12 +223,11 @@ class CartModel {
    */
   static async markExpiredCarts() {
     try {
-      const [result] = await pool.query(
-        `UPDATE shopping_cart 
-         SET status = 'expired' 
-         WHERE status = 'active' AND expires_at < NOW()`
-      );
-      return result.affectedRows;
+      const result = await prisma.shoppingCart.updateMany({
+        where: { status: 'active', expiresAt: { lt: new Date() } },
+        data: { status: 'expired' }
+      });
+      return result.count;
     } catch (error) {
       logger.error('Error marcando carritos expirados:', error);
       throw error;

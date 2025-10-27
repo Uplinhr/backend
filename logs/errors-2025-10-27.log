@@ -1,0 +1,2 @@
+2025-10-27 07:17:40 [ERROR] ❌ Error migrando usuario cliente01@gmail.com:
+2025-10-27 07:20:49 [ERROR] Error migrando usuario {"email":"admin@gmail.com","error":"\nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`email`)"}

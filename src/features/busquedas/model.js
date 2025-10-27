@@ -1,150 +1,182 @@
-import pool from '../../database/database.js'
+import prisma from '../../database/prisma.js'
+
+// Mapeo de Prisma Search a estructura legacy esperada por controller
+// Prisma: { id, creditId, searchInfo, creditsUsed, status, notes, createdAt, updatedAt }
+// Legacy: { id, info_busqueda, creditos_usados, observaciones, estado, id_cred, id_tipo, id_proceso, fecha_alta, ultima_mod, usuario(JSON), creditos(JSON) }
+const mapSearchToLegacy = (s) => {
+    if (\!s) return null;
+    
+    return {
+        id: s.id,
+        info_busqueda: s.searchInfo,
+        creditos_usados: s.creditsUsed,
+        observaciones: s.notes,
+        estado: s.status.toLowerCase(),
+        id_cred: s.creditId,
+        id_tipo: null, // No existe en Prisma
+        id_proceso: null, // No existe en Prisma
+        fecha_alta: s.createdAt,
+        ultima_mod: s.updatedAt,
+        // Estructuras relacionadas: compatibilidad
+        usuario: null, // Se obtendría del credit.user si se necesita
+        creditos: null // Se obtendría del credit si se necesita
+    };
+}
 
 const busquedaModel = {
     getAll: async () => {
-    const [rows] = await pool.query(
-        `SELECT 
-            b.*,
-            JSON_OBJECT(
-            'id', u.id,
-            'nombre', u.nombre,
-            'apellido', u.apellido,
-            'email', u.email,
-            'fecha_alta', u.fecha_alta,
-            'rol', u.rol,
-            'num_celular', u.num_celular,
-            'active', u.active
-            ) AS usuario
-        FROM busquedas b
-        LEFT JOIN creditos c ON b.id_cred = c.id
-        LEFT JOIN usuarios u ON c.id_usuario = u.id`
-    );
-    return rows || null
+        const searches = await prisma.search.findMany({
+            include: {
+                credit: {
+                    include: {
+                        user: {
+                            select: { id: true, nombre: true, apellido: true, email: true, fecha_alta: true, rol: true, num_celular: true, active: true }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        
+        return searches.map(s => ({
+            ...mapSearchToLegacy(s),
+            usuario: s.credit?.user ? {
+                id: s.credit.user.id,
+                nombre: s.credit.user.nombre,
+                apellido: s.credit.user.apellido,
+                email: s.credit.user.email,
+                fecha_alta: s.credit.user.fecha_alta,
+                rol: s.credit.user.rol,
+                num_celular: s.credit.user.num_celular,
+                active: s.credit.user.active
+            } : null,
+            creditos: s.credit ? {
+                id: s.credit.id,
+                tipo_credito: s.credit.type.toLowerCase(),
+                cantidad: s.credit.amount,
+                fecha_alta: s.credit.createdAt,
+                vencimiento: s.credit.expiryDate
+            } : null
+        }));
     },
+    
     getById: async (id) => {
-        const [rows] = await pool.query(
-            `SELECT 
-                b.*,
-                JSON_OBJECT(
-                'id', c.id,
-                'tipo_credito', c.tipo_credito,
-                'cantidad', c.cantidad,
-                'fecha_alta', c.fecha_alta,
-                'vencimiento', c.vencimiento
-                ) AS creditos,
-                JSON_OBJECT(
-                'id', u.id,
-                'nombre', u.nombre,
-                'apellido', u.apellido,
-                'email', u.email,
-                'fecha_alta', u.fecha_alta,
-                'rol', u.rol,
-                'num_celular', u.num_celular,
-                'active', u.active
-                ) AS usuario
-            FROM busquedas b
-            LEFT JOIN creditos c ON b.id_cred = c.id
-            LEFT JOIN usuarios u ON c.id_usuario = u.id
-            WHERE b.id = ?`, 
-            [id]
-        );
-        return rows[0] || null
+        const search = await prisma.search.findUnique({
+            where: { id },
+            include: {
+                credit: {
+                    include: {
+                        user: {
+                            select: { id: true, nombre: true, apellido: true, email: true, fecha_alta: true, rol: true, num_celular: true, active: true }
+                        }
+                    }
+                }
+            }
+        });
+        
+        if (\!search) return null;
+        
+        return {
+            ...mapSearchToLegacy(search),
+            usuario: search.credit?.user ? {
+                id: search.credit.user.id,
+                nombre: search.credit.user.nombre,
+                apellido: search.credit.user.apellido,
+                email: search.credit.user.email,
+                fecha_alta: search.credit.user.fecha_alta,
+                rol: search.credit.user.rol,
+                num_celular: search.credit.user.num_celular,
+                active: search.credit.user.active
+            } : null,
+            creditos: search.credit ? {
+                id: search.credit.id,
+                tipo_credito: search.credit.type.toLowerCase(),
+                cantidad: search.credit.amount,
+                fecha_alta: search.credit.createdAt,
+                vencimiento: search.credit.expiryDate
+            } : null
+        };
     },
+    
     getByUserId: async(id) => {
-        const [rows] = await pool.query(
-            `SELECT 
-                b.*,
-                JSON_OBJECT(
-                'id', c.id,
-                'tipo_credito', c.tipo_credito,
-                'cantidad', c.cantidad,
-                'fecha_alta', c.fecha_alta,
-                'vencimiento', c.vencimiento
-                ) AS creditos,
-                JSON_OBJECT(
-                'id', u.id,
-                'nombre', u.nombre,
-                'apellido', u.apellido,
-                'email', u.email,
-                'fecha_alta', u.fecha_alta,
-                'rol', u.rol,
-                'num_celular', u.num_celular,
-                'active', u.active
-                ) AS usuario
-                FROM busquedas b
-                LEFT JOIN creditos c ON b.id_cred = c.id
-                LEFT JOIN usuarios u ON c.id_usuario = u.id
-                WHERE u.id = ?;
-            `,
-            [id]
-        )
-        return rows || null
+        // Buscar búsquedas a través de créditos del usuario
+        const searches = await prisma.search.findMany({
+            where: {
+                credit: {
+                    userId: id
+                }
+            },
+            include: {
+                credit: {
+                    include: {
+                        user: {
+                            select: { id: true, nombre: true, apellido: true, email: true, fecha_alta: true, rol: true, num_celular: true, active: true }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        
+        return searches.map(s => ({
+            ...mapSearchToLegacy(s),
+            usuario: s.credit?.user ? {
+                id: s.credit.user.id,
+                nombre: s.credit.user.nombre,
+                apellido: s.credit.user.apellido,
+                email: s.credit.user.email,
+                fecha_alta: s.credit.user.fecha_alta,
+                rol: s.credit.user.rol,
+                num_celular: s.credit.user.num_celular,
+                active: s.credit.user.active
+            } : null,
+            creditos: s.credit ? {
+                id: s.credit.id,
+                tipo_credito: s.credit.type.toLowerCase(),
+                cantidad: s.credit.amount,
+                fecha_alta: s.credit.createdAt,
+                vencimiento: s.credit.expiryDate
+            } : null
+        }));
     },
+    
     editById: async (id, busqueda) => {
-        const campos = [];
-        const valores = [];
+        const updateData = {};
+        if (busqueda.info_busqueda \!== undefined) updateData.searchInfo = busqueda.info_busqueda;
+        if (busqueda.creditos_usados \!== undefined) updateData.creditsUsed = busqueda.creditos_usados;
+        if (busqueda.observaciones \!== undefined) updateData.notes = busqueda.observaciones;
+        if (busqueda.estado \!== undefined) updateData.status = busqueda.estado.toUpperCase();
+        if (busqueda.id_cred \!== undefined) updateData.creditId = busqueda.id_cred;
         
-        if (busqueda.info_busqueda !== undefined) {
-            campos.push('info_busqueda = ?');
-            valores.push(busqueda.info_busqueda);
-        }
+        if (Object.keys(updateData).length === 0) return false;
         
-        if (busqueda.creditos_usados !== undefined) {
-            campos.push('creditos_usados = ?');
-            valores.push(busqueda.creditos_usados);
-        }
+        const updated = await prisma.search.update({
+            where: { id },
+            data: updateData
+        });
         
-        if (busqueda.observaciones !== undefined) {
-            campos.push('observaciones = ?');
-            valores.push(busqueda.observaciones);
-        }
-        
-        if (busqueda.estado !== undefined) {
-            campos.push('estado = ?');
-            valores.push(busqueda.estado);
-        }
-        
-        if (busqueda.id_cred !== undefined) {
-            campos.push('id_cred = ?');
-            valores.push(busqueda.id_cred);
-        }
-        
-        if (busqueda.id_tipo !== undefined) {
-            campos.push('id_tipo = ?');
-            valores.push(busqueda.id_tipo);
-        }
-        
-        if (busqueda.id_proceso !== undefined) {
-            campos.push('id_proceso = ?');
-            valores.push(busqueda.id_proceso);
-        }
-        
-        campos.push('ultima_mod = NOW()');
-        
-        // Obligatorio para el WHERE
-        valores.push(id);
-        
-        if (campos.length === 0) {
-            return false; // En caso de no tener nada que actualizar
-        }
-        
-        const query = `UPDATE busquedas SET ${campos.join(', ')} WHERE id = ?`;
-        const [result] = await pool.query(query, valores);
-        return result.affectedRows > 0
+        return \!\!updated;
     },
+    
     create: async (info_busqueda, id_cred) => {
-        const [busqueda] = await pool.query(
-            `INSERT INTO busquedas (info_busqueda, id_cred, creditos_usados)
-            VALUES (?, ?, ?)`, [info_busqueda, id_cred, null]
-        )
-        return busqueda.insertId
+        const created = await prisma.search.create({
+            data: {
+                creditId: id_cred,
+                searchInfo: info_busqueda,
+                creditsUsed: 1, // Default
+                status: 'PENDING'
+            }
+        });
+        
+        return created.id;
     },
+    
     deleteById: async (id) => {
-        const [result] = await pool.query(
-            'UPDATE busquedas SET estado = ? WHERE id = ?',
-            ['Eliminado', id]
-        )
-        return result.affectedRows > 0
+        const updated = await prisma.search.update({
+            where: { id },
+            data: { status: 'CANCELLED' }
+        });
+        return \!\!updated;
     }
 }
 

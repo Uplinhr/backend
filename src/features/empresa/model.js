@@ -1,223 +1,103 @@
-import pool from '../../database/database.js'
+import prisma from '../../database/prisma.js'
+
+const mapEmpresaToLegacy = (e) => {
+    if (!e) return null;
+    return {
+        id: e.id,
+        nombre: e.name,
+        email: e.email,
+        id_usuario: e.userId || null,
+        nombre_fantasia: e.fantasyName || null,
+        cuit: e.cuit || null,
+        condicion_iva: e.taxCondition || null,
+        tipo_societario: e.legalType || null,
+        actividad_principal: e.mainActivity || null,
+        domicilio_legal_calle_numero: e.legalStreet || null,
+        domicilio_legal_ciudad: e.legalCity || null,
+        domicilio_legal_pais: e.legalCountry || null,
+        codigo_postal: e.postalCode || null,
+        active: e.active,
+        fecha_alta: e.createdAt,
+        ultima_mod: e.updatedAt,
+    };
+}
 
 const empresaModel = {
     getAll: async () => {
-    const [rows] = await pool.query(
-        'SELECT * FROM empresas'
-    );
-    return rows || null
+        const rows = await prisma.empresa.findMany({ orderBy: { createdAt: 'asc' } });
+        return rows.map(mapEmpresaToLegacy) || null;
     },
     getById: async (id) => {
-        const [rows] = await pool.query(
-            'SELECT * FROM empresas WHERE id = ?', 
-            [id]
-        );
-        return rows[0] || null
+        const row = await prisma.empresa.findUnique({ where: { id } });
+        return mapEmpresaToLegacy(row);
     },
     editById: async (id, empresa) => {
-        const campos = [];
-        const valores = [];
-        
-        // Campos obligatorios
-        if (empresa.nombre) {
-            campos.push('nombre = ?');
-            valores.push(empresa.nombre);
-        }
-        
-        if (empresa.email) {
-            campos.push('email = ?');
-            valores.push(empresa.email);
-        }
-        
-        // Campos opcionales
-        if (empresa.nombre_fantasia !== undefined) {
-            campos.push('nombre_fantasia = ?');
-            valores.push(empresa.nombre_fantasia);
-        }
-        
-        if (empresa.cuit !== undefined) {
-            campos.push('cuit = ?');
-            valores.push(empresa.cuit);
-        }
-        
-        if (empresa.condicion_iva !== undefined) {
-            campos.push('condicion_iva = ?');
-            valores.push(empresa.condicion_iva);
-        }
-        
-        if (empresa.tipo_societario !== undefined) {
-            campos.push('tipo_societario = ?');
-            valores.push(empresa.tipo_societario);
-        }
-        
-        if (empresa.actividad_principal !== undefined) {
-            campos.push('actividad_principal = ?');
-            valores.push(empresa.actividad_principal);
-        }
-        
-        if (empresa.domicilio_legal_calle_numero !== undefined) {
-            campos.push('domicilio_legal_calle_numero = ?');
-            valores.push(empresa.domicilio_legal_calle_numero);
-        }
-        
-        if (empresa.domicilio_legal_ciudad !== undefined) {
-            campos.push('domicilio_legal_ciudad = ?');
-            valores.push(empresa.domicilio_legal_ciudad);
-        }
-        
-        if (empresa.domicilio_legal_pais !== undefined) {
-            campos.push('domicilio_legal_pais = ?');
-            valores.push(empresa.domicilio_legal_pais);
-        }
-        
-        if (empresa.codigo_postal !== undefined) {
-            campos.push('codigo_postal = ?');
-            valores.push(empresa.codigo_postal);
-        }
-
-        if (empresa.id_usuario !== undefined) {
-            campos.push('id_usuario = ?');
-            valores.push(empresa.id_usuario);
-        }
-
-        if (empresa.active !== undefined) {
-            campos.push('active = ?');
-            valores.push(empresa.active);
-        }
-        
-        campos.push('ultima_mod = NOW()');
-        
-        // Obligatorio para el WHERE
-        valores.push(id);
-        
-        if (campos.length === 0) {
-            return false; // En caso de no tener nada que actualizar
-        }
-        
-        const query = `UPDATE empresas SET ${campos.join(', ')} WHERE id = ?`;
-        const [result] = await pool.query(query, valores);
-        return result.affectedRows > 0;
+        const data = {};
+        if (empresa.nombre !== undefined) data.name = empresa.nombre;
+        if (empresa.email !== undefined) data.email = empresa.email;
+        if (empresa.nombre_fantasia !== undefined) data.fantasyName = empresa.nombre_fantasia;
+        if (empresa.cuit !== undefined) data.cuit = empresa.cuit;
+        if (empresa.condicion_iva !== undefined) data.taxCondition = empresa.condicion_iva;
+        if (empresa.tipo_societario !== undefined) data.legalType = empresa.tipo_societario;
+        if (empresa.actividad_principal !== undefined) data.mainActivity = empresa.actividad_principal;
+        if (empresa.domicilio_legal_calle_numero !== undefined) data.legalStreet = empresa.domicilio_legal_calle_numero;
+        if (empresa.domicilio_legal_ciudad !== undefined) data.legalCity = empresa.domicilio_legal_ciudad;
+        if (empresa.domicilio_legal_pais !== undefined) data.legalCountry = empresa.domicilio_legal_pais;
+        if (empresa.codigo_postal !== undefined) data.postalCode = empresa.codigo_postal;
+        if (empresa.id_usuario !== undefined) data.userId = empresa.id_usuario;
+        if (empresa.active !== undefined) data.active = !!empresa.active;
+        if (Object.keys(data).length === 0) return false;
+        await prisma.empresa.update({ where: { id }, data });
+        return true;
     },
     editOwn: async (empresa) => {
-        const campos = [];
-        const valores = [];
-        
-        // Campos obligatorios
-        if (empresa.nombre) {
-            campos.push('nombre = ?');
-            valores.push(empresa.nombre);
-        }
-        
-        if (empresa.email) {
-            campos.push('email = ?');
-            valores.push(empresa.email);
-        }
-        
-        // Campos opcionales
-        if (empresa.nombre_fantasia !== undefined) {
-            campos.push('nombre_fantasia = ?');
-            valores.push(empresa.nombre_fantasia);
-        }
-        
-        if (empresa.cuit !== undefined) {
-            campos.push('cuit = ?');
-            valores.push(empresa.cuit);
-        }
-        
-        if (empresa.condicion_iva !== undefined) {
-            campos.push('condicion_iva = ?');
-            valores.push(empresa.condicion_iva);
-        }
-        
-        if (empresa.tipo_societario !== undefined) {
-            campos.push('tipo_societario = ?');
-            valores.push(empresa.tipo_societario);
-        }
-        
-        if (empresa.actividad_principal !== undefined) {
-            campos.push('actividad_principal = ?');
-            valores.push(empresa.actividad_principal);
-        }
-        
-        if (empresa.domicilio_legal_calle_numero !== undefined) {
-            campos.push('domicilio_legal_calle_numero = ?');
-            valores.push(empresa.domicilio_legal_calle_numero);
-        }
-        
-        if (empresa.domicilio_legal_ciudad !== undefined) {
-            campos.push('domicilio_legal_ciudad = ?');
-            valores.push(empresa.domicilio_legal_ciudad);
-        }
-        
-        if (empresa.domicilio_legal_pais !== undefined) {
-            campos.push('domicilio_legal_pais = ?');
-            valores.push(empresa.domicilio_legal_pais);
-        }
-        
-        if (empresa.codigo_postal !== undefined) {
-            campos.push('codigo_postal = ?');
-            valores.push(empresa.codigo_postal);
-        }
-        
-        campos.push('ultima_mod = NOW()');
-        
-        // Obligatorio para el WHERE
-        valores.push(empresa.id_usuario);
-        
-        if (campos.length === 0) {
-            return false; // En caso de no tener nada que actualizar
-        }
-        
-        const query = `UPDATE empresas SET ${campos.join(', ')} WHERE id_usuario = ?`;
-        const [result] = await pool.query(query, valores);
-        return result.affectedRows > 0;
+        const data = {};
+        if (empresa.nombre !== undefined) data.name = empresa.nombre;
+        if (empresa.email !== undefined) data.email = empresa.email;
+        if (empresa.nombre_fantasia !== undefined) data.fantasyName = empresa.nombre_fantasia;
+        if (empresa.cuit !== undefined) data.cuit = empresa.cuit;
+        if (empresa.condicion_iva !== undefined) data.taxCondition = empresa.condicion_iva;
+        if (empresa.tipo_societario !== undefined) data.legalType = empresa.tipo_societario;
+        if (empresa.actividad_principal !== undefined) data.mainActivity = empresa.actividad_principal;
+        if (empresa.domicilio_legal_calle_numero !== undefined) data.legalStreet = empresa.domicilio_legal_calle_numero;
+        if (empresa.domicilio_legal_ciudad !== undefined) data.legalCity = empresa.domicilio_legal_ciudad;
+        if (empresa.domicilio_legal_pais !== undefined) data.legalCountry = empresa.domicilio_legal_pais;
+        if (empresa.codigo_postal !== undefined) data.postalCode = empresa.codigo_postal;
+        if (Object.keys(data).length === 0) return false;
+        await prisma.empresa.updateMany({ where: { userId: empresa.id_usuario }, data });
+        return true;
     },
     create: async (empresa) => {
-        const { nombre, email, id_usuario, ...camposOpcionales } = empresa;
-        
-        const [result] = await pool.query(
-            `INSERT INTO empresas 
-            (nombre, email, id_usuario, nombre_fantasia, cuit, condicion_iva, 
-             tipo_societario, actividad_principal, domicilio_legal_calle_numero,
-             domicilio_legal_ciudad, domicilio_legal_pais, codigo_postal) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
-            [
-                nombre, 
-                email, 
-                id_usuario,
-                camposOpcionales.nombre_fantasia || null,
-                camposOpcionales.cuit || null,
-                camposOpcionales.condicion_iva || null,
-                camposOpcionales.tipo_societario || null,
-                camposOpcionales.actividad_principal || null,
-                camposOpcionales.domicilio_legal_calle_numero || null,
-                camposOpcionales.domicilio_legal_ciudad || null,
-                camposOpcionales.domicilio_legal_pais || null,
-                camposOpcionales.codigo_postal || null
-            ]
-        );
-        return result.affectedRows > 0 ? result.insertId : false;
+        const created = await prisma.empresa.create({
+            data: {
+                name: empresa.nombre,
+                email: empresa.email,
+                userId: empresa.id_usuario || null,
+                fantasyName: empresa.nombre_fantasia || null,
+                cuit: empresa.cuit || null,
+                taxCondition: empresa.condicion_iva || null,
+                legalType: empresa.tipo_societario || null,
+                mainActivity: empresa.actividad_principal || null,
+                legalStreet: empresa.domicilio_legal_calle_numero || null,
+                legalCity: empresa.domicilio_legal_ciudad || null,
+                legalCountry: empresa.domicilio_legal_pais || null,
+                postalCode: empresa.codigo_postal || null,
+                active: true,
+            }
+        });
+        return created.id;
     },
     enableById: async (id) => {
-        const [result] = await pool.query(
-            'UPDATE empresas SET active = true WHERE id = ?',
-            [id]
-        )
-        return result.affectedRows > 0
+        await prisma.empresa.update({ where: { id }, data: { active: true } });
+        return true;
     },
     deleteById: async (id) => {
-        const [result] = await pool.query(
-            'UPDATE empresas SET active = false WHERE id = ?',
-            [id]
-        )
-        return result.affectedRows > 0
+        await prisma.empresa.update({ where: { id }, data: { active: false } });
+        return true;
     },
     unlinkUserById: async (id) => {
-        const [result] = await pool.query(
-            'UPDATE empresas SET id_usuario = null WHERE id = ?',
-            [id]
-        )
-        return result.affectedRows > 0
+        await prisma.empresa.update({ where: { id }, data: { userId: null } });
+        return true;
     }
 }
 

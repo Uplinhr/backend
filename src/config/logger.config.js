@@ -65,6 +65,28 @@ const sanitizeLog = (obj) => {
   return sanitized;
 };
 
+// Logger específico para transacciones de pago
+export const paymentLogger = winston.createLogger({
+  level: 'info',
+  format: logFormat,
+  transports: [
+    new DailyRotateFile({
+      filename: 'logs/payments-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '90d', // Mantener logs de pagos por 90 días
+      level: 'info',
+    }),
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple(),
+      ),
+      level: 'warn', // Solo mostrar warnings y errors en consola
+    }),
+  ],
+});
+
 logger.sanitize = sanitizeLog;
 
 export default logger;

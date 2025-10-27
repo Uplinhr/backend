@@ -1,19 +1,51 @@
-import pool from '../../database/database.js';
+import prisma from '../../database/prisma.js';
 import logger from '../../config/logger.config.js';
+
+// Mapea el registro de Prisma (TaxConfig) al formato legacy que espera el service
+// Prisma: { id, name, rate(0-1), country("ARG - Argentina"), isActive }
+// Legacy: { country_code, country_name, tax_name, tax_rate(0-100), active, apply_to_services, apply_to_memberships, notes }
+function mapPrismaToLegacy(t) {
+  if (!t) return null;
+  let country_code = null;
+  let country_name = null;
+  if (t.country) {
+    const parts = String(t.country).split(' - ');
+    country_code = parts[0] || null;
+    country_name = parts.slice(1).join(' - ') || null;
+  }
+
+  return {
+    id: t.id,
+    country_code,
+    country_name,
+    tax_name: t.name,
+    tax_rate: typeof t.rate === 'number' ? t.rate * 100 : null, // convertir 0.21 -> 21.00
+    active: t.isActive,
+    // Estos flags no existen en Prisma por ahora; por compatibilidad los dejamos en true
+    apply_to_services: true,
+    apply_to_memberships: true,
+    notes: null,
+  };
+}
 
 class TaxModel {
   /**
-   * Obtiene configuración de impuesto por país
+   * Obtiene configuración de impuesto por país (ISO3)
    */
   static async getTaxByCountry(countryCode) {
     try {
-      const [rows] = await pool.query(
-        'SELECT * FROM tax_config WHERE country_code = ? AND active = TRUE',
-        [countryCode]
-      );
-      return rows[0] || null;
+      // Buscar por prefijo del código dentro del campo country (formato "ARG - Argentina")
+      const tax = await prisma.taxConfig.findFirst({
+        where: {
+          isActive: true,
+          country: { startsWith: countryCode },
+        },
+        orderBy: { updatedAt: 'desc' },
+      });
+
+      return mapPrismaToLegacy(tax);
     } catch (error) {
-      logger.error('Error obteniendo configuración de impuesto:', error);
+      logger.error('Error obteniendo configuración de impuesto (Prisma):', error);
       throw error;
     }
   }
@@ -23,12 +55,13 @@ class TaxModel {
    */
   static async getAllActiveTaxes() {
     try {
-      const [rows] = await pool.query(
-        'SELECT * FROM tax_config WHERE active = TRUE ORDER BY country_name'
-      );
-      return rows;
+      const taxes = await prisma.taxConfig.findMany({
+        where: { isActive: true },
+        orderBy: { country: 'asc' },
+      });
+      return taxes.map(mapPrismaToLegacy);
     } catch (error) {
-      logger.error('Error obteniendo configuraciones de impuestos:', error);
+      logger.error('Error obteniendo configuraciones de impuestos (Prisma):', error);
       throw error;
     }
   }
@@ -38,24 +71,23 @@ class TaxModel {
    */
   static async createTax(taxData) {
     try {
-      const [result] = await pool.query(
-        `INSERT INTO tax_config 
-        (country_code, country_name, tax_name, tax_rate, active, apply_to_services, apply_to_memberships, notes) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          taxData.country_code,
-          taxData.country_name,
-          taxData.tax_name,
-          taxData.tax_rate,
-          taxData.active ?? true,
-          taxData.apply_to_services ?? true,
-          taxData.apply_to_memberships ?? true,
-          taxData.notes || null
-        ]
-      );
-      return result.insertId;
+      const country = taxData.country_code && taxData.country_name
+        ? `${taxData.country_code} - ${taxData.country_name}`
+        : taxData.country_name || taxData.country_code || null;
+
+      const created = await prisma.taxConfig.create({
+        data: {
+          name: taxData.tax_name,
+          // convertir 21.00 -> 0.21
+          rate: typeof taxData.tax_rate === 'number' ? taxData.tax_rate / 100 : 0,
+          country: country,
+          isActive: taxData.active ?? true,
+        }
+      });
+
+      return created.id;
     } catch (error) {
-      logger.error('Error creando configuración de impuesto:', error);
+      logger.error('Error creando configuración de impuesto (Prisma):', error);
       throw error;
     }
   }
@@ -65,30 +97,25 @@ class TaxModel {
    */
   static async updateTax(id, taxData) {
     try {
-      const [result] = await pool.query(
-        `UPDATE tax_config SET 
-          country_name = COALESCE(?, country_name),
-          tax_name = COALESCE(?, tax_name),
-          tax_rate = COALESCE(?, tax_rate),
-          active = COALESCE(?, active),
-          apply_to_services = COALESCE(?, apply_to_services),
-          apply_to_memberships = COALESCE(?, apply_to_memberships),
-          notes = COALESCE(?, notes)
-        WHERE id = ?`,
-        [
-          taxData.country_name,
-          taxData.tax_name,
-          taxData.tax_rate,
-          taxData.active,
-          taxData.apply_to_services,
-          taxData.apply_to_memberships,
-          taxData.notes,
-          id
-        ]
-      );
-      return result.affectedRows > 0;
+      const updateData = {};
+      if (taxData.tax_name !== undefined) updateData.name = taxData.tax_name;
+      if (taxData.tax_rate !== undefined) updateData.rate = taxData.tax_rate / 100;
+      if (taxData.active !== undefined) updateData.isActive = !!taxData.active;
+      if (taxData.country_name !== undefined || taxData.country_code !== undefined) {
+        const country = taxData.country_code && taxData.country_name
+          ? `${taxData.country_code} - ${taxData.country_name}`
+          : taxData.country_name || taxData.country_code || null;
+        updateData.country = country;
+      }
+
+      const updated = await prisma.taxConfig.update({
+        where: { id },
+        data: updateData,
+      });
+
+      return !!updated;
     } catch (error) {
-      logger.error('Error actualizando configuración de impuesto:', error);
+      logger.error('Error actualizando configuración de impuesto (Prisma):', error);
       throw error;
     }
   }
@@ -98,13 +125,13 @@ class TaxModel {
    */
   static async deactivateTax(id) {
     try {
-      const [result] = await pool.query(
-        'UPDATE tax_config SET active = FALSE WHERE id = ?',
-        [id]
-      );
-      return result.affectedRows > 0;
+      const updated = await prisma.taxConfig.update({
+        where: { id },
+        data: { isActive: false },
+      });
+      return !!updated;
     } catch (error) {
-      logger.error('Error desactivando configuración de impuesto:', error);
+      logger.error('Error desactivando configuración de impuesto (Prisma):', error);
       throw error;
     }
   }

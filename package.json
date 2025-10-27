@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "migrate": "node src/database/run-migrations.js",
+    "migrate:from-mysql": "node src/database/migrate-from-mysql.js",
     "seeders": "node src/database/run-seeders.js",
     "test": "jest",
     "test:coverage": "jest --coverage",

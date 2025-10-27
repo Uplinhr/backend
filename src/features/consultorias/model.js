@@ -1,139 +1,123 @@
-import pool from '../../database/database.js'
+import prisma from '../../database/prisma.js'
+
+// Mapeo de Prisma Consultation a estructura legacy esperada por controller
+// Prisma: { id, userId, totalHours, remainingHours, expiryDate, isActive, createdAt, updatedAt, sessions[] }
+// Legacy: { id, horas_totales, horas_restantes, fecha_alta, vencimiento, id_usuario, consultas(JSON) }
+const mapConsultationToLegacy = (c) => {
+    if (\!c) return null;
+    
+    return {
+        id: c.id,
+        horas_totales: c.totalHours,
+        horas_restantes: c.remainingHours,
+        fecha_alta: c.createdAt,
+        vencimiento: c.expiryDate,
+        id_usuario: c.userId,
+        // Consultas individuales como JSON
+        consultas: c.sessions.map(s => ({
+            id: s.id,
+            fecha_alta: s.createdAt,
+            ultima_mod: s.updatedAt,
+            comentarios: s.notes,
+            cantidad_horas: s.duration ? Math.floor(s.duration / 60) : null,
+            observaciones: s.notes,
+            estado: s.status.toLowerCase()
+        }))
+    };
+}
 
 const consultoriaModel = {
     getAll: async () => {
-    const [rows] = await pool.query(
-        `SELECT 
-            cons.*,
-            COALESCE(
-                (
-                    SELECT JSON_ARRAYAGG(
-                        JSON_OBJECT(
-                            'id', cc.id,
-                            'fecha_alta', cc.fecha_alta,
-                            'ultima_mod', cc.ultima_mod,
-                            'comentarios', cc.comentarios,
-                            'cantidad_horas', cc.cantidad_horas,
-                            'observaciones', cc.observaciones,
-                            'estado', cc.estado
-                        )
-                    )
-                    FROM consultas cc
-                    WHERE cc.id_consultoria = cons.id
-                ),
-                JSON_ARRAY()
-            ) AS consultas
-        FROM consultorias cons`
-    );
-    return rows || null
+        const consultations = await prisma.consultation.findMany({
+            include: {
+                user: {
+                    select: { email: true, name: true }
+                },
+                sessions: {
+                    select: { id: true, startTime: true, endTime: true, duration: true, cost: true, notes: true, status: true, createdAt: true, updatedAt: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        
+        return consultations.map(mapConsultationToLegacy);
     },
+    
     getById: async (id) => {
-        const [rows] = await pool.query(
-            `SELECT 
-                cons.*,
-                COALESCE(
-                    (
-                        SELECT JSON_ARRAYAGG(
-                            JSON_OBJECT(
-                                'id', cc.id,
-                                'fecha_alta', cc.fecha_alta,
-                                'ultima_mod', cc.ultima_mod,
-                                'comentarios', cc.comentarios,
-                                'cantidad_horas', cc.cantidad_horas,
-                                'observaciones', cc.observaciones,
-                                'estado', cc.estado
-                            )
-                        )
-                        FROM consultas cc
-                        WHERE cc.id_consultoria = cons.id
-                    ),
-                    JSON_ARRAY()
-                ) AS consultas
-            FROM consultorias cons
-            WHERE cons.id = ?`, 
-            [id]
-        );
-        return rows[0] || null
+        const consultation = await prisma.consultation.findUnique({
+            where: { id },
+            include: {
+                user: {
+                    select: { email: true, name: true }
+                },
+                sessions: {
+                    select: { id: true, startTime: true, endTime: true, duration: true, cost: true, notes: true, status: true, createdAt: true, updatedAt: true }
+                }
+            }
+        });
+        
+        return consultation ? mapConsultationToLegacy(consultation) : null;
     },
+    
     getOwn: async (id) => {
-        const [rows] = await pool.query(
-            `SELECT 
-                cons.*,
-                COALESCE(
-                    (
-                        SELECT JSON_ARRAYAGG(
-                            JSON_OBJECT(
-                                'id', cc.id,
-                                'fecha_alta', cc.fecha_alta,
-                                'ultima_mod', cc.ultima_mod,
-                                'comentarios', cc.comentarios,
-                                'cantidad_horas', cc.cantidad_horas,
-                                'observaciones', cc.observaciones,
-                                'estado', cc.estado
-                            )
-                        )
-                        FROM consultas cc
-                        WHERE cc.id_consultoria = cons.id
-                    ),
-                    JSON_ARRAY()
-                ) AS consultas
-            FROM consultorias cons
-            WHERE cons.id_usuario = ? 
-            AND (cons.vencimiento IS NULL OR cons.vencimiento > NOW())
-            ORDER BY cons.fecha_alta DESC 
-            LIMIT 1`,
-            [id]
-        );
-        return rows[0] || null
+        const consultations = await prisma.consultation.findMany({
+            where: {
+                userId: id,
+                isActive: true,
+                OR: [
+                    { expiryDate: null },
+                    { expiryDate: { gte: new Date() } }
+                ]
+            },
+            include: {
+                sessions: {
+                    select: { id: true, startTime: true, endTime: true, duration: true, cost: true, notes: true, status: true, createdAt: true, updatedAt: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 1
+        });
+        
+        return consultations.length > 0 ? mapConsultationToLegacy(consultations[0]) : null;
     },
+    
     editById: async (id, consultoria) => {
-        const campos = [];
-        const valores = [];
+        const updateData = {};
+        if (consultoria.horas_totales \!== undefined) updateData.totalHours = consultoria.horas_totales;
+        if (consultoria.horas_restantes \!== undefined) updateData.remainingHours = consultoria.horas_restantes;
+        if (consultoria.vencimiento \!== undefined) updateData.expiryDate = consultoria.vencimiento;
+        if (consultoria.id_usuario \!== undefined) updateData.userId = consultoria.id_usuario;
         
-        if (consultoria.horas_totales !== undefined) {
-            campos.push('horas_totales = ?');
-            valores.push(consultoria.horas_totales);
-        }
+        if (Object.keys(updateData).length === 0) return false;
         
-        if (consultoria.horas_restantes !== undefined) {
-            campos.push('horas_restantes = ?');
-            valores.push(consultoria.horas_restantes);
-        }
+        const updated = await prisma.consultation.update({
+            where: { id },
+            data: updateData
+        });
         
-        if (consultoria.vencimiento !== undefined) {
-            campos.push('vencimiento = ?');
-            valores.push(consultoria.vencimiento);
-        }
-        
-        if (consultoria.id_usuario !== undefined) {
-            campos.push('id_usuario = ?');
-            valores.push(consultoria.id_usuario);
-        }
-        
-        // Obligatorio para el WHERE
-        valores.push(id);
-        
-        if (campos.length === 0) {
-            return false; // En caso de no tener nada que actualizar
-        }
-        
-        const query = `UPDATE consultorias SET ${campos.join(', ')} WHERE id = ?`;
-        const [result] = await pool.query(query, valores);
-        return result.affectedRows > 0
+        return \!\!updated;
     },
+    
     create: async (horas_totales, horas_restantes, vencimiento, id_usuario) => {
-        const [consultoria] = await pool.query(
-            `INSERT INTO consultorias (horas_totales, horas_restantes, vencimiento, id_usuario) 
-            VALUES (?, ?, ?, ?)`, [horas_totales, horas_restantes, vencimiento, id_usuario]
-        )
-        return consultoria.insertId
+        const created = await prisma.consultation.create({
+            data: {
+                userId: id_usuario,
+                totalHours: horas_totales,
+                remainingHours: horas_restantes,
+                expiryDate: vencimiento,
+                isActive: true
+            }
+        });
+        
+        return created.id;
     },
+    
     deleteById: async (id) => {
-        const [result] = await pool.query(
-            'DELETE FROM consultorias WHERE id = ?',
-            [id]
-        )
-        return result.affectedRows > 0
+        const updated = await prisma.consultation.update({
+            where: { id },
+            data: { isActive: false }
+        });
+        return \!\!updated;
     }
 }
 

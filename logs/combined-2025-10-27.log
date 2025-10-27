@@ -1,0 +1,74 @@
+2025-10-27 02:18:38 [INFO] 🚀 Iniciando migración completa de MySQL a PostgreSQL...
+2025-10-27 02:18:38 [INFO] 📊 Iniciando transacción de migración...
+2025-10-27 02:18:38 [INFO] Iniciando migración de usuarios...
+2025-10-27 02:18:39 [INFO] Usuario migrado exitosamente {"email":"admin@gmail.com","name":"admin admin"}
+2025-10-27 02:18:39 [INFO] Usuario migrado exitosamente {"email":"admin2@gmail.com","name":"admin admin2"}
+2025-10-27 02:18:39 [INFO] Usuario migrado exitosamente {"email":"admin3@gmail.com","name":"admin admin3"}
+2025-10-27 02:18:39 [INFO] Usuario migrado exitosamente {"email":"test@gmail.com","name":"test suarez"}
+2025-10-27 02:18:39 [INFO] Usuario migrado exitosamente {"email":"test2@gmail.com","name":"test2 lopez"}
+2025-10-27 02:18:39 [INFO] Usuario migrado exitosamente {"email":"test3@gmail.com","name":"testDisable gomez"}
+2025-10-27 02:18:39 [INFO] Migración de usuarios completada: 6 usuarios procesados
+2025-10-27 02:18:39 [INFO] Iniciando migración de planes...
+2025-10-27 02:18:39 [INFO] Plan migrado exitosamente {"name":"Start","price":149}
+2025-10-27 02:18:39 [INFO] Plan migrado exitosamente {"name":"Growth","price":499}
+2025-10-27 02:18:39 [INFO] Plan migrado exitosamente {"name":"Premium","price":1399}
+2025-10-27 02:18:39 [INFO] Plan migrado exitosamente {"name":"Custom","price":0}
+2025-10-27 02:18:39 [INFO] Migración de planes completada: 4 planes procesados
+2025-10-27 02:18:39 [INFO] Iniciando migración de configuración de impuestos...
+2025-10-27 02:18:39 [INFO] TaxConfig migrado exitosamente {"name":"IVA","country":"ARG - Argentina"}
+2025-10-27 02:18:39 [INFO] TaxConfig migrado exitosamente {"name":"Sales Tax","country":"USA - United States"}
+2025-10-27 02:18:39 [INFO] Migración de TaxConfig completada: 2 configuraciones procesadas
+2025-10-27 02:18:39 [INFO] Iniciando migración de servicios de búsqueda de talento...
+2025-10-27 02:18:39 [INFO] TalentSearchService migrado exitosamente {"name":"Single Hire","price":720}
+2025-10-27 02:18:39 [INFO] TalentSearchService migrado exitosamente {"name":"Pro","price":3960}
+2025-10-27 02:18:39 [INFO] TalentSearchService migrado exitosamente {"name":"Premium","price":5940}
+2025-10-27 02:18:39 [INFO] TalentSearchService migrado exitosamente {"name":"Platinum","price":7920}
+2025-10-27 02:18:39 [INFO] Migración de TalentSearchService completada: 4 servicios procesados
+2025-10-27 02:18:39 [INFO] Iniciando migración de consultores...
+2025-10-27 02:18:39 [INFO] Consultant migrado exitosamente {"name":"Melisa Restrepo","email":"melisa.restrepo@uplinhr.com"}
+2025-10-27 02:18:39 [INFO] Consultant migrado exitosamente {"name":"Kelly Gómez","email":"kelly.gomez@uplinhr.com"}
+2025-10-27 02:18:39 [INFO] Consultant migrado exitosamente {"name":"Karry Marmolejo","email":"karry.marmolejo@uplinhr.com"}
+2025-10-27 02:18:39 [INFO] Consultant migrado exitosamente {"name":"Cecilia Prado","email":"cecilia.prado@uplinhr.com"}
+2025-10-27 02:18:39 [INFO] Consultant migrado exitosamente {"name":"Adriana López Galvis","email":"adriana.lopez@uplinhr.com"}
+2025-10-27 02:18:39 [INFO] Migración de consultores completada: 5 consultores procesados
+2025-10-27 02:18:39 [INFO] ✅ Migración completada exitosamente
+2025-10-27 02:18:39 [INFO] 🔍 Validando integridad de datos migrados...
+2025-10-27 02:18:39 [INFO] 📊 Resultados de validación: {"users":13,"plans":8,"taxes":7,"services":8,"consultants":7}
+2025-10-27 02:48:01 [INFO] [object Object]
+2025-10-27 02:48:01 [INFO] [object Object]
+2025-10-27 02:49:28 [INFO] [object Object]
+2025-10-27 02:49:28 [INFO] [object Object]
+2025-10-27 02:50:06 [INFO] [object Object]
+2025-10-27 02:50:07 [INFO] [object Object]
+2025-10-27 02:50:07 [INFO] [object Object]
+2025-10-27 02:54:57 [INFO] [object Object]
+2025-10-27 02:54:57 [INFO] [object Object]
+2025-10-27 06:44:00 [INFO] [object Object]
+2025-10-27 06:44:00 [INFO] [object Object]
+2025-10-27 06:46:15 [INFO] [object Object]
+2025-10-27 06:46:15 [INFO] [object Object]
+2025-10-27 06:48:23 [INFO] [object Object]
+2025-10-27 06:48:23 [INFO] [object Object]
+2025-10-27 06:59:45 [INFO] [object Object]
+2025-10-27 06:59:45 [INFO] [object Object]
+2025-10-27 06:59:58 [INFO] [object Object]
+2025-10-27 07:00:01 [INFO] [object Object]
+2025-10-27 07:03:20 [INFO] [object Object]
+2025-10-27 07:03:20 [INFO] [object Object]
+2025-10-27 07:17:39 [INFO] 🚀 Migrando usuarios de MySQL a Prisma...
+2025-10-27 07:17:40 [INFO] 📊 Encontrados 7 usuarios activos en MySQL
+2025-10-27 07:17:40 [INFO] ⚠️ Usuario admin@gmail.com ya existe en Prisma, saltando...
+2025-10-27 07:17:40 [INFO] ⚠️ Usuario admin2@gmail.com ya existe en Prisma, saltando...
+2025-10-27 07:17:40 [INFO] ⚠️ Usuario admin3@gmail.com ya existe en Prisma, saltando...
+2025-10-27 07:17:40 [INFO] ⚠️ Usuario test@gmail.com ya existe en Prisma, saltando...
+2025-10-27 07:17:40 [INFO] ⚠️ Usuario test2@gmail.com ya existe en Prisma, saltando...
+2025-10-27 07:17:40 [INFO] ⚠️ Usuario test3@gmail.com ya existe en Prisma, saltando...
+2025-10-27 07:17:40 [ERROR] ❌ Error migrando usuario cliente01@gmail.com:
+2025-10-27 07:17:40 [INFO] 🎉 Migración de usuarios completada
+2025-10-27 07:20:49 [INFO] 🚀 Iniciando migración completa de MySQL a PostgreSQL...
+2025-10-27 07:20:49 [INFO] 📊 Iniciando transacción de migración...
+2025-10-27 07:20:49 [INFO] Iniciando migración de usuarios...
+2025-10-27 07:20:49 [ERROR] Error migrando usuario {"email":"admin@gmail.com","error":"\nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`email`)"}
+2025-10-27 07:20:49 [ERROR] Error en migración de usuarios {"error":"\nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`email`)"}
+2025-10-27 07:20:49 [ERROR] ❌ Error en migración - ejecutando rollback {"error":"\nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`email`)"}
+2025-10-27 07:20:49 [ERROR] 💥 Error fatal en migración {"error":"\nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`email`)"}

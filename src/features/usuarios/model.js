@@ -1,146 +1,59 @@
-import pool from '../../database/database.js'
+import prisma from '../../database/prisma.js'
+
+// Helpers de mapeo entre Prisma.User y estructura legacy
+const mapRoleToLegacy = (role) => {
+    if (role === 'ADMINISTRADOR') return 'admin';
+    return 'cliente';
+}
+
+const splitName = (name) => {
+    if (!name) return { nombre: null, apellido: null };
+    const parts = String(name).trim().split(/\s+/);
+    if (parts.length === 1) return { nombre: parts[0], apellido: null };
+    return { nombre: parts.slice(0, -1).join(' '), apellido: parts.slice(-1).join(' ') };
+}
+
+const mapUserToLegacy = (u) => {
+    if (!u) return null;
+    const { nombre, apellido } = splitName(u.name);
+    return {
+        id: u.id,
+        nombre,
+        apellido,
+        email: u.email,
+        fecha_alta: u.createdAt,
+        active: u.deletedAt ? false : true,
+        num_celular: null,
+        rol: mapRoleToLegacy(u.role),
+        // Estructuras relacionadas no existen en Prisma actual: proveer compatibilidad
+        plan: {
+            id: null,
+            nombre: null,
+            creditos_mes: null,
+            meses_cred: null,
+            horas_cons: null,
+            precio: null,
+            active: null,
+            fecha_alta: null,
+            ultima_mod: null
+        },
+        creditos: [],
+        consultorias: {
+            id: null,
+            horas_totales: null,
+            horas_restantes: null,
+            fecha_alta: null,
+            vencimiento: null
+        },
+        empresas: null
+    };
+}
 
 const usuarioModel = {
     getAll: async () => {
-        const [rows] = await pool.query(
-            `SELECT 
-                u.id,
-                u.nombre,
-                u.apellido,
-                u.email,
-                u.fecha_alta,
-                u.active,
-                u.num_celular,
-                u.rol,
-                COALESCE(
-                    JSON_OBJECT(
-                        'id', p.id,
-                        'nombre', p.nombre,
-                        'creditos_mes', p.creditos_mes,
-                        'meses_cred', p.meses_cred,
-                        'horas_cons', p.horas_cons,
-                        'precio', p.precio,
-                        'active', p.active,
-                        'fecha_alta', p.fecha_alta,
-                        'ultima_mod', p.ultima_mod
-                    ),
-                    JSON_OBJECT(
-                        'id', NULL,
-                        'nombre', NULL,
-                        'creditos_mes', NULL,
-                        'meses_cred', NULL,
-                        'horas_cons', NULL,
-                        'precio', NULL,
-                        'active', NULL,
-                        'fecha_alta', NULL,
-                        'ultima_mod', NULL
-                    )
-                ) AS plan,
-
-                COALESCE(
-                    (
-                        SELECT JSON_ARRAYAGG(
-                            JSON_OBJECT(
-                                'id', c.id,
-                                'tipo_credito', c.tipo_credito,
-                                'cantidad', c.cantidad,
-                                'vencimiento', c.vencimiento,
-                                'fecha_alta', c.fecha_alta
-                            )
-                        )
-                        FROM creditos c
-                        WHERE c.id_usuario = u.id
-                        AND (c.vencimiento IS NULL OR c.vencimiento > NOW())
-                        AND (c.tipo_credito != 'plan' OR c.id = (
-                            SELECT c2.id 
-                            FROM creditos c2 
-                            WHERE c2.id_usuario = u.id 
-                            AND c2.tipo_credito = 'plan' 
-                            ORDER BY c2.fecha_alta DESC 
-                            LIMIT 1
-                        ))
-                    ),
-                    JSON_ARRAY()
-                ) AS creditos,
-
-                COALESCE(
-                    JSON_OBJECT(
-                        'id', cons.id,
-                        'horas_totales', cons.horas_totales,
-                        'horas_restantes', cons.horas_restantes,
-                        'fecha_alta', cons.fecha_alta,
-                        'vencimiento', cons.vencimiento
-                    ),
-                    JSON_OBJECT(
-                        'id', NULL,
-                        'horas_totales', NULL,
-                        'horas_restantes', NULL,
-                        'fecha_alta', NULL,
-                        'vencimiento', NULL
-                    )
-                ) AS consultorias,
-
-                CASE 
-                    WHEN e.id IS NOT NULL THEN 
-                        JSON_OBJECT(
-                            'id', e.id,
-                            'nombre', e.nombre,
-                            'email', e.email,
-                            'active', e.active,
-                            'fecha_alta', e.fecha_alta,
-                            'ultima_mod', e.ultima_mod
-                        )
-                    ELSE NULL 
-                END AS empresas
-
-            FROM usuarios u
-            LEFT JOIN planes p ON u.id_plan = p.id
-            LEFT JOIN consultorias cons ON cons.id_usuario = u.id 
-                AND cons.vencimiento > NOW()
-                AND cons.fecha_alta = (
-                    SELECT MAX(cons2.fecha_alta) 
-                    FROM consultorias cons2 
-                    WHERE cons2.id_usuario = u.id 
-                    AND cons2.vencimiento > NOW()
-                )
-            LEFT JOIN empresas e ON e.id_usuario = u.id`
-        );
-
-        // Filtrado de créditos de plan viejos por cada usuario
-        if (rows && rows.length > 0) {
-            for (const user of rows) {
-                if (user.creditos) {
-                    try {
-                        let creditos = user.creditos;
-
-                        // Verificar si ya es objeto o necesita parseo
-                        if (typeof creditos === 'string') {
-                            creditos = JSON.parse(creditos);
-                        }
-
-                        // Filtrar creditos de plan viejos
-                        const creditosFiltrados = [];
-                        const planCredits = creditos.filter(c => c && c.tipo_credito === 'plan');
-                        const otrosCreditos = creditos.filter(c => c && c.tipo_credito !== 'plan');
-                        if (planCredits.length > 0) {
-                            const planMasReciente = planCredits.reduce((latest, current) => {
-                                if (!latest) return current;
-                                return new Date(current.fecha_alta) > new Date(latest.fecha_alta) ? current : latest;
-                            }, null);
-                            creditosFiltrados.push(planMasReciente);
-                        }
-                        creditosFiltrados.push(...otrosCreditos);
-                        user.creditos = creditosFiltrados;
-                    } catch (error) {
-                        console.error('Error procesando créditos para usuario:', user.id, error);
-                        user.creditos = [];
-                    }
-                } else {
-                    user.creditos = [];
-                }
-            }
-        }
-        return rows || null;
+        const users = await prisma.user.findMany({ orderBy: { createdAt: 'desc' } });
+        const mapped = users.map(mapUserToLegacy);
+        return mapped || null;
     },/*
     getAllActives: async () => {
     const [rows] = await pool.query(
@@ -149,178 +62,8 @@ const usuarioModel = {
     return rows || null
     },*/
     getById: async (id) => {
-        const [rows] = await pool.query(
-            `SELECT 
-                u.id,
-                u.nombre,
-                u.apellido,
-                u.email,
-                u.fecha_alta,
-                u.active,
-                u.num_celular,
-                u.rol,
-                COALESCE(
-                    JSON_OBJECT(
-                        'id', p.id,
-                        'nombre', p.nombre,
-                        'creditos_mes', p.creditos_mes,
-                        'meses_cred', p.meses_cred,
-                        'horas_cons', p.horas_cons,
-                        'precio', p.precio,
-                        'active', p.active,
-                        'fecha_alta', p.fecha_alta,
-                        'ultima_mod', p.ultima_mod
-                    ),
-                    JSON_OBJECT(
-                        'id', NULL,
-                        'nombre', NULL,
-                        'creditos_mes', NULL,
-                        'meses_cred', NULL,
-                        'horas_cons', NULL,
-                        'precio', NULL,
-                        'active', NULL,
-                        'fecha_alta', NULL,
-                        'ultima_mod', NULL
-                    )
-                ) AS plan,
-                    
-                COALESCE(
-                    (
-                        SELECT JSON_ARRAYAGG(
-                            JSON_OBJECT(
-                                'id', c.id,
-                                'tipo_credito', c.tipo_credito,
-                                'cantidad', c.cantidad,
-                                'vencimiento', c.vencimiento,
-                                'fecha_alta', c.fecha_alta,
-                                'busquedas', COALESCE(
-                                    (
-                                        SELECT JSON_ARRAYAGG(
-                                            JSON_OBJECT(
-                                                'id', b.id,
-                                                'fecha_alta', b.fecha_alta,
-                                                'ultima_mod', b.ultima_mod,
-                                                'info_busqueda', b.info_busqueda,
-                                                'creditos_usados', b.creditos_usados,
-                                                'observaciones', b.observaciones,
-                                                'estado', b.estado
-                                            )
-                                        )
-                                        FROM busquedas b 
-                                        WHERE b.id_cred = c.id
-                                    ),
-                                    JSON_ARRAY()
-                                )
-                            )
-                        )
-                        FROM creditos c
-                        WHERE c.id_usuario = u.id
-                        AND (c.vencimiento IS NULL OR c.vencimiento >= CURRENT_DATE())
-                        AND (c.tipo_credito != 'plan' OR c.id = (
-                            SELECT c2.id 
-                            FROM creditos c2 
-                            WHERE c2.id_usuario = u.id 
-                            AND c2.tipo_credito = 'plan'
-                            AND (c2.vencimiento IS NULL OR c2.vencimiento >= CURRENT_DATE())
-                            ORDER BY c2.fecha_alta DESC 
-                            LIMIT 1
-                        ))
-                    ),
-                    JSON_ARRAY()
-                ) AS creditos,
-                    
-                COALESCE(
-                    (
-                        SELECT JSON_OBJECT(
-                            'id', cons.id,
-                            'horas_totales', cons.horas_totales,
-                            'horas_restantes', cons.horas_restantes,
-                            'fecha_alta', cons.fecha_alta,
-                            'vencimiento', cons.vencimiento,
-                            'consultas', COALESCE(
-                                (
-                                    SELECT JSON_ARRAYAGG(
-                                        JSON_OBJECT(
-                                            'id', cc.id,
-                                            'fecha_alta', cc.fecha_alta,
-                                            'ultima_mod', cc.ultima_mod,
-                                            'comentarios', cc.comentarios,
-                                            'cantidad_horas', cc.cantidad_horas,
-                                            'observaciones', cc.observaciones,
-                                            'estado', cc.estado
-                                        )
-                                    )
-                                    FROM consultas cc
-                                    WHERE cc.id_consultoria = cons.id
-                                ),
-                                JSON_ARRAY()
-                            )
-                        )
-                        FROM consultorias cons
-                        WHERE cons.id_usuario = u.id
-                        AND (cons.vencimiento IS NULL OR cons.vencimiento >= CURRENT_DATE())
-                        AND cons.id = (
-                            SELECT cons2.id
-                            FROM consultorias cons2
-                            WHERE cons2.id_usuario = u.id
-                            AND (cons2.vencimiento IS NULL OR cons2.vencimiento >= CURRENT_DATE())
-                            ORDER BY cons2.fecha_alta DESC
-                            LIMIT 1
-                        )
-                    ),
-                    JSON_OBJECT()
-                ) AS consultorias,
-                    
-                CASE 
-                    WHEN e.id IS NOT NULL THEN 
-                        JSON_OBJECT(
-                            'id', e.id,
-                            'nombre', e.nombre,
-                            'email', e.email,
-                            'active', e.active,
-                            'fecha_alta', e.fecha_alta,
-                            'ultima_mod', e.ultima_mod
-                        )
-                    ELSE NULL 
-                END AS empresas
-            FROM usuarios u
-            LEFT JOIN planes p ON u.id_plan = p.id
-            LEFT JOIN empresas e ON e.id_usuario = u.id 
-            WHERE u.id = ?;`, 
-            [id]
-        );
-
-        if (rows[0]) {
-            const user = rows[0];
-            // Filtrar creditos de plan viejos
-            if (user.creditos.length > 0) {
-                try {
-                    let creditos = user.creditos;
-                    //Verificar si necesita parseo
-                    if (typeof creditos === 'string') {
-                        creditos = JSON.parse(creditos);
-                    }
-                    const creditosFiltrados = [];
-                    const planCredits = creditos.filter(c => c && c.tipo_credito === 'plan');
-                    const otrosCreditos = creditos.filter(c => c && c.tipo_credito !== 'plan');
-                    if (planCredits.length > 0) {
-                        const planMasReciente = planCredits.reduce((latest, current) => {
-                            if (!latest) return current;
-                            return new Date(current.fecha_alta) > new Date(latest.fecha_alta) ? current : latest;
-                        }, null);
-                        creditosFiltrados.push(planMasReciente);
-                    }
-                    creditosFiltrados.push(...otrosCreditos);
-                    user.creditos = creditosFiltrados;
-                } catch (error) {
-                    console.error('Error procesando créditos para usuario:', user.id, error);
-                    user.creditos = [];
-                }
-            } else {
-                user.creditos = [];
-            }
-        }
-        return rows[0] || null;
+        const u = await prisma.user.findUnique({ where: { id } });
+        return mapUserToLegacy(u);
     },
     editOwn: async (id, usuario) => {
         const campos = [];
@@ -348,9 +91,17 @@ const usuarioModel = {
             return false; // En caso de no tener nada que actualizar
         }
         
-        const query = `UPDATE usuarios SET ${campos.join(', ')} WHERE id = ?`;
-        const [result] = await pool.query(query, valores);
-        return result.affectedRows > 0
+        // Compatibilidad: solo podemos actualizar nombre y num_celular (no existe), así que unimos nombre+apellido
+        if (usuario.nombre !== undefined || usuario.apellido !== undefined) {
+            const current = await prisma.user.findUnique({ where: { id } });
+            const currentParts = splitName(current?.name);
+            const newNombre = usuario.nombre ?? currentParts.nombre ?? '';
+            const newApellido = usuario.apellido ?? currentParts.apellido ?? '';
+            const fullName = [newNombre, newApellido].filter(Boolean).join(' ').trim();
+            await prisma.user.update({ where: { id }, data: { name: fullName || null } });
+            return true;
+        }
+        return false
     },
     editById: async (id, usuario) => {
         const campos = [];
@@ -398,23 +149,29 @@ const usuarioModel = {
             return false; // En caso de no tener nada que actualizar
         }
         
-        const query = `UPDATE usuarios SET ${campos.join(', ')} WHERE id = ?`;
-        const [result] = await pool.query(query, valores);
-        return result.affectedRows > 0
+        // Compatibilidad con Prisma: actualizamos nombre, email y rol
+        const data = {};
+        if (usuario.nombre !== undefined || usuario.apellido !== undefined) {
+            const current = await prisma.user.findUnique({ where: { id } });
+            const currentParts = splitName(current?.name);
+            const newNombre = usuario.nombre ?? currentParts.nombre ?? '';
+            const newApellido = usuario.apellido ?? currentParts.apellido ?? '';
+            const fullName = [newNombre, newApellido].filter(Boolean).join(' ').trim();
+            data.name = fullName || null;
+        }
+        if (usuario.email !== undefined) data.email = usuario.email;
+        if (usuario.rol !== undefined) data.role = usuario.rol === 'admin' ? 'ADMINISTRADOR' : 'CLIENTE';
+        if (Object.keys(data).length === 0) return false;
+        await prisma.user.update({ where: { id }, data });
+        return true
     },
     enableById: async (id) => {
-        const [result] = await pool.query(
-            'UPDATE usuarios SET active = true WHERE id = ?',
-            [id]
-        )
-        return result.affectedRows > 0
+        await prisma.user.update({ where: { id }, data: { deletedAt: null } });
+        return true
     },
     deleteById: async (id) => {
-        const [result] = await pool.query(
-            'UPDATE usuarios SET active = false WHERE id = ?',
-            [id]
-        )
-        return result.affectedRows > 0 // Retorna true si eliminó algún registro
+        await prisma.user.update({ where: { id }, data: { deletedAt: new Date() } });
+        return true // Retorna true si realizó la actualización
     }
 }
 
