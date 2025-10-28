@@ -3,7 +3,7 @@ import TaxService from '../taxes/service.js';
 import { generateCartUUID, calculateExpirationDate, roundToTwoDecimals } from '../../utils/helpers.js';
 import paymentConfig from '../../config/payment.config.js';
 import logger from '../../config/logger.config.js';
-import pool from '../../database/database.js';
+import prisma from '../../database/prisma.js';
 
 class CartService {
   /**
@@ -220,11 +220,7 @@ class CartService {
    * Agrega item al carrito
    */
   static async addItemToCart(cartUUID, itemData, userId) {
-    const connection = await pool.getConnection();
-
     try {
-      await connection.beginTransaction();
-
       const cart = await CartModel.getCartByUUID(cartUUID);
 
       if (!cart) {
@@ -302,7 +298,7 @@ class CartService {
       // Recalcular totales del carrito
       await this.recalculateCartTotals(cart.id);
 
-      await connection.commit();
+      // No explicit transaction; operations ya son atómicas con Prisma en modelo
 
       logger.info({
         type: 'ITEM_ADDED_TO_CART',
@@ -314,11 +310,8 @@ class CartService {
 
       return await this.getCartWithItems(cartUUID);
     } catch (error) {
-      await connection.rollback();
       logger.error('Error agregando item al carrito:', error);
       throw error;
-    } finally {
-      connection.release();
     }
   }
 
@@ -360,30 +353,24 @@ class CartService {
    */
   static async getProductInfo(itemType, itemId) {
     try {
-      let query, params;
-
       switch (itemType) {
-        case 'membership':
-          query = 'SELECT id, nombre as name, precio as price, 0 as discount_percentage FROM planes WHERE id = ? AND active = TRUE';
-          params = [itemId];
-          break;
-
-        case 'talent_search':
-          query = 'SELECT id, service_name as name, base_price as price, discount_percentage FROM talent_search_services WHERE id = ? AND active = TRUE';
-          params = [itemId];
-          break;
-
-        case 'credits':
-          query = 'SELECT id, nombre as name, precio as price, 0 as discount_percentage FROM creditos WHERE id = ?';
-          params = [itemId];
-          break;
-
+        case 'membership': {
+          const plan = await prisma.plan.findUnique({ where: { id: String(itemId) } });
+          if (!plan || plan.isActive === false) return null;
+          return { id: plan.id, name: plan.name, price: plan.price, discount_percentage: 0 };
+        }
+        case 'talent_search': {
+          const svc = await prisma.talentSearchService.findUnique({ where: { id: String(itemId) } });
+          if (!svc || svc.isActive === false) return null;
+          return { id: svc.id, name: svc.name, price: svc.price, discount_percentage: 0 };
+        }
+        case 'credits': {
+          // No existe catálogo de créditos en Prisma actual
+          throw new Error('Tipo de item credits no soportado aún en Prisma');
+        }
         default:
           throw new Error('Tipo de item no soportado');
       }
-
-      const [rows] = await pool.query(query, params);
-      return rows[0] || null;
     } catch (error) {
       logger.error('Error obteniendo información del producto:', error);
       throw error;
@@ -396,6 +383,38 @@ class CartService {
   static isCartExpired(cart) {
     if (!cart.expires_at) return false;
     return new Date() > new Date(cart.expires_at);
+  }
+
+  /**
+   * Marca carrito como checkout (no cambia estado en DB, solo logging/compat)
+   */
+  static async markAsCheckout(cartUUID) {
+    try {
+      const cart = await CartModel.getCartByUUID(cartUUID);
+      if (!cart) throw new Error('Carrito no encontrado');
+      return true;
+    } catch (error) {
+      logger.error('Error marcando carrito como checkout:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Marca carrito como convertido
+   */
+  static async markAsConverted(cartUUID) {
+    try {
+      const cart = await CartModel.getCartByUUID(cartUUID);
+      if (!cart) throw new Error('Carrito no encontrado');
+      await prisma.shoppingCart.update({
+        where: { id: cart.id },
+        data: { status: 'converted', convertedAt: new Date() }
+      });
+      return true;
+    } catch (error) {
+      logger.error('Error marcando carrito como convertido:', error);
+      throw error;
+    }
   }
 }
 

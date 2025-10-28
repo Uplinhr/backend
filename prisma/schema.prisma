@@ -29,6 +29,9 @@ model User {
   planPurchases PlanPurchase[]
   empresas      Empresa[]
   shoppingCarts ShoppingCart[]
+  paymentOrders PaymentOrder[]
+  auditLogs     PaymentAuditLog[]
+  passwordResets PasswordReset[]
 
   @@map("users")
 }
@@ -242,6 +245,7 @@ model ShoppingCart {
   // Relaciones
   user  User?      @relation(fields: [userId], references: [id])
   items CartItem[]
+  orders PaymentOrder[]
 
   @@map("shopping_cart")
 }
@@ -366,4 +370,126 @@ enum CartStatus {
   converted
   expired
   abandoned
+}
+
+// Estados de órdenes/transacciones de pago
+enum PaymentStatus {
+  pending
+  initiated
+  completed
+  failed
+  cancelled
+  refunded
+  captured
+}
+
+// Órdenes de pago (equivalente a payment_orders)
+model PaymentOrder {
+  id               String        @id @default(cuid())
+  orderNumber      String        @map("order_number") @unique
+  userId           String?       @map("id_usuario")
+  cartId           String?       @map("id_cart")
+  status           PaymentStatus
+  paymentGateway   String        @map("payment_gateway")
+  currency         String        @default("USD")
+  subtotal         Float?
+  taxAmount        Float?        @map("tax_amount")
+  discountAmount   Float?        @map("discount_amount")
+  totalAmount      Float?        @map("total_amount")
+  countryCode      String?       @map("country_code")
+  taxRate          Float?        @map("tax_rate")
+  taxName          String?       @map("tax_name")
+  paymentMethod    String?       @map("payment_method")
+  externalPaymentId String?      @map("external_payment_id")
+  paymentUrl       String?       @map("payment_url")
+  expiresAt        DateTime?     @map("expires_at")
+  customerEmail    String?       @map("customer_email")
+  customerName     String?       @map("customer_name")
+  billingAddress   Json?         @map("billing_address")
+  notes            String?
+  createdAt        DateTime      @default(now()) @map("fecha_alta")
+  paidAt           DateTime?     @map("paid_at")
+  cancelledAt      DateTime?     @map("cancelled_at")
+  refundedAt       DateTime?     @map("refunded_at")
+  updatedAt        DateTime      @updatedAt
+
+  // Relaciones
+  user             User?         @relation(fields: [userId], references: [id])
+  cart             ShoppingCart? @relation(fields: [cartId], references: [id])
+  transactions     PaymentTransaction[] @relation("OrderTransactions")
+  auditLogs        PaymentAuditLog[]
+
+  @@map("payment_orders")
+}
+
+// Transacciones de pago (equivalente a payment_transactions)
+model PaymentTransaction {
+  id                   String        @id @default(cuid())
+  transactionId        String        @map("transaction_id") @unique
+  orderId              String        @map("id_order")
+  status               PaymentStatus
+  paymentGateway       String        @map("payment_gateway")
+  gatewayTransactionId String?       @map("gateway_transaction_id")
+  gatewayStatus        String?       @map("gateway_status")
+  gatewayResponse      Json?         @map("gateway_response")
+  amount               Float
+  currency             String        @default("USD")
+  gatewayFee           Float?        @map("gateway_fee")
+  netAmount            Float?        @map("net_amount")
+  paymentMethod        String?       @map("payment_method")
+  cardLastFour         String?       @map("card_last_four")
+  cardBrand            String?       @map("card_brand")
+  errorCode            String?       @map("error_code")
+  errorMessage         String?       @map("error_message")
+  processedAt          DateTime?     @map("processed_at")
+  ipAddress            String?       @map("ip_address")
+  userAgent            String?       @map("user_agent")
+  createdAt            DateTime      @default(now()) @map("fecha_alta")
+  updatedAt            DateTime      @updatedAt
+
+  // Relaciones
+  order PaymentOrder @relation("OrderTransactions", fields: [orderId], references: [id], onDelete: Cascade)
+  auditLogs PaymentAuditLog[]
+
+  @@map("payment_transactions")
+}
+
+// Log de auditoría de pagos (equivalente a payment_audit_log)
+model PaymentAuditLog {
+  id                String     @id @default(cuid())
+  orderId           String?    @map("id_order")
+  transactionId     String?    @map("id_transaction")
+  userId            String?    @map("id_usuario")
+  eventType         String     @map("event_type")
+  eventDescription  String?    @map("event_description")
+  performedBy       String?    @map("performed_by")
+  performedByType   String?    @map("performed_by_type")
+  oldValue          Json?      @map("old_value")
+  newValue          Json?      @map("new_value")
+  metadata          Json?
+  ipAddress         String?    @map("ip_address")
+  userAgent         String?    @map("user_agent")
+  createdAt         DateTime   @default(now()) @map("fecha_alta")
+
+  // Relaciones
+  order        PaymentOrder?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  transaction  PaymentTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  user         User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("payment_audit_log")
+}
+
+// Reinicio de contraseña (equivalente a reinicio_contrasenia)
+model PasswordReset {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  email      String
+  expiresAt  DateTime @map("fecha_exp")
+  userId     String?  @map("id_usuario")
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("fecha_alta")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("reinicio_contrasenia")
 }

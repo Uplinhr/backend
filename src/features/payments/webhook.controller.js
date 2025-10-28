@@ -1,6 +1,6 @@
 import PaymentService from './payment.service.js';
-import pool from '../../database/database.js';
 import { paymentLogger } from '../../config/logger.config.js';
+import AuditModel from './models/audit.model.js';
 
 class WebhookController {
   /**
@@ -112,21 +112,21 @@ class WebhookController {
     try {
       const eventId = payload.id || payload.event_id || `EVENT-${Date.now()}`;
       const eventType = payload.type || payload.event_type || 'unknown';
-
-      await pool.query(
-        `INSERT INTO webhook_events 
-        (event_id, payment_gateway, event_type, payload, headers, signature, ip_address, processed) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, FALSE)`,
-        [
+      await AuditModel.logEvent({
+        id_order: null,
+        id_transaction: null,
+        id_usuario: null,
+        event_type: `${gateway}_webhook_received`,
+        event_description: `Webhook ${eventType} recibido (${eventId})`,
+        performed_by_type: 'gateway',
+        metadata: {
           eventId,
           gateway,
-          eventType,
-          JSON.stringify(payload),
-          JSON.stringify(headers),
-          headers['x-signature'] || headers['x-webhook-signature'] || null,
+          headers,
+          payload,
           ipAddress
-        ]
-      );
+        }
+      });
     } catch (error) {
       paymentLogger.error({
         type: 'WEBHOOK_LOG_ERROR',

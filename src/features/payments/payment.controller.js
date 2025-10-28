@@ -1,7 +1,7 @@
 import PaymentService from './payment.service.js';
 import { successResponse, errorResponse } from '../../utils/helpers.js';
 import { paymentLogger } from '../../config/logger.config.js';
-import pool from '../../database/database.js';
+import prisma from '../../database/prisma.js';
 import { encrypt, decrypt } from '../../utils/encryption.js';
 
 class PaymentController {
@@ -185,11 +185,11 @@ class PaymentController {
    */
   static async getHealth(req, res) {
     try {
-      const [rows] = await pool.query('SELECT 1 as connected');
+      const rows = await prisma.$queryRaw`SELECT 1 as connected`;
       const health = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
-        database: rows.length > 0 ? 'connected' : 'disconnected',
+        database: Array.isArray(rows) && rows.length > 0 ? 'connected' : 'disconnected',
         uptime: process.uptime()
       };
       return res.json(successResponse(health));
@@ -448,21 +448,18 @@ class PaymentController {
    */
   static async getWebhookStatus(req, res) {
     try {
-      const [pending] = await pool.query(
-        'SELECT COUNT(*) as count FROM webhook_events WHERE processed = FALSE'
-      );
-      const [processed] = await pool.query(
-        'SELECT COUNT(*) as count FROM webhook_events WHERE processed = TRUE'
-      );
-      const [failed] = await pool.query(
-        'SELECT COUNT(*) as count FROM webhook_events WHERE processing_status = "failed"'
-      );
-
+      // No existe tabla webhook_events en Prisma. Como alternativa,
+      // reportamos actividad reciente por transacciones de pago.
+      const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const [processedCount, failedCount] = await Promise.all([
+        prisma.paymentTransaction.count({ where: { createdAt: { gte: last24h } } }),
+        prisma.paymentTransaction.count({ where: { createdAt: { gte: last24h }, status: 'failed' } })
+      ]);
       const status = {
-        pending: pending[0].count,
-        processed: processed[0].count,
-        failed: failed[0].count,
-        total: pending[0].count + processed[0].count + failed[0].count
+        processed: processedCount,
+        failed: failedCount,
+        pending: 0,
+        total: processedCount + failedCount
       };
 
       return res.json(successResponse(status));
@@ -477,14 +474,17 @@ class PaymentController {
    */
   static async getBasicStats(req, res) {
     try {
-      const [totalPayments] = await pool.query(
-        'SELECT COUNT(*) as count, SUM(amount) as total FROM payment_transactions WHERE status = "completed"'
-      );
-
+      const agg = await prisma.paymentTransaction.aggregate({
+        _count: { _all: true },
+        _sum: { amount: true },
+        where: { status: 'completed' }
+      });
+      const totalPayments = agg._count._all || 0;
+      const totalAmount = agg._sum.amount || 0;
       const stats = {
-        totalPayments: totalPayments[0].count || 0,
-        totalAmount: totalPayments[0].total || 0,
-        successRate: totalPayments[0].count > 0 ? '100' : '0'
+        totalPayments,
+        totalAmount,
+        successRate: totalPayments > 0 ? '100' : '0'
       };
 
       return res.json(successResponse(stats));

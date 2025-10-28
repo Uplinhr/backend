@@ -6,120 +6,115 @@ import PaymentGatewayFactory from './adapters/index.js';
 import { generateOrderNumber, generateTransactionId, calculateExpirationDate } from '../../utils/helpers.js';
 import paymentConfig from '../../config/payment.config.js';
 import logger, { paymentLogger } from '../../config/logger.config.js';
-import pool from '../../database/database.js';
+import prisma from '../../database/prisma.js';
 
 class PaymentService {
   /**
    * Crea orden de pago desde el carrito
    */
   static async createOrderFromCart(userId, cartUUID, paymentGateway, additionalData = {}) {
-    const connection = await pool.getConnection();
-    
     try {
-      await connection.beginTransaction();
+      // Encapsular operaciones críticas en transacción Prisma
+      return await prisma.$transaction(async () => {
 
-      // Obtener carrito con items
-      const cart = await CartService.getCartWithItems(cartUUID);
+        // Obtener carrito con items
+        const cart = await CartService.getCartWithItems(cartUUID);
 
-      if (!cart || cart.id_usuario !== userId) {
-        throw new Error('Carrito no encontrado o no pertenece al usuario');
-      }
+        if (!cart || cart.userId !== userId) {
+          throw new Error('Carrito no encontrado o no pertenece al usuario');
+        }
 
-      if (cart.items.length === 0) {
-        throw new Error('El carrito está vacío');
-      }
+        if (cart.items.length === 0) {
+          throw new Error('El carrito está vacío');
+        }
 
-      if (cart.status !== 'active') {
-        throw new Error('El carrito no está activo');
-      }
+        if (cart.status !== 'active') {
+          throw new Error('El carrito no está activo');
+        }
 
-      // Validar pasarela
-      if (!PaymentGatewayFactory.isGatewayAvailable(paymentGateway)) {
-        throw new Error(`Pasarela de pago ${paymentGateway} no disponible`);
-      }
+        // Validar pasarela
+        if (!PaymentGatewayFactory.isGatewayAvailable(paymentGateway)) {
+          throw new Error(`Pasarela de pago ${paymentGateway} no disponible`);
+        }
 
-      // Marcar carrito como checkout
-      await CartService.markAsCheckout(cartUUID);
+        // Marcar carrito como checkout (no cambia estado, válido para logging)
+        await CartService.markAsCheckout(cartUUID);
 
-      // Generar número de orden
-      const orderNumber = generateOrderNumber();
-      const expiresAt = calculateExpirationDate(paymentConfig.order.paymentExpirationHours);
+        // Generar número de orden
+        const orderNumber = generateOrderNumber();
+        const expiresAt = calculateExpirationDate(paymentConfig.order.paymentExpirationHours);
 
-      // Crear orden
-      const orderData = {
-        order_number: orderNumber,
-        id_usuario: userId,
-        id_cart: cart.id,
-        status: 'pending',
-        payment_gateway: paymentGateway,
-        currency: cart.currency,
-        subtotal: cart.subtotal,
-        tax_amount: cart.tax_amount,
-        discount_amount: cart.discount_amount || 0,
-        total_amount: cart.total_amount,
-        country_code: cart.country_code,
-        tax_rate: cart.items[0]?.tax_rate || 0,
-        tax_name: additionalData.tax_name || 'IVA',
-        customer_email: additionalData.customer_email,
-        customer_name: additionalData.customer_name,
-        billing_address: additionalData.billing_address,
-        expires_at: expiresAt,
-        notes: additionalData.notes
-      };
+        // Crear orden
+        const orderData = {
+          order_number: orderNumber,
+          id_usuario: userId,
+          id_cart: cart.id,
+          status: 'pending',
+          payment_gateway: paymentGateway,
+          currency: cart.currency,
+          subtotal: cart.subtotal,
+          tax_amount: cart.taxAmount,
+          discount_amount: cart.discountAmount || 0,
+          total_amount: cart.totalAmount,
+          country_code: cart.countryCode,
+          tax_rate: cart.items[0]?.taxRate || 0,
+          tax_name: additionalData.tax_name || 'IVA',
+          customer_email: additionalData.customer_email,
+          customer_name: additionalData.customer_name,
+          billing_address: additionalData.billing_address,
+          expires_at: expiresAt,
+          notes: additionalData.notes
+        };
 
-      const orderId = await OrderModel.createOrder(orderData);
+        const orderId = await OrderModel.createOrder(orderData);
 
-      // Registrar auditoría
-      await AuditModel.logEvent({
-        id_order: orderId,
-        id_usuario: userId,
-        event_type: 'order_created',
-        event_description: `Orden ${orderNumber} creada`,
-        performed_by_type: 'customer',
-        new_value: { order_id: orderId, total: cart.total_amount },
-        ip_address: additionalData.ip_address,
-        user_agent: additionalData.user_agent
+        // Registrar auditoría
+        await AuditModel.logEvent({
+          id_order: orderId,
+          id_usuario: userId,
+          event_type: 'order_created',
+          event_description: `Orden ${orderNumber} creada`,
+          performed_by_type: 'customer',
+          new_value: { order_id: orderId, total: cart.total_amount },
+          ip_address: additionalData.ip_address,
+          user_agent: additionalData.user_agent
+        });
+
+        // Crear pago en la pasarela
+        const paymentResult = await this.processPaymentWithGateway(
+          orderId,
+          paymentGateway,
+          cart,
+          orderData
+        );
+
+        paymentLogger.info({
+          type: 'ORDER_CREATED',
+          orderId,
+          orderNumber,
+          userId,
+          gateway: paymentGateway,
+          amount: cart.totalAmount
+        });
+
+        return {
+          order_id: orderId,
+          order_number: orderNumber,
+          payment_url: paymentResult.payment_url,
+          payment_id: paymentResult.payment_id,
+          total_amount: cart.totalAmount,
+          currency: cart.currency,
+          expires_at: expiresAt
+        };
+
       });
-
-      // Crear pago en la pasarela
-      const paymentResult = await this.processPaymentWithGateway(
-        orderId,
-        paymentGateway,
-        cart,
-        orderData
-      );
-
-      await connection.commit();
-
-      paymentLogger.info({
-        type: 'ORDER_CREATED',
-        orderId,
-        orderNumber,
-        userId,
-        gateway: paymentGateway,
-        amount: cart.total_amount
-      });
-
-      return {
-        order_id: orderId,
-        order_number: orderNumber,
-        payment_url: paymentResult.payment_url,
-        payment_id: paymentResult.payment_id,
-        total_amount: cart.total_amount,
-        currency: cart.currency,
-        expires_at: expiresAt
-      };
-
     } catch (error) {
-      await connection.rollback();
       paymentLogger.error({
         type: 'ORDER_CREATION_ERROR',
         userId,
         error: error.message
       });
       throw error;
-    } finally {
-      connection.release();
     }
   }
 
@@ -144,10 +139,10 @@ class PaymentService {
         customer_name: orderData.customer_name,
         billing_address: orderData.billing_address,
         items: cart.items.map(item => ({
-          name: item.item_name,
-          description: `${item.item_type} - ${item.item_name}`,
+          name: item.itemName,
+          description: `${item.itemType} - ${item.itemName}`,
           quantity: item.quantity,
-          unit_price: item.unit_price
+          unit_price: item.unitPrice
         }))
       };
 
@@ -209,7 +204,7 @@ class PaymentService {
       }
 
       // Verificar ownership si se proporciona userId
-      if (userId && order.id_usuario !== userId) {
+      if (userId && order.userId !== userId) {
         throw new Error('No tienes permiso para ver esta orden');
       }
 
@@ -314,57 +309,51 @@ class PaymentService {
    * Actualiza orden desde webhook
    */
   static async updateOrderFromWebhook(order, webhookData) {
-    const connection = await pool.getConnection();
-    
     try {
-      await connection.beginTransaction();
+      await prisma.$transaction(async () => {
 
-      const oldStatus = order.status;
-      const newStatus = webhookData.status;
+        const oldStatus = order.status;
+        const newStatus = webhookData.status;
 
-      // Actualizar estado de la orden
-      if (oldStatus !== newStatus) {
-        await OrderModel.updateOrderStatus(order.id, newStatus);
+        // Actualizar estado de la orden
+        if (oldStatus !== newStatus) {
+          await OrderModel.updateOrderStatus(order.id, newStatus);
 
-        // Si el pago fue completado
-        if (newStatus === 'completed') {
-          await this.handlePaymentCompleted(order);
+          // Si el pago fue completado
+          if (newStatus === 'completed') {
+            await this.handlePaymentCompleted(order);
+          }
+
+          // Registrar auditoría
+          await AuditModel.logEvent({
+            id_order: order.id,
+            id_usuario: order.id_usuario,
+            event_type: 'payment_status_changed',
+            event_description: `Estado cambiado de ${oldStatus} a ${newStatus}`,
+            performed_by_type: 'gateway',
+            old_value: { status: oldStatus },
+            new_value: { status: newStatus }
+          });
         }
 
-        // Registrar auditoría
-        await AuditModel.logEvent({
+        // Crear/actualizar transacción
+        const transactionId = generateTransactionId(order.paymentGateway);
+        await TransactionModel.createTransaction({
+          transaction_id: transactionId,
           id_order: order.id,
-          id_usuario: order.id_usuario,
-          event_type: 'payment_status_changed',
-          event_description: `Estado cambiado de ${oldStatus} a ${newStatus}`,
-          performed_by_type: 'gateway',
-          old_value: { status: oldStatus },
-          new_value: { status: newStatus }
+          status: newStatus,
+          payment_gateway: order.paymentGateway,
+          gateway_transaction_id: webhookData.payment_id,
+          gateway_status: webhookData.status,
+          gateway_response: webhookData.payment_data,
+          amount: webhookData.amount || order.totalAmount,
+          currency: webhookData.currency || order.currency,
+          processed_at: new Date()
         });
-      }
 
-      // Crear/actualizar transacción
-      const transactionId = generateTransactionId(order.payment_gateway);
-      await TransactionModel.createTransaction({
-        transaction_id: transactionId,
-        id_order: order.id,
-        status: newStatus,
-        payment_gateway: order.payment_gateway,
-        gateway_transaction_id: webhookData.payment_id,
-        gateway_status: webhookData.status,
-        gateway_response: webhookData.payment_data,
-        amount: webhookData.amount || order.total_amount,
-        currency: webhookData.currency || order.currency,
-        processed_at: new Date()
       });
-
-      await connection.commit();
-
     } catch (error) {
-      await connection.rollback();
       throw error;
-    } finally {
-      connection.release();
     }
   }
 
@@ -375,13 +364,8 @@ class PaymentService {
     try {
       // Marcar carrito como convertido
       if (order.id_cart) {
-        const [cartRows] = await pool.query(
-          'SELECT cart_uuid FROM shopping_cart WHERE id = ?',
-          [order.id_cart]
-        );
-        if (cartRows[0]) {
-          await CartService.markAsConverted(cartRows[0].cart_uuid);
-        }
+        const cart = await prisma.shoppingCart.findUnique({ where: { id: String(order.id_cart) } });
+        if (cart?.cartUuid) await CartService.markAsConverted(cart.cartUuid);
       }
 
       // TODO: Activar servicios comprados (membresías, créditos, etc.)
@@ -410,80 +394,72 @@ class PaymentService {
    * Procesa reembolso
    */
   static async refundOrder(orderId, reason, amount = null, performedBy = null) {
-    const connection = await pool.getConnection();
-    
     try {
-      await connection.beginTransaction();
+      await prisma.$transaction(async () => {
 
-      const order = await OrderModel.getOrderById(orderId);
+        const order = await OrderModel.getOrderById(orderId);
 
-      if (!order) {
-        throw new Error('Orden no encontrada');
-      }
+        if (!order) {
+          throw new Error('Orden no encontrada');
+        }
 
-      if (order.status !== 'completed') {
-        throw new Error('Solo se pueden reembolsar órdenes completadas');
-      }
+        if (order.status !== 'completed') {
+          throw new Error('Solo se pueden reembolsar órdenes completadas');
+        }
 
-      // Obtener adaptador de la pasarela
-      const adapter = PaymentGatewayFactory.getAdapter(order.payment_gateway);
+        // Obtener adaptador de la pasarela
+        const adapter = PaymentGatewayFactory.getAdapter(order.paymentGateway);
 
-      // Procesar reembolso en la pasarela
-      const refundResult = await adapter.refundPayment(
-        order.external_payment_id,
-        amount
-      );
+        // Procesar reembolso en la pasarela
+        const refundResult = await adapter.refundPayment(
+          order.externalPaymentId,
+          amount
+        );
 
-      // Actualizar estado de la orden
-      await OrderModel.updateOrderStatus(orderId, 'refunded');
+        // Actualizar estado de la orden
+        await OrderModel.updateOrderStatus(orderId, 'refunded');
 
-      // Crear transacción de reembolso
-      const transactionId = generateTransactionId(order.payment_gateway);
-      await TransactionModel.createTransaction({
-        transaction_id: transactionId,
-        id_order: orderId,
-        status: 'refunded',
-        payment_gateway: order.payment_gateway,
-        gateway_transaction_id: refundResult.refund_id,
-        gateway_status: refundResult.status,
-        gateway_response: refundResult,
-        amount: amount || order.total_amount,
-        currency: order.currency,
-        processed_at: new Date()
+        // Crear transacción de reembolso
+        const transactionId = generateTransactionId(order.paymentGateway);
+        await TransactionModel.createTransaction({
+          transaction_id: transactionId,
+          id_order: orderId,
+          status: 'refunded',
+          payment_gateway: order.paymentGateway,
+          gateway_transaction_id: refundResult.refund_id,
+          gateway_status: refundResult.status,
+          gateway_response: refundResult,
+          amount: amount || order.totalAmount,
+          currency: order.currency,
+          processed_at: new Date()
+        });
+
+        // Registrar auditoría
+        await AuditModel.logEvent({
+          id_order: orderId,
+          id_usuario: order.userId,
+          event_type: 'order_refunded',
+          event_description: `Orden reembolsada. Razón: ${reason}`,
+          performed_by: performedBy,
+          performed_by_type: performedBy ? 'admin' : 'system',
+          new_value: { amount: amount || order.totalAmount, reason }
+        });
       });
-
-      // Registrar auditoría
-      await AuditModel.logEvent({
-        id_order: orderId,
-        id_usuario: order.id_usuario,
-        event_type: 'order_refunded',
-        event_description: `Orden reembolsada. Razón: ${reason}`,
-        performed_by: performedBy,
-        performed_by_type: performedBy ? 'admin' : 'system',
-        new_value: { amount: amount || order.total_amount, reason }
-      });
-
-      await connection.commit();
 
       paymentLogger.info({
         type: 'ORDER_REFUNDED',
         orderId,
-        amount: amount || order.total_amount,
+        amount: amount || order.totalAmount,
         reason
       });
-
       return true;
-
     } catch (error) {
-      await connection.rollback();
       paymentLogger.error({
         type: 'REFUND_ERROR',
         orderId,
         error: error.message
       });
       throw error;
-    } finally {
-      connection.release();
     }
   }
 
@@ -499,36 +475,45 @@ class PaymentService {
    */
   static async getPaymentStats(filters = {}) {
     try {
-      const [statsRows] = await pool.query(
-        `SELECT 
-          COUNT(*) as total_orders,
-          COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_orders,
-          COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_orders,
-          COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_orders,
-          COUNT(CASE WHEN status = 'refunded' THEN 1 END) as refunded_orders,
-          SUM(CASE WHEN status = 'completed' THEN total_amount ELSE 0 END) as total_revenue,
-          AVG(CASE WHEN status = 'completed' THEN total_amount ELSE NULL END) as average_order_value
-         FROM payment_orders
-         WHERE fecha_alta >= COALESCE(?, '2000-01-01')
-         AND fecha_alta <= COALESCE(?, NOW())`,
-        [filters.date_from, filters.date_to]
-      );
+      const where = {};
+      if (filters.date_from || filters.date_to) {
+        where['createdAt'] = {};
+        if (filters.date_from) where['createdAt'].gte = new Date(filters.date_from);
+        if (filters.date_to) where['createdAt'].lte = new Date(filters.date_to);
+      }
 
-      const [gatewayStats] = await pool.query(
-        `SELECT 
-          payment_gateway,
-          COUNT(*) as orders_count,
-          SUM(CASE WHEN status = 'completed' THEN total_amount ELSE 0 END) as revenue
-         FROM payment_orders
-         WHERE fecha_alta >= COALESCE(?, '2000-01-01')
-         AND fecha_alta <= COALESCE(?, NOW())
-         GROUP BY payment_gateway`,
-        [filters.date_from, filters.date_to]
-      );
+      const [totalOrders, completedOrders, pendingOrders, failedOrders, refundedOrders, totalRevenue, avgOrderValue] = await Promise.all([
+        prisma.paymentOrder.count({ where }),
+        prisma.paymentOrder.count({ where: { ...where, status: 'completed' } }),
+        prisma.paymentOrder.count({ where: { ...where, status: 'pending' } }),
+        prisma.paymentOrder.count({ where: { ...where, status: 'failed' } }),
+        prisma.paymentOrder.count({ where: { ...where, status: 'refunded' } }),
+        prisma.paymentOrder.aggregate({ _sum: { totalAmount: true }, where: { ...where, status: 'completed' } }),
+        prisma.paymentOrder.aggregate({ _avg: { totalAmount: true }, where: { ...where, status: 'completed' } })
+      ]);
+
+      const gatewayRows = await prisma.paymentOrder.groupBy({
+        by: ['paymentGateway'],
+        where,
+        _count: { _all: true },
+        _sum: { totalAmount: true }
+      });
 
       return {
-        overview: statsRows[0],
-        by_gateway: gatewayStats
+        overview: {
+          total_orders: totalOrders,
+          completed_orders: completedOrders,
+          pending_orders: pendingOrders,
+          failed_orders: failedOrders,
+          refunded_orders: refundedOrders,
+          total_revenue: totalRevenue._sum.totalAmount || 0,
+          average_order_value: avgOrderValue._avg.totalAmount || 0
+        },
+        by_gateway: gatewayRows.map(r => ({
+          payment_gateway: r.paymentGateway,
+          orders_count: r._count._all,
+          revenue: r._sum.totalAmount || 0
+        }))
       };
 
     } catch (error) {

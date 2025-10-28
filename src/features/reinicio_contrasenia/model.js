@@ -1,36 +1,30 @@
-import pool from '../../database/database.js'
+import prisma from '../../database/prisma.js'
 
 const reinicio_contraseniaModel = {
     create: async (token, email, fechaExp, idUsuario) => {
-        const [result] = await pool.query(
-            `INSERT INTO reinicio_contrasenia
-            (token, email, fecha_exp, id_usuario)
-            VALUES (?, ?, ?, ?)`,
-            [token, email, fechaExp, idUsuario]
-        )
-        return result.insertId
+        const created = await prisma.passwordReset.create({
+            data: {
+                token,
+                email,
+                expiresAt: fechaExp,
+                userId: idUsuario ?? null,
+            }
+        })
+        return created.id
     },
     getByToken: async (token) => {
-        const [rows] = await pool.query(
-            `SELECT * FROM reinicio_contrasenia 
-             WHERE token = ?`,
-            [token]
-        );
-        return rows[0] || null;
+        const row = await prisma.passwordReset.findUnique({ where: { token } })
+        return row || null;
     },
     setTokenAsUsed: async (id) => {
-        const [result] = await pool.query(
-            `UPDATE reinicio_contrasenia SET used = TRUE WHERE id = ?`,
-            [id]
-        );
-        return result.affectedRows > 0;
+        await prisma.passwordReset.update({ where: { id: String(id) }, data: { used: true } })
+        return true;
     },
     deleteExpiredTokens: async () => {
-        const [result] = await pool.query(
-            `DELETE FROM reinicio_contrasenia 
-             WHERE fecha_exp <= NOW() OR used = TRUE`,
-        );
-        return result.affectedRows;
+        const result = await prisma.passwordReset.deleteMany({
+            where: { OR: [{ expiresAt: { lte: new Date() } }, { used: true }] }
+        })
+        return result.count;
     }
 }
 
