@@ -33,6 +33,7 @@
   "homepage": "https://github.com/Uplinhr/backend#readme",
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.3",
+    "@prisma/client": "^6.17.1",
     "auth0": "^5.0.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.6",
@@ -50,12 +51,10 @@
     "jsonwebtoken": "^9.0.2",
     "mercadopago": "^2.0.15",
     "morgan": "^1.10.0",
-    "mysql2": "^3.14.3",
     "resend": "^6.2.2",
     "uuid": "^9.0.1",
     "winston": "^3.18.3",
-    "winston-daily-rotate-file": "^4.7.1",
-    "@prisma/client": "^6.17.1"
+    "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",

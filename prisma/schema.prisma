@@ -11,26 +11,26 @@ datasource db {
 
 // Modelo User (integración con Auth0)
 model User {
-  id        String   @id @default(cuid())
-  auth0Id   String?  @unique // Para integración con Auth0
-  email     String   @unique
+  id        String    @id @default(cuid())
+  auth0Id   String?   @unique // Para integración con Auth0
+  email     String    @unique
   name      String?
-  role      Role     @default(CLIENTE) // Enum para roles
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      Role      @default(CLIENTE) // Enum para roles
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   // Relaciones
-  transactions Transaction[]
-  plans        UserPlan[]
-  consultants  Consultant[] @relation("UserConsultants")
-  credits      Credit[]
-  consultations Consultation[]
-  planPurchases PlanPurchase[]
-  empresas      Empresa[]
-  shoppingCarts ShoppingCart[]
-  paymentOrders PaymentOrder[]
-  auditLogs     PaymentAuditLog[]
+  transactions   Transaction[]
+  plans          UserPlan[]
+  consultants    Consultant[]      @relation("UserConsultants")
+  credits        Credit[]
+  consultations  Consultation[]
+  planPurchases  PlanPurchase[]
+  empresas       Empresa[]
+  shoppingCarts  ShoppingCart[]
+  paymentOrders  PaymentOrder[]
+  auditLogs      PaymentAuditLog[]
   passwordResets PasswordReset[]
 
   @@map("users")
@@ -43,7 +43,7 @@ model Plan {
   description String?
   price       Float
   currency    String   @default("USD")
-  features    Json?    // Para características flexibles
+  features    Json? // Para características flexibles
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -58,20 +58,20 @@ model Plan {
 
 // Modelo Transaction/Payment
 model Transaction {
-  id                  String            @id @default(cuid())
-  userId              String
-  planId              String?
-  amount              Float
-  currency            String            @default("USD")
-  status              TransactionStatus @default(PENDING)
-  gateway             PaymentGateway
-  gatewayTransactionId String?          // ID de la pasarela (MP, PayPal, etc.)
-  metadata            Json?            // Datos adicionales encriptados
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  id                   String            @id @default(cuid())
+  userId               String
+  planId               String?
+  amount               Float
+  currency             String            @default("USD")
+  status               TransactionStatus @default(PENDING)
+  gateway              PaymentGateway
+  gatewayTransactionId String? // ID de la pasarela (MP, PayPal, etc.)
+  metadata             Json? // Datos adicionales encriptados
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
 
   // Relaciones
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan Plan? @relation(fields: [planId], references: [id])
 
   @@map("transactions")
@@ -80,9 +80,9 @@ model Transaction {
 // Modelo TaxConfig
 model TaxConfig {
   id        String   @id @default(cuid())
-  name      String   // Nombre del impuesto
-  rate      Float    // Tasa (ej: 0.21 para 21%)
-  country   String?  // País aplicable
+  name      String // Nombre del impuesto
+  rate      Float // Tasa (ej: 0.21 para 21%)
+  country   String? // País aplicable
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -92,17 +92,17 @@ model TaxConfig {
 
 // Modelo Consultant
 model Consultant {
-  id          String   @id @default(cuid())
-  userId      String   // Relacionado con User
-  name        String
-  email       String
-  phone       String?
-  bio         String?
-  skills      Json?    // Habilidades como array
-  hourlyRate  Float?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  userId     String // Relacionado con User
+  name       String
+  email      String
+  phone      String?
+  bio        String?
+  skills     Json? // Habilidades como array
+  hourlyRate Float?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relaciones
   user User @relation("UserConsultants", fields: [userId], references: [id])
@@ -117,7 +117,7 @@ model TalentSearchService {
   description String?
   price       Float
   currency    String   @default("USD")
-  category    String?  // Categoría del servicio
+  category    String? // Categoría del servicio
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -127,96 +127,96 @@ model TalentSearchService {
 
 // Modelo Credit (créditos de usuarios)
 model Credit {
-  id          String   @id @default(cuid())
-  userId      String
-  type        CreditType
-  amount      Int      // Cantidad de créditos
-  expiryDate  DateTime?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String     @id @default(cuid())
+  userId     String
+  type       CreditType
+  amount     Int // Cantidad de créditos
+  expiryDate DateTime?
+  isActive   Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   // Relaciones
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  searches    Search[]
-  purchases   CreditPurchase[]
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  searches  Search[]
+  purchases CreditPurchase[]
 
   @@map("credits")
 }
 
 // Modelo Search (búsquedas de talento)
 model Search {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   creditId    String
-  searchInfo  Json     // Información de la búsqueda
-  creditsUsed Int      @default(1)
+  searchInfo  Json // Información de la búsqueda
+  creditsUsed Int          @default(1)
   status      SearchStatus @default(PENDING)
   notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   // Relaciones
-  credit      Credit   @relation(fields: [creditId], references: [id], onDelete: Cascade)
+  credit Credit @relation(fields: [creditId], references: [id], onDelete: Cascade)
 
   @@map("searches")
 }
 
 // Modelo Consultation (consultorías/horas de consulta)
 model Consultation {
-  id            String   @id @default(cuid())
-  userId        String
-  totalHours    Int      // Horas totales contratadas
-  remainingHours Int     // Horas restantes
-  expiryDate    DateTime?
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String    @id @default(cuid())
+  userId         String
+  totalHours     Int // Horas totales contratadas
+  remainingHours Int // Horas restantes
+  expiryDate     DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   // Relaciones
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sessions      ConsultationSession[]
+  user     User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions ConsultationSession[]
 
   @@map("consultations")
 }
 
 // Modelo ConsultationSession (sesiones individuales de consultoría)
 model ConsultationSession {
-  id              String   @id @default(cuid())
-  consultationId  String
-  startTime       DateTime
-  endTime         DateTime?
-  duration        Int?     // Duración en minutos
-  cost            Float?   // Costo de la sesión
-  paymentMethod   String?
-  notes           String?
-  status          ConsultationStatus @default(SCHEDULED)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String             @id @default(cuid())
+  consultationId String
+  startTime      DateTime
+  endTime        DateTime?
+  duration       Int? // Duración en minutos
+  cost           Float? // Costo de la sesión
+  paymentMethod  String?
+  notes          String?
+  status         ConsultationStatus @default(SCHEDULED)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 
   // Relaciones
-  consultation    Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
 
   @@map("consultation_sessions")
 }
 
 // Modelo Empresa (datos de empresas de usuarios)
 model Empresa {
-  id                   String   @id @default(cuid())
-  userId               String?
-  name                 String
-  email                String
-  fantasyName          String?
-  cuit                 String?
-  taxCondition         String?
-  legalType            String?
-  mainActivity         String?
-  legalStreet          String?
-  legalCity            String?
-  legalCountry         String?
-  postalCode           String?
-  active               Boolean  @default(true)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id           String   @id @default(cuid())
+  userId       String?
+  name         String
+  email        String
+  fantasyName  String?
+  cuit         String?
+  taxCondition String?
+  legalType    String?
+  mainActivity String?
+  legalStreet  String?
+  legalCity    String?
+  legalCountry String?
+  postalCode   String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relaciones
   user User? @relation(fields: [userId], references: [id])
@@ -226,25 +226,25 @@ model Empresa {
 
 // Modelo ShoppingCart (carrito de compras)
 model ShoppingCart {
-  id              String      @id @default(cuid())
-  cartUuid        String      @unique
-  userId          String?
-  sessionId       String?
-  status          CartStatus  @default(active)
-  currency        String      @default("USD")
-  countryCode     String?
-  expiresAt       DateTime?
-  convertedAt     DateTime?
-  subtotal        Float?
-  taxAmount       Float?
-  discountAmount  Float?
-  totalAmount     Float?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id             String     @id @default(cuid())
+  cartUuid       String     @unique
+  userId         String?
+  sessionId      String?
+  status         CartStatus @default(active)
+  currency       String     @default("USD")
+  countryCode    String?
+  expiresAt      DateTime?
+  convertedAt    DateTime?
+  subtotal       Float?
+  taxAmount      Float?
+  discountAmount Float?
+  totalAmount    Float?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   // Relaciones
-  user  User?      @relation(fields: [userId], references: [id])
-  items CartItem[]
+  user   User?          @relation(fields: [userId], references: [id])
+  items  CartItem[]
   orders PaymentOrder[]
 
   @@map("shopping_cart")
@@ -252,21 +252,21 @@ model ShoppingCart {
 
 // Modelo CartItem (items del carrito)
 model CartItem {
-  id                  String        @id @default(cuid())
-  cartId              String
-  itemType            String
-  itemId              String?
-  itemName            String
-  quantity            Int           @default(1)
-  unitPrice           Float
-  discountPercentage  Float?        @default(0)
-  taxRate             Float?        @default(0)
-  subtotal            Float
-  taxAmount           Float?        @default(0)
-  total               Float
-  metadata            Json?
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  id                 String   @id @default(cuid())
+  cartId             String
+  itemType           String
+  itemId             String?
+  itemName           String
+  quantity           Int      @default(1)
+  unitPrice          Float
+  discountPercentage Float?   @default(0)
+  taxRate            Float?   @default(0)
+  subtotal           Float
+  taxAmount          Float?   @default(0)
+  total              Float
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   // Relaciones
   cart ShoppingCart @relation(fields: [cartId], references: [id], onDelete: Cascade)
@@ -276,45 +276,45 @@ model CartItem {
 
 // Modelo CreditPurchase (compras de créditos)
 model CreditPurchase {
-  id          String   @id @default(cuid())
-  creditId    String
-  amount      Float    // Costo de la compra
+  id            String   @id @default(cuid())
+  creditId      String
+  amount        Float // Costo de la compra
   paymentMethod String
-  notes       String?
-  createdAt   DateTime @default(now())
+  notes         String?
+  createdAt     DateTime @default(now())
 
   // Relaciones
-  credit      Credit   @relation(fields: [creditId], references: [id], onDelete: Cascade)
+  credit Credit @relation(fields: [creditId], references: [id], onDelete: Cascade)
 
   @@map("credit_purchases")
 }
 
 // Modelo PlanPurchase (compras de planes)
 model PlanPurchase {
-  id              String   @id @default(cuid())
-  userId          String
-  planId          String
-  amount          Float    // Precio pagado
-  paymentMethod   String   // Medio de pago
-  notes           String?
-  createdAt       DateTime @default(now())
+  id            String   @id @default(cuid())
+  userId        String
+  planId        String
+  amount        Float // Precio pagado
+  paymentMethod String // Medio de pago
+  notes         String?
+  createdAt     DateTime @default(now())
 
   // Relaciones
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan            Plan     @relation(fields: [planId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
 
   @@map("plan_purchases")
 }
 
 // Modelo UserPlan (para suscripciones de usuarios)
 model UserPlan {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   planId    String
-  startDate DateTime @default(now())
+  startDate DateTime  @default(now())
   endDate   DateTime?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
 
   // Relaciones
   user User @relation(fields: [userId], references: [id])
@@ -345,9 +345,9 @@ enum PaymentGateway {
 }
 
 enum CreditType {
-  PLAN      // Créditos que vienen con un plan
-  PURCHASE  // Créditos comprados adicionalmente
-  BONUS     // Créditos de regalo/bonus
+  PLAN // Créditos que vienen con un plan
+  PURCHASE // Créditos comprados adicionalmente
+  BONUS // Créditos de regalo/bonus
 }
 
 enum SearchStatus {
@@ -385,39 +385,39 @@ enum PaymentStatus {
 
 // Órdenes de pago (equivalente a payment_orders)
 model PaymentOrder {
-  id               String        @id @default(cuid())
-  orderNumber      String        @map("order_number") @unique
-  userId           String?       @map("id_usuario")
-  cartId           String?       @map("id_cart")
-  status           PaymentStatus
-  paymentGateway   String        @map("payment_gateway")
-  currency         String        @default("USD")
-  subtotal         Float?
-  taxAmount        Float?        @map("tax_amount")
-  discountAmount   Float?        @map("discount_amount")
-  totalAmount      Float?        @map("total_amount")
-  countryCode      String?       @map("country_code")
-  taxRate          Float?        @map("tax_rate")
-  taxName          String?       @map("tax_name")
-  paymentMethod    String?       @map("payment_method")
-  externalPaymentId String?      @map("external_payment_id")
-  paymentUrl       String?       @map("payment_url")
-  expiresAt        DateTime?     @map("expires_at")
-  customerEmail    String?       @map("customer_email")
-  customerName     String?       @map("customer_name")
-  billingAddress   Json?         @map("billing_address")
-  notes            String?
-  createdAt        DateTime      @default(now()) @map("fecha_alta")
-  paidAt           DateTime?     @map("paid_at")
-  cancelledAt      DateTime?     @map("cancelled_at")
-  refundedAt       DateTime?     @map("refunded_at")
-  updatedAt        DateTime      @updatedAt
+  id                String        @id @default(cuid())
+  orderNumber       String        @unique @map("order_number")
+  userId            String?       @map("id_usuario")
+  cartId            String?       @map("id_cart")
+  status            PaymentStatus
+  paymentGateway    String        @map("payment_gateway")
+  currency          String        @default("USD")
+  subtotal          Float?
+  taxAmount         Float?        @map("tax_amount")
+  discountAmount    Float?        @map("discount_amount")
+  totalAmount       Float?        @map("total_amount")
+  countryCode       String?       @map("country_code")
+  taxRate           Float?        @map("tax_rate")
+  taxName           String?       @map("tax_name")
+  paymentMethod     String?       @map("payment_method")
+  externalPaymentId String?       @map("external_payment_id")
+  paymentUrl        String?       @map("payment_url")
+  expiresAt         DateTime?     @map("expires_at")
+  customerEmail     String?       @map("customer_email")
+  customerName      String?       @map("customer_name")
+  billingAddress    Json?         @map("billing_address")
+  notes             String?
+  createdAt         DateTime      @default(now()) @map("fecha_alta")
+  paidAt            DateTime?     @map("paid_at")
+  cancelledAt       DateTime?     @map("cancelled_at")
+  refundedAt        DateTime?     @map("refunded_at")
+  updatedAt         DateTime      @updatedAt
 
   // Relaciones
-  user             User?         @relation(fields: [userId], references: [id])
-  cart             ShoppingCart? @relation(fields: [cartId], references: [id])
-  transactions     PaymentTransaction[] @relation("OrderTransactions")
-  auditLogs        PaymentAuditLog[]
+  user         User?                @relation(fields: [userId], references: [id])
+  cart         ShoppingCart?        @relation(fields: [cartId], references: [id])
+  transactions PaymentTransaction[] @relation("OrderTransactions")
+  auditLogs    PaymentAuditLog[]
 
   @@map("payment_orders")
 }
@@ -425,7 +425,7 @@ model PaymentOrder {
 // Transacciones de pago (equivalente a payment_transactions)
 model PaymentTransaction {
   id                   String        @id @default(cuid())
-  transactionId        String        @map("transaction_id") @unique
+  transactionId        String        @unique @map("transaction_id")
   orderId              String        @map("id_order")
   status               PaymentStatus
   paymentGateway       String        @map("payment_gateway")
@@ -448,7 +448,7 @@ model PaymentTransaction {
   updatedAt            DateTime      @updatedAt
 
   // Relaciones
-  order PaymentOrder @relation("OrderTransactions", fields: [orderId], references: [id], onDelete: Cascade)
+  order     PaymentOrder      @relation("OrderTransactions", fields: [orderId], references: [id], onDelete: Cascade)
   auditLogs PaymentAuditLog[]
 
   @@map("payment_transactions")
@@ -456,38 +456,38 @@ model PaymentTransaction {
 
 // Log de auditoría de pagos (equivalente a payment_audit_log)
 model PaymentAuditLog {
-  id                String     @id @default(cuid())
-  orderId           String?    @map("id_order")
-  transactionId     String?    @map("id_transaction")
-  userId            String?    @map("id_usuario")
-  eventType         String     @map("event_type")
-  eventDescription  String?    @map("event_description")
-  performedBy       String?    @map("performed_by")
-  performedByType   String?    @map("performed_by_type")
-  oldValue          Json?      @map("old_value")
-  newValue          Json?      @map("new_value")
-  metadata          Json?
-  ipAddress         String?    @map("ip_address")
-  userAgent         String?    @map("user_agent")
-  createdAt         DateTime   @default(now()) @map("fecha_alta")
+  id               String   @id @default(cuid())
+  orderId          String?  @map("id_order")
+  transactionId    String?  @map("id_transaction")
+  userId           String?  @map("id_usuario")
+  eventType        String   @map("event_type")
+  eventDescription String?  @map("event_description")
+  performedBy      String?  @map("performed_by")
+  performedByType  String?  @map("performed_by_type")
+  oldValue         Json?    @map("old_value")
+  newValue         Json?    @map("new_value")
+  metadata         Json?
+  ipAddress        String?  @map("ip_address")
+  userAgent        String?  @map("user_agent")
+  createdAt        DateTime @default(now()) @map("fecha_alta")
 
   // Relaciones
-  order        PaymentOrder?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  transaction  PaymentTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
-  user         User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  order       PaymentOrder?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  transaction PaymentTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  user        User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("payment_audit_log")
 }
 
 // Reinicio de contraseña (equivalente a reinicio_contrasenia)
 model PasswordReset {
-  id         String   @id @default(cuid())
-  token      String   @unique
-  email      String
-  expiresAt  DateTime @map("fecha_exp")
-  userId     String?  @map("id_usuario")
-  used       Boolean  @default(false)
-  createdAt  DateTime @default(now()) @map("fecha_alta")
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime @map("fecha_exp")
+  userId    String?  @map("id_usuario")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("fecha_alta")
 
   user User? @relation(fields: [userId], references: [id])
 

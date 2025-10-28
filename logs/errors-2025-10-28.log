@@ -1,0 +1,2 @@
+2025-10-28 10:24:42 [ERROR] Error migrando User {"error":"\nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`email`)"}
+2025-10-28 10:24:42 [ERROR] Error migrando User {"error":"\nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`email`)"}

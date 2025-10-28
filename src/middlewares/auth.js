@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import pool from '../database/database.js';
+import prisma from '../database/prisma.js';
 
 /**
  * Obtiene el token de la request desde múltiples fuentes
@@ -140,7 +140,7 @@ export const authRequired = async (req, res, next) => {
     // Log de éxito en validación básica
     console.log(`AUTH SUCCESS: Token validated - User ID: ${decoded.id}, IP: ${req.ip}`);
 
-    const [user] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [decoded.id]);
+    const user = await prisma.user.findUnique({ where: { id: String(decoded.id) } });
     
     if (!user) {
       console.warn(`AUTH FAIL: User not found - User ID: ${decoded.id}, IP: ${req.ip}`);
@@ -150,15 +150,8 @@ export const authRequired = async (req, res, next) => {
       });
     }
 
-    if (!user[0].active) {
-      console.warn(`AUTH FAIL: User inactive - User ID: ${decoded.id}, IP: ${req.ip}`);
-      return res.status(401).json({ 
-        message: "Usuario desactivado",
-        code: "USER_INACTIVE"
-      });
-    }
-
-    req.user = user[0];
+    // Compat: mapear role -> rol para módulos existentes
+    req.user = { ...user, rol: user.role };
     
     // Log de autenticación exitosa
     const processingTime = Date.now() - startTime;

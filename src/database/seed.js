@@ -47,8 +47,12 @@ async function migrateUsers() {
 
   for (const user of users) {
     try {
-      await prisma.user.create({ data: user });
-      logger.info('User migrado', logger.sanitize({ name: user.name }));
+      await prisma.user.upsert({
+        where: { email: user.email },
+        update: {},
+        create: user
+      });
+      logger.info('User migrado (upsert)', logger.sanitize({ name: user.name }));
     } catch (error) {
       logger.error('Error migrando User', logger.sanitize({ error: error.message }));
     }

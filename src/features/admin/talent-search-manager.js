@@ -1,3 +1,6 @@
+import prisma from '../../database/prisma.js';
+import logger from '../../config/logger.config.js';
+
 /**
  * Servicios de Búsqueda de Talento - Gestión Administrativa
  *
@@ -17,37 +20,23 @@ class TalentSearchServiceManager {
    */
   static async getAllServices() {
     try {
-      const [services] = await pool.query(`
-        SELECT
-          id,
-          service_name,
-          base_price,
-          discount_percentage,
-          hires_included,
-          description,
-          features,
-          active,
-          display_order,
-          fecha_alta,
-          ultima_mod
-        FROM talent_search_services
-        ORDER BY display_order, service_name
-      `);
+      const services = await prisma.talentSearchService.findMany({
+        orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }]
+      });
 
-      return services.map(service => ({
-        id: service.id,
-        name: service.service_name,
-        basePrice: parseFloat(service.base_price),
-        discountPercentage: parseFloat(service.discount_percentage),
-        hiresIncluded: service.hires_included,
-        description: service.description,
-        features: JSON.parse(service.features || '{}'),
-        active: Boolean(service.active),
-        displayOrder: service.display_order,
-        createdAt: service.fecha_alta,
-        updatedAt: service.ultima_mod,
-        // Calcular precio final con descuento aplicado
-        finalPrice: parseFloat(service.base_price) * (1 - parseFloat(service.discount_percentage) / 100)
+      return services.map(s => ({
+        id: s.id,
+        name: s.name,
+        basePrice: s.price,
+        discountPercentage: s.discountPercentage ?? 0,
+        hiresIncluded: s.hiresIncluded ?? 1,
+        description: s.description,
+        features: s.features || {},
+        active: s.isActive,
+        displayOrder: s.displayOrder ?? 0,
+        createdAt: s.createdAt,
+        updatedAt: s.updatedAt,
+        finalPrice: (s.price ?? 0) * (1 - ((s.discountPercentage ?? 0) / 100))
       }));
 
     } catch (error) {
@@ -60,11 +49,7 @@ class TalentSearchServiceManager {
    * Crear nuevo servicio de búsqueda
    */
   static async createService(serviceData) {
-    const connection = await pool.getConnection();
-
     try {
-      await connection.beginTransaction();
-
       const {
         name,
         basePrice,
@@ -75,44 +60,32 @@ class TalentSearchServiceManager {
         displayOrder = 0
       } = serviceData;
 
-      // Verificar que el nombre no exista
-      const [existing] = await connection.query(
-        'SELECT id FROM talent_search_services WHERE service_name = ?',
-        [name]
-      );
+      const exists = await prisma.talentSearchService.findUnique({ where: { name } });
+      if (exists) throw new Error('Ya existe un servicio con ese nombre');
 
-      if (existing.length > 0) {
-        throw new Error('Ya existe un servicio con ese nombre');
-      }
-
-      // Insertar nuevo servicio
-      const [result] = await connection.query(`
-        INSERT INTO talent_search_services (
-          service_name, base_price, discount_percentage, hires_included,
-          description, features, display_order
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `, [
-        name,
-        basePrice,
-        discountPercentage,
-        hiresIncluded,
-        description,
-        JSON.stringify(features),
-        displayOrder
-      ]);
-
-      await connection.commit();
+      const created = await prisma.talentSearchService.create({
+        data: {
+          name,
+          price: basePrice,
+          discountPercentage,
+          hiresIncluded,
+          description,
+          features,
+          displayOrder,
+          isActive: true
+        }
+      });
 
       logger.info({
         type: 'TALENT_SEARCH_SERVICE_CREATED',
-        serviceId: result.insertId,
+        serviceId: created.id,
         serviceName: name,
         basePrice,
         discountPercentage
       });
 
       return {
-        id: result.insertId,
+        id: created.id,
         name,
         basePrice,
         discountPercentage,
@@ -124,11 +97,8 @@ class TalentSearchServiceManager {
       };
 
     } catch (error) {
-      await connection.rollback();
       logger.error('Error creando servicio de búsqueda:', error);
       throw error;
-    } finally {
-      connection.release();
     }
   }
 
@@ -136,109 +106,32 @@ class TalentSearchServiceManager {
    * Actualizar servicio existente
    */
   static async updateService(serviceId, updateData) {
-    const connection = await pool.getConnection();
-
     try {
-      await connection.beginTransaction();
-
-      const {
-        name,
-        basePrice,
-        discountPercentage,
-        hiresIncluded,
-        description,
-        features,
-        active,
-        displayOrder
-      } = updateData;
-
-      // Verificar que el servicio existe
-      const [existing] = await connection.query(
-        'SELECT id FROM talent_search_services WHERE id = ?',
-        [serviceId]
-      );
-
-      if (existing.length === 0) {
-        throw new Error('Servicio no encontrado');
-      }
-
-      // Si se cambia el nombre, verificar que no exista otro con ese nombre
+      const { name } = updateData;
       if (name) {
-        const [nameCheck] = await connection.query(
-          'SELECT id FROM talent_search_services WHERE service_name = ? AND id != ?',
-          [name, serviceId]
-        );
-
-        if (nameCheck.length > 0) {
-          throw new Error('Ya existe otro servicio con ese nombre');
-        }
+        const exists = await prisma.talentSearchService.findUnique({ where: { name } });
+        if (exists && exists.id !== serviceId) throw new Error('Ya existe otro servicio con ese nombre');
       }
 
-      // Construir query de actualización dinámicamente
-      const updates = [];
-      const values = [];
+      const data = {};
+      if (updateData.name !== undefined) data.name = updateData.name;
+      if (updateData.basePrice !== undefined) data.price = updateData.basePrice;
+      if (updateData.discountPercentage !== undefined) data.discountPercentage = updateData.discountPercentage;
+      if (updateData.hiresIncluded !== undefined) data.hiresIncluded = updateData.hiresIncluded;
+      if (updateData.description !== undefined) data.description = updateData.description;
+      if (updateData.features !== undefined) data.features = updateData.features;
+      if (updateData.active !== undefined) data.isActive = updateData.active;
+      if (updateData.displayOrder !== undefined) data.displayOrder = updateData.displayOrder;
 
-      if (name !== undefined) {
-        updates.push('service_name = ?');
-        values.push(name);
-      }
-      if (basePrice !== undefined) {
-        updates.push('base_price = ?');
-        values.push(basePrice);
-      }
-      if (discountPercentage !== undefined) {
-        updates.push('discount_percentage = ?');
-        values.push(discountPercentage);
-      }
-      if (hiresIncluded !== undefined) {
-        updates.push('hires_included = ?');
-        values.push(hiresIncluded);
-      }
-      if (description !== undefined) {
-        updates.push('description = ?');
-        values.push(description);
-      }
-      if (features !== undefined) {
-        updates.push('features = ?');
-        values.push(JSON.stringify(features));
-      }
-      if (active !== undefined) {
-        updates.push('active = ?');
-        values.push(active);
-      }
-      if (displayOrder !== undefined) {
-        updates.push('display_order = ?');
-        values.push(displayOrder);
-      }
+      if (Object.keys(data).length === 0) throw new Error('No hay datos para actualizar');
 
-      if (updates.length === 0) {
-        throw new Error('No hay datos para actualizar');
-      }
+      await prisma.talentSearchService.update({ where: { id: String(serviceId) }, data });
 
-      values.push(serviceId);
-
-      await connection.query(`
-        UPDATE talent_search_services
-        SET ${updates.join(', ')}, ultima_mod = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `, values);
-
-      await connection.commit();
-
-      logger.info({
-        type: 'TALENT_SEARCH_SERVICE_UPDATED',
-        serviceId,
-        updates: Object.keys(updateData)
-      });
-
+      logger.info({ type: 'TALENT_SEARCH_SERVICE_UPDATED', serviceId, updates: Object.keys(updateData) });
       return true;
-
     } catch (error) {
-      await connection.rollback();
       logger.error('Error actualizando servicio de búsqueda:', error);
       throw error;
-    } finally {
-      connection.release();
     }
   }
 
@@ -247,22 +140,9 @@ class TalentSearchServiceManager {
    */
   static async deleteService(serviceId) {
     try {
-      const [result] = await pool.query(
-        'UPDATE talent_search_services SET active = FALSE WHERE id = ?',
-        [serviceId]
-      );
-
-      if (result.affectedRows === 0) {
-        throw new Error('Servicio no encontrado');
-      }
-
-      logger.info({
-        type: 'TALENT_SEARCH_SERVICE_DELETED',
-        serviceId
-      });
-
+      await prisma.talentSearchService.update({ where: { id: String(serviceId) }, data: { isActive: false } });
+      logger.info({ type: 'TALENT_SEARCH_SERVICE_DELETED', serviceId });
       return true;
-
     } catch (error) {
       logger.error('Error eliminando servicio de búsqueda:', error);
       throw error;
@@ -274,43 +154,38 @@ class TalentSearchServiceManager {
    */
   static async getServiceStats(serviceId = null) {
     try {
-      let whereClause = '';
-      let params = [];
+      const last30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const services = await prisma.talentSearchService.findMany({
+        where: serviceId ? { id: String(serviceId) } : {},
+        select: { id: true, name: true }
+      });
 
-      if (serviceId) {
-        whereClause = 'WHERE ci.item_id = ?';
-        params = [serviceId];
-      }
-
-      const [stats] = await pool.query(`
-        SELECT
-          tss.id,
-          tss.service_name,
-          COUNT(ci.id) as times_used,
-          SUM(ci.quantity) as total_hires,
-          SUM(ci.total) as total_revenue,
-          AVG(ci.unit_price) as avg_unit_price,
-          MAX(ci.fecha_alta) as last_used
-        FROM talent_search_services tss
-        LEFT JOIN cart_items ci ON (
-          ci.item_type = 'talent_search' AND
-          ci.item_id = tss.id AND
-          ci.fecha_alta >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        )
-        ${whereClause}
-        GROUP BY tss.id, tss.service_name
-        ORDER BY times_used DESC, total_revenue DESC
-      `, params);
-
-      return stats.map(stat => ({
-        serviceId: stat.id,
-        serviceName: stat.service_name,
-        timesUsed: parseInt(stat.times_used) || 0,
-        totalHires: parseInt(stat.total_hires) || 0,
-        totalRevenue: parseFloat(stat.total_revenue) || 0,
-        avgUnitPrice: parseFloat(stat.avg_unit_price) || 0,
-        lastUsed: stat.last_used
+      const stats = await Promise.all(services.map(async (s) => {
+        const items = await prisma.cartItem.findMany({
+          where: {
+            itemType: 'talent_search',
+            itemId: String(s.id),
+            createdAt: { gte: last30d }
+          },
+          select: { id: true, quantity: true, total: true, unitPrice: true, createdAt: true }
+        });
+        const timesUsed = items.length;
+        const totalHires = items.reduce((a, b) => a + (b.quantity || 0), 0);
+        const totalRevenue = items.reduce((a, b) => a + (b.total || 0), 0);
+        const avgUnitPrice = items.length ? (items.reduce((a, b) => a + (b.unitPrice || 0), 0) / items.length) : 0;
+        const lastUsed = items.reduce((max, it) => (max && max > it.createdAt ? max : it.createdAt), null);
+        return {
+          serviceId: s.id,
+          serviceName: s.name,
+          timesUsed,
+          totalHires,
+          totalRevenue,
+          avgUnitPrice,
+          lastUsed
+        };
       }));
+
+      return stats.sort((a, b) => (b.timesUsed - a.timesUsed) || (b.totalRevenue - a.totalRevenue));
 
     } catch (error) {
       logger.error('Error obteniendo estadísticas de servicios:', error);

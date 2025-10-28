@@ -1,0 +1,8 @@
+[
+  "01-usuarios.sql",
+  "02-planes.sql",
+  "03-tax-config.sql",
+  "04-talent-search-services.sql",
+  "05-consultants.sql",
+  "06-update-planes.sql"
+]

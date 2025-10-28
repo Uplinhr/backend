@@ -1,0 +1,24 @@
+2025-10-28 10:24:41 [INFO] Iniciando migración de datos de seeders
+2025-10-28 10:24:42 [ERROR] Error migrando User {"error":"\nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`email`)"}
+2025-10-28 10:24:42 [ERROR] Error migrando User {"error":"\nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`email`)"}
+2025-10-28 10:24:42 [INFO] TaxConfig migrado {"name":"IVA"}
+2025-10-28 10:24:42 [INFO] TaxConfig migrado {"name":"IGV"}
+2025-10-28 10:24:42 [INFO] TalentSearchService migrado {"name":"Búsqueda Básica"}
+2025-10-28 10:24:42 [INFO] TalentSearchService migrado {"name":"Búsqueda Avanzada"}
+2025-10-28 10:24:42 [INFO] Consultant migrado {"name":"Juan Pérez"}
+2025-10-28 10:24:42 [INFO] Consultant migrado {"name":"María López"}
+2025-10-28 10:24:42 [INFO] Plan migrado {"name":"Básico"}
+2025-10-28 10:24:42 [INFO] Plan migrado {"name":"Premium"}
+2025-10-28 10:24:42 [INFO] Migración de datos completada
+2025-10-28 11:02:54 [INFO] Iniciando migración de datos de seeders
+2025-10-28 11:02:57 [INFO] User migrado (upsert) {"name":"Juan Pérez"}
+2025-10-28 11:02:57 [INFO] User migrado (upsert) {"name":"María López"}
+2025-10-28 11:02:57 [INFO] TaxConfig migrado {"name":"IVA"}
+2025-10-28 11:02:57 [INFO] TaxConfig migrado {"name":"IGV"}
+2025-10-28 11:02:57 [INFO] TalentSearchService migrado {"name":"Búsqueda Básica"}
+2025-10-28 11:02:57 [INFO] TalentSearchService migrado {"name":"Búsqueda Avanzada"}
+2025-10-28 11:02:57 [INFO] Consultant migrado {"name":"Juan Pérez"}
+2025-10-28 11:02:57 [INFO] Consultant migrado {"name":"María López"}
+2025-10-28 11:02:57 [INFO] Plan migrado {"name":"Básico"}
+2025-10-28 11:02:57 [INFO] Plan migrado {"name":"Premium"}
+2025-10-28 11:02:57 [INFO] Migración de datos completada
