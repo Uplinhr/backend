@@ -21,6 +21,64 @@ async function migrateTaxConfigs() {
   }
 }
 
+async function seedMembershipPlans() {
+  const plans = [
+    {
+      code: 'START',
+      name: 'Start',
+      priceMonthly: 149,
+      currency: 'USD',
+      creditsPerMonth: 110,
+      rolloverMonths: 0,
+      benefits: { trialDays: 7, academy: true, support: ['email','whatsapp'] },
+      isActive: true,
+    },
+    {
+      code: 'GROWTH',
+      name: 'Growth',
+      priceMonthly: 499,
+      currency: 'USD',
+      creditsPerMonth: 120,
+      rolloverMonths: 3,
+      benefits: { academy: true, support: ['email','whatsapp'], advisor: false },
+      isActive: true,
+    },
+    {
+      code: 'PREMIUM',
+      name: 'Premium',
+      priceMonthly: 1399,
+      currency: 'USD',
+      creditsPerMonth: 300,
+      rolloverMonths: 3,
+      benefits: { academy: true, support: ['email','whatsapp'], advisor: true },
+      isActive: true,
+    },
+    {
+      code: 'CUSTOM',
+      name: 'Custom',
+      priceMonthly: 0,
+      currency: 'USD',
+      creditsPerMonth: 0,
+      rolloverMonths: 3,
+      benefits: { custom: true },
+      isActive: true,
+    },
+  ];
+
+  for (const p of plans) {
+    try {
+      await prisma.membershipPlan.upsert({
+        where: { code: p.code },
+        update: { ...p },
+        create: { ...p },
+      });
+      logger.info('MembershipPlan seed (upsert)', logger.sanitize({ code: p.code }));
+    } catch (error) {
+      logger.error('Error seeding MembershipPlan', logger.sanitize({ error: error.message }));
+    }
+  }
+}
+
 async function migrateTalentSearchServices() {
   // Datos basados en 04-talent-search-services.sql (ejemplo real)
   const services = [
@@ -106,6 +164,7 @@ async function main() {
   await migrateTalentSearchServices();
   await migrateConsultants();
   await migratePlans();
+  await seedMembershipPlans();
 
   logger.info('Migración de datos completada');
 }

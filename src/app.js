@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import config from './config.js';
 import helmet from 'helmet'; // Import para headers de seguridad
 import logger from './config/logger.config.js'; // Import para logging con Winston
+import { randomUUID } from 'crypto';
 
 // Para ESM: obtener __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +27,9 @@ import { cartRoutes } from './features/cart/index.js';
 import { taxesRoutes } from './features/taxes/index.js';
 import { paymentsRoutes } from './features/payments/index.js';
 import adminTalentSearchRoutes from './features/admin/talent-search.routes.js';
+import membershipsRoutes from './features/memberships/routes.js';
+import membershipsAdminRoutes from './features/memberships/admin.routes.js';
+import membershipsWebhooksRoutes from './features/webhooks/memberships.routes.js';
 import { securityHeaders, preventParameterPollution, sanitizeData, generalRateLimiter, auditLog } from './middlewares/security.middleware.js';
 
 const app = express();
@@ -93,6 +97,9 @@ app.use('/api/consultas', consultasRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/taxes', taxesRoutes);
 app.use('/api/payments', paymentsRoutes);
+app.use('/api/memberships', membershipsRoutes);
+app.use('/api/admin/memberships', membershipsAdminRoutes);
+app.use('/api/webhooks/memberships', membershipsWebhooksRoutes);
 
 // Rutas administrativas
 app.use('/api/admin', adminTalentSearchRoutes);
@@ -111,7 +118,7 @@ app.use((err, req, res, next) => {
   let statusCode = 500;
   let message = 'Error interno del servidor';
   let logLevel = 'error';
-  let errorId = require('crypto').randomUUID(); // ID único para tracking
+  let errorId = randomUUID(); // ID único para tracking
 
   if (err.name === 'ValidationError') {
     statusCode = 400;

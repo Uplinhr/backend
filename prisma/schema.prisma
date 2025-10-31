@@ -4,6 +4,150 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
+// Planes de membresía mensuales (Start, Growth, Premium, Custom)
+model MembershipPlan {
+  id           String   @id @default(cuid())
+  code         String   @unique // START, GROWTH, PREMIUM, CUSTOM
+  name         String
+  priceMonthly Float
+  currency     String   @default("USD")
+  creditsPerMonth Int
+  rolloverMonths  Int   @default(0) // 0 = no acumulables
+  benefits     Json?
+  // Integración con pasarelas
+  mpProductId  String?
+  paypalPlanId String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subscriptions MembershipSubscription[]
+
+  @@map("membership_plans")
+}
+
+// Suscripción del usuario a un plan de membresía
+model MembershipSubscription {
+  id               String             @id @default(cuid())
+  userId           String
+  planId           String
+  status           SubscriptionStatus @default(ACTIVE)
+  startedAt        DateTime           @default(now())
+  canceledAt       DateTime?
+  suspendedAt      DateTime?
+  nextBillingAt    DateTime
+  lastChargedAt    DateTime?
+  lastChargeResult ChargeResult?
+  retryAttempts    Int                @default(0)
+  maxRetryAttempts Int                @default(3)
+  retryIntervalHrs Int                @default(24)
+  graceDays        Int                @default(7)
+  metadata         Json?
+  // Identificadores externos para conciliación
+  externalCustomerId     String?
+  externalSubscriptionId String?
+  lastExternalChargeId   String?
+
+  user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan MembershipPlan @relation(fields: [planId], references: [id])
+
+  @@index([userId, status])
+  @@map("membership_subscriptions")
+}
+
+// Perfil de usuario (datos personales extendidos)
+model UserProfile {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  documentType   String?
+  documentNumber String?
+  dateOfBirth    DateTime?
+  country        String?
+  state          String?
+  city           String?
+  address        String?
+  postalCode     String?
+  jobTitle       String?
+  seniority      String?
+  linkedinUrl    String?
+  website        String?
+  preferences    Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+// Perfil de empresa del usuario (B2B)
+model CompanyProfile {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  companyName  String
+  companyEmail String?
+  companyPhone String?
+  taxId        String?
+  industry     String?
+  companySize  String?
+  country      String?
+  state        String?
+  city         String?
+  address      String?
+  postalCode   String?
+  website      String?
+  linkedinUrl  String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("company_profiles")
+}
+
+// Identidades externas (OAuth/OIDC)
+model UserIdentity {
+  id             String       @id @default(cuid())
+  userId         String
+  provider       AuthProvider
+  providerUserId String
+  rawProfile     Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId, provider])
+  @@map("user_identities")
+}
+
+// Notificaciones transaccionales
+model Notification {
+  id        String             @id @default(cuid())
+  userId    String
+  type      NotificationType
+  status    NotificationStatus @default(PENDING)
+  subject   String
+  body      String?
+  metadata  Json?
+  sentAt    DateTime?
+  createdAt DateTime           @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  ACCOUNT_WELCOME
+  PASSWORD_RESET
+  PLAN_PURCHASE
+  TALENT_SEARCH_UPDATE
+  CONSULTATION_UPDATE
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -11,27 +155,42 @@ datasource db {
 
 // Modelo User (integración con Auth0)
 model User {
-  id        String    @id @default(cuid())
-  auth0Id   String?   @unique // Para integración con Auth0
-  email     String    @unique
-  name      String?
-  role      Role      @default(CLIENTE) // Enum para roles
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  id               String       @id @default(cuid())
+  auth0Id          String?      @unique // Para integración con Auth0
+  email            String       @unique
+  name             String?
+  provider         AuthProvider @default(MAGIC_LINK)
+  emailVerified    Boolean      @default(false)
+  profileCompleted Boolean      @default(false)
+  firstName        String?
+  lastName         String?
+  fullName         String?
+  pictureUrl       String?
+  locale           String?
+  phone            String?
+  role             Role         @default(CLIENTE) // Enum para roles
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  deletedAt        DateTime?
 
   // Relaciones
-  transactions   Transaction[]
-  plans          UserPlan[]
-  consultants    Consultant[]      @relation("UserConsultants")
-  credits        Credit[]
-  consultations  Consultation[]
-  planPurchases  PlanPurchase[]
-  empresas       Empresa[]
-  shoppingCarts  ShoppingCart[]
-  paymentOrders  PaymentOrder[]
-  auditLogs      PaymentAuditLog[]
-  passwordResets PasswordReset[]
+  transactions            Transaction[]
+  plans                   UserPlan[]
+  consultants             Consultant[]             @relation("UserConsultants")
+  credits                 Credit[]
+  consultations           Consultation[]
+  planPurchases           PlanPurchase[]
+  empresas                Empresa[]
+  shoppingCarts           ShoppingCart[]
+  paymentOrders           PaymentOrder[]
+  auditLogs               PaymentAuditLog[]
+  passwordResets          PasswordReset[]
+  // Nuevas relaciones Auth0/Profile
+  profile                 UserProfile?
+  company                 CompanyProfile?
+  identities              UserIdentity[]
+  notifications           Notification[]
+  membershipSubscriptions MembershipSubscription[]
 
   @@map("users")
 }
@@ -330,6 +489,14 @@ enum Role {
   CLIENTE
 }
 
+// Proveedor de autenticación
+enum AuthProvider {
+  GOOGLE
+  LINKEDIN
+  MAGIC_LINK
+  EMAIL_PASSWORD
+}
+
 enum TransactionStatus {
   PENDING
   COMPLETED
@@ -342,6 +509,21 @@ enum PaymentGateway {
   MERCADO_PAGO
   PAYPAL
   PAYONEER
+}
+
+// Estado de suscripción de membresías
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  SUSPENDED
+}
+
+// Intento de cobro del ciclo
+enum ChargeResult {
+  SUCCESS
+  FAILED
+  PENDING
 }
 
 enum CreditType {

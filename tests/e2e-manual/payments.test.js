@@ -1,5 +1,13 @@
 import request from 'supertest';
-import app from '../src/app.js';
+let app;
+
+beforeAll(async () => {
+  ({ default: app } = await import('../src/app.js'));
+});
+
+afterAll(async () => {
+  await new Promise((r) => setTimeout(r, 0));
+});
 
 describe('Payment System Tests', () => {
   let authToken;

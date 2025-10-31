@@ -1,6 +1,7 @@
 // src/middleware/validation.js - Middleware de validación robusto según prompt Día 2
 import { body, param, query, validationResult } from 'express-validator';
 import logger from '../config/logger.config.js';
+import { randomUUID } from 'crypto';
 
 // Middleware para validar resultados de validación
 export const handleValidationErrors = (req, res, next) => {
@@ -17,7 +18,7 @@ export const handleValidationErrors = (req, res, next) => {
     return res.status(400).json({
       error: 'Datos de entrada inválidos',
       details: errors.array(),
-      errorId: require('crypto').randomUUID()
+      errorId: randomUUID()
     });
   }
 
@@ -322,7 +323,7 @@ export const validateRequestSize = (maxSize = '10mb') => {
 
       return res.status(413).json({
         error: 'Request demasiado grande',
-        errorId: require('crypto').randomUUID()
+        errorId: randomUUID()
       });
     }
 
@@ -344,7 +345,7 @@ export const validateFileType = (allowedTypes = ['image/jpeg', 'image/png', 'app
 
       return res.status(400).json({
         error: 'Tipo de archivo no permitido',
-        errorId: require('crypto').randomUUID()
+        errorId: randomUUID()
       });
     }
 

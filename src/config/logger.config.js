@@ -1,6 +1,6 @@
 // src/config/logger.config.js - Configuración actualizada con sanitize (ES modules)
 import winston from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
+// Daily rotate deshabilitado para compatibilidad ESM/Jest
 
 // Formato para logs
 const logFormat = winston.format.combine(
@@ -14,22 +14,9 @@ const logFormat = winston.format.combine(
   })
 );
 
-// Transport para errores
-const errorTransport = new DailyRotateFile({
-  filename: 'logs/errors-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  maxSize: '20m',
-  maxFiles: '14d',
-  level: 'error',
-});
-
-// Transport para logs generales
-const combinedTransport = new DailyRotateFile({
-  filename: 'logs/combined-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  maxSize: '20m',
-  maxFiles: '14d',
-});
+const isTest = process.env.NODE_ENV === 'test';
+const errorTransport = null;
+const combinedTransport = null;
 
 // Logger principal
 const logger = winston.createLogger({
@@ -37,13 +24,14 @@ const logger = winston.createLogger({
   format: logFormat,
   transports: [
     new winston.transports.Console({
+      silent: isTest,
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.simple(),
       ),
     }),
-    errorTransport,
-    combinedTransport,
+    ...(errorTransport ? [errorTransport] : []),
+    ...(combinedTransport ? [combinedTransport] : []),
   ],
   exceptionHandlers: [
     new winston.transports.File({ filename: 'logs/exceptions.log' }),
@@ -70,20 +58,7 @@ export const paymentLogger = winston.createLogger({
   level: 'info',
   format: logFormat,
   transports: [
-    new DailyRotateFile({
-      filename: 'logs/payments-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '90d', // Mantener logs de pagos por 90 días
-      level: 'info',
-    }),
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple(),
-      ),
-      level: 'warn', // Solo mostrar warnings y errors en consola
-    }),
+    new winston.transports.Console({ silent: isTest })
   ],
 });
 

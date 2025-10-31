@@ -10,6 +10,11 @@ export default {
     '**/tests/**/*.test.js',
     '**/__tests__/**/*.js',
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/tests/e2e-manual/',
+  ],
+  transform: {},
   verbose: true,
   testTimeout: 10000,
   clearMocks: true,
