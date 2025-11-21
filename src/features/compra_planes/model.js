@@ -4,7 +4,7 @@ import prisma from '../../database/prisma.js'
 // Prisma: { id, userId, planId, amount, paymentMethod, notes, createdAt }
 // Legacy: { id, medio_pago, observaciones, precio_abonado, id_plan, id_usuario, fecha_alta, plan(JSON), usuario(JSON) }
 const mapPlanPurchaseToLegacy = (pp) => {
-    if (\!pp) return null;
+    if (!pp) return null;
     
     return {
         id: pp.id,
@@ -73,11 +73,11 @@ const compra_planModel = {
     
     editCompra_PlanById: async (id, plan) => {
         const updateData = {};
-        if (plan.medio_pago \!== undefined) updateData.paymentMethod = plan.medio_pago;
-        if (plan.observaciones \!== undefined) updateData.notes = plan.observaciones;
-        if (plan.precio_abonado \!== undefined) updateData.amount = plan.precio_abonado;
-        if (plan.id_plan \!== undefined) updateData.planId = plan.id_plan;
-        if (plan.id_usuario \!== undefined) updateData.userId = plan.id_usuario;
+        if (plan.medio_pago !== undefined) updateData.paymentMethod = plan.medio_pago;
+        if (plan.observaciones !== undefined) updateData.notes = plan.observaciones;
+        if (plan.precio_abonado !== undefined) updateData.amount = plan.precio_abonado;
+        if (plan.id_plan !== undefined) updateData.planId = plan.id_plan;
+        if (plan.id_usuario !== undefined) updateData.userId = plan.id_usuario;
         
         if (Object.keys(updateData).length === 0) return false;
         
@@ -86,7 +86,7 @@ const compra_planModel = {
             data: updateData
         });
         
-        return \!\!updated;
+        return !!updated;
     },
     
     create: async (medio_pago, observaciones, precio_abonado, id_plan, id_usuario) => {
@@ -108,8 +108,9 @@ const compra_planModel = {
         const deleted = await prisma.planPurchase.delete({
             where: { id }
         });
-        return \!\!deleted;
+        return !!deleted;
     }
 }
 
 export default compra_planModel
+

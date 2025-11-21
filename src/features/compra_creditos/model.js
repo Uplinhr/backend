@@ -4,7 +4,7 @@ import prisma from '../../database/prisma.js'
 // Prisma: { id, creditId, amount, paymentMethod, notes, createdAt }
 // Legacy: { id, medio_pago, costo, observaciones, id_cred, fecha_alta, creditos(JSON) }
 const mapCreditPurchaseToLegacy = (cp) => {
-    if (\!cp) return null;
+    if (!cp) return null;
     
     return {
         id: cp.id,
@@ -60,10 +60,10 @@ const compra_creditosModel = {
     
     editById: async (id, compra_credito) => {
         const updateData = {};
-        if (compra_credito.medio_pago \!== undefined) updateData.paymentMethod = compra_credito.medio_pago;
-        if (compra_credito.costo \!== undefined) updateData.amount = compra_credito.costo;
-        if (compra_credito.observaciones \!== undefined) updateData.notes = compra_credito.observaciones;
-        if (compra_credito.id_cred \!== undefined) updateData.creditId = compra_credito.id_cred;
+        if (compra_credito.medio_pago !== undefined) updateData.paymentMethod = compra_credito.medio_pago;
+        if (compra_credito.costo !== undefined) updateData.amount = compra_credito.costo;
+        if (compra_credito.observaciones !== undefined) updateData.notes = compra_credito.observaciones;
+        if (compra_credito.id_cred !== undefined) updateData.creditId = compra_credito.id_cred;
         
         if (Object.keys(updateData).length === 0) return false;
         
@@ -72,7 +72,7 @@ const compra_creditosModel = {
             data: updateData
         });
         
-        return \!\!updated;
+        return !!updated;
     },
     
     create: async (medio_pago, costo, observaciones, cantidad, id_usuario) => {
@@ -114,8 +114,9 @@ const compra_creditosModel = {
                 }
             }
         });
-        return \!\!updated;
+        return !!updated;
     }
 }
 
 export default compra_creditosModel
+

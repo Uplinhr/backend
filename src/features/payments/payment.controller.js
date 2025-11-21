@@ -275,7 +275,7 @@ class PaymentController {
 
       const config = {
         configured: mercadopagoAdapter.isConfigured(),
-        webhookUrl: `${process.env.WEBHOOK_BASE_URL}/mercadopago`,
+        webhookUrl: `${process.env.WEBHOOK_BASE_URL}/api/mercadopago/webhook`,
         mode: process.env.NODE_ENV || 'development'
       };
 

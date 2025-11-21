@@ -4,7 +4,7 @@ import prisma from '../../database/prisma.js'
 // Prisma: { id, userId, totalHours, remainingHours, expiryDate, isActive, createdAt, updatedAt, sessions[] }
 // Legacy: { id, horas_totales, horas_restantes, fecha_alta, vencimiento, id_usuario, consultas(JSON) }
 const mapConsultationToLegacy = (c) => {
-    if (\!c) return null;
+    if (!c) return null;
     
     return {
         id: c.id,
@@ -83,10 +83,10 @@ const consultoriaModel = {
     
     editById: async (id, consultoria) => {
         const updateData = {};
-        if (consultoria.horas_totales \!== undefined) updateData.totalHours = consultoria.horas_totales;
-        if (consultoria.horas_restantes \!== undefined) updateData.remainingHours = consultoria.horas_restantes;
-        if (consultoria.vencimiento \!== undefined) updateData.expiryDate = consultoria.vencimiento;
-        if (consultoria.id_usuario \!== undefined) updateData.userId = consultoria.id_usuario;
+        if (consultoria.horas_totales !== undefined) updateData.totalHours = consultoria.horas_totales;
+        if (consultoria.horas_restantes !== undefined) updateData.remainingHours = consultoria.horas_restantes;
+        if (consultoria.vencimiento !== undefined) updateData.expiryDate = consultoria.vencimiento;
+        if (consultoria.id_usuario !== undefined) updateData.userId = consultoria.id_usuario;
         
         if (Object.keys(updateData).length === 0) return false;
         
@@ -95,7 +95,7 @@ const consultoriaModel = {
             data: updateData
         });
         
-        return \!\!updated;
+        return !!updated;
     },
     
     create: async (horas_totales, horas_restantes, vencimiento, id_usuario) => {
@@ -117,8 +117,9 @@ const consultoriaModel = {
             where: { id },
             data: { isActive: false }
         });
-        return \!\!updated;
+        return !!updated;
     }
 }
 
 export default consultoriaModel
+

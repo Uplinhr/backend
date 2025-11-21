@@ -1,6 +1,7 @@
 // src/database/seed.js - Script para migrar datos de seeders SQL a Prisma
 import { PrismaClient } from '../generated/prisma/index.js';
 import logger from '../config/logger.config.js';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -99,16 +100,24 @@ async function migrateTalentSearchServices() {
 async function migrateUsers() {
   // Datos de usuarios para consultores
   const users = [
-    { email: 'juan@example.com', name: 'Juan Pérez', role: 'CLIENTE' },
-    { email: 'maria@example.com', name: 'María López', role: 'CLIENTE' },
+    { email: 'admin@uplin.test', name: 'Admin', role: 'ADMINISTRADOR', passwordPlain: 'admin123' },
+    { email: 'cliente@uplin.test', name: 'Cliente', role: 'CLIENTE', passwordPlain: 'client123' },
+    { email: 'juan@example.com', name: 'Juan Pérez', role: 'CLIENTE', passwordPlain: 'test123' },
+    { email: 'maria@example.com', name: 'María López', role: 'CLIENTE', passwordPlain: 'test123' },
   ];
 
   for (const user of users) {
     try {
+      const password = await bcrypt.hash(user.passwordPlain, 10);
       await prisma.user.upsert({
         where: { email: user.email },
-        update: {},
-        create: user
+        update: { role: user.role, name: user.name, password },
+        create: {
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          password,
+        }
       });
       logger.info('User migrado (upsert)', logger.sanitize({ name: user.name }));
     } catch (error) {

@@ -4,7 +4,7 @@ import prisma from '../../database/prisma.js'
 // Prisma: { id, creditId, searchInfo, creditsUsed, status, notes, createdAt, updatedAt }
 // Legacy: { id, info_busqueda, creditos_usados, observaciones, estado, id_cred, id_tipo, id_proceso, fecha_alta, ultima_mod, usuario(JSON), creditos(JSON) }
 const mapSearchToLegacy = (s) => {
-    if (\!s) return null;
+    if (!s) return null;
     
     return {
         id: s.id,
@@ -74,7 +74,7 @@ const busquedaModel = {
             }
         });
         
-        if (\!search) return null;
+        if (!search) return null;
         
         return {
             ...mapSearchToLegacy(search),
@@ -142,11 +142,11 @@ const busquedaModel = {
     
     editById: async (id, busqueda) => {
         const updateData = {};
-        if (busqueda.info_busqueda \!== undefined) updateData.searchInfo = busqueda.info_busqueda;
-        if (busqueda.creditos_usados \!== undefined) updateData.creditsUsed = busqueda.creditos_usados;
-        if (busqueda.observaciones \!== undefined) updateData.notes = busqueda.observaciones;
-        if (busqueda.estado \!== undefined) updateData.status = busqueda.estado.toUpperCase();
-        if (busqueda.id_cred \!== undefined) updateData.creditId = busqueda.id_cred;
+        if (busqueda.info_busqueda !== undefined) updateData.searchInfo = busqueda.info_busqueda;
+        if (busqueda.creditos_usados !== undefined) updateData.creditsUsed = busqueda.creditos_usados;
+        if (busqueda.observaciones !== undefined) updateData.notes = busqueda.observaciones;
+        if (busqueda.estado !== undefined) updateData.status = busqueda.estado.toUpperCase();
+        if (busqueda.id_cred !== undefined) updateData.creditId = busqueda.id_cred;
         
         if (Object.keys(updateData).length === 0) return false;
         
@@ -155,7 +155,7 @@ const busquedaModel = {
             data: updateData
         });
         
-        return \!\!updated;
+        return !!updated;
     },
     
     create: async (info_busqueda, id_cred) => {
@@ -176,8 +176,9 @@ const busquedaModel = {
             where: { id },
             data: { status: 'CANCELLED' }
         });
-        return \!\!updated;
+        return !!updated;
     }
 }
 
 export default busquedaModel
+

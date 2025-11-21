@@ -1,9 +1,17 @@
 import { auth } from 'express-oauth2-jwt-bearer';
 
-const requireAuth0 = auth({
-  audience: process.env.AUTH0_AUDIENCE,
-  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
-  tokenSigningAlg: 'RS256',
-});
+const audience = process.env.AUTH0_AUDIENCE;
+const domain = process.env.AUTH0_DOMAIN;
+
+let requireAuth0;
+if (audience && domain) {
+  requireAuth0 = auth({
+    audience,
+    issuerBaseURL: `https://${domain}/`,
+    tokenSigningAlg: 'RS256',
+  });
+} else {
+  requireAuth0 = (req, res, next) => next();
+}
 
 export default requireAuth0;

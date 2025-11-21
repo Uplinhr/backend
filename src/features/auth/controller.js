@@ -168,6 +168,32 @@ export const register = async (req, res) => {
       console.error('Error enviando email:', error)
     }
 
+    // Enviar email de verificación al usuario
+    try {
+      const verifyToken = jwt.sign({ id: idUsuario, purpose: 'verify_email' }, process.env.JWT_SECRET, { expiresIn: '24h' });
+      const verifyLink = `${process.env.FRONTEND_URL}/verify-email?token=${verifyToken}`;
+      await resend.emails.send({
+        from: `UplinHR <${process.env.EMAIL_FROM}>`,
+        to: [email],
+        subject: 'Confirma tu correo - UplinHR',
+        html: `
+          <html><body style="font-family:Arial,sans-serif">
+            <h2 style="color:#502B7D;">Confirma tu correo</h2>
+            <p>Hola ${[nombre, apellido].filter(Boolean).join(' ') || ''}, gracias por registrarte en UplinHR.</p>
+            <p>Para activar tu cuenta, por favor confirma tu correo haciendo clic en el siguiente botón:</p>
+            <p style="text-align:center;margin:24px 0;">
+              <a href="${verifyLink}" style="display:inline-block;padding:12px 20px;background:#6C4099;color:#fff;border-radius:6px;text-decoration:none;font-weight:600;">Confirmar correo</a>
+            </p>
+            <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+            <p><a href="${verifyLink}">${verifyLink}</a></p>
+            <p style="color:#666;font-size:12px">Este enlace expira en 24 horas.</p>
+          </body></html>
+        `,
+      });
+    } catch (e) {
+      console.error('No se pudo enviar verificación de email:', e?.message || e);
+    }
+
     successRes(res, {
       data: { id: idUsuario, token },
       message: 'Usuario creado exitosamente',
@@ -191,6 +217,48 @@ export const register = async (req, res) => {
         errors: error.message
       });
     }
+  }
+};
+
+// Envía verificación de email al usuario autenticado (JWT local)
+export const sendVerifyEmail = async (req, res) => {
+  try {
+    const userId = String(req.user.id);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return errorRes(res, { message: 'Usuario no encontrado', statusCode: 404 });
+    if (user.emailVerified) return successRes(res, { message: 'El email ya está verificado', statusCode: 200 });
+
+    const verifyToken = jwt.sign({ id: userId, purpose: 'verify_email' }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const verifyLink = `${process.env.FRONTEND_URL}/verify-email?token=${verifyToken}`;
+    const resend = new Resend(process.env.MAIL_API_KEY);
+    await resend.emails.send({
+      from: `UplinHR <${process.env.EMAIL_FROM}>`,
+      to: [user.email],
+      subject: 'Confirma tu correo - UplinHR',
+      html: `<html><body><p>Confirma tu correo:</p><p><a href="${verifyLink}">${verifyLink}</a></p></body></html>`,
+    });
+    return successRes(res, { message: 'Email de verificación enviado', statusCode: 200 });
+  } catch (error) {
+    return errorRes(res, { message: 'Error enviando verificación', statusCode: 500, errors: error.message });
+  }
+};
+
+// Confirma verificación de email usando token
+export const confirmVerifyEmail = async (req, res) => {
+  try {
+    const token = req.query.token || req.body.token;
+    if (!token) return errorRes(res, { message: 'Token requerido', statusCode: 400 });
+    const decoded = jwt.verify(String(token), process.env.JWT_SECRET);
+    if (decoded.purpose !== 'verify_email' || !decoded.id) {
+      return errorRes(res, { message: 'Token inválido', statusCode: 400 });
+    }
+    await prisma.user.update({ where: { id: String(decoded.id) }, data: { emailVerified: true } });
+    return successRes(res, { message: 'Email verificado correctamente', statusCode: 200 });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return errorRes(res, { message: 'El enlace ha expirado', statusCode: 400 });
+    }
+    return errorRes(res, { message: 'Error verificando email', statusCode: 500, errors: error.message });
   }
 };
 
@@ -221,14 +289,25 @@ export const login = async (req, res) => {
       });
     }
 
+    if (process.env.DEV) console.log('[LOGIN] email received:', email);
+
     const user = await authModel.login(email)
+    if (process.env.DEV) console.log('[LOGIN] user found:', !!user);
 
     if (!user) return errorRes(res, {message: 'Usuario no encontrado',statusCode: 404});
 
+    if (!user.contrasenia) {
+      return errorRes(res, { message: 'El usuario no tiene contraseña local. Restablece la contraseña o ingresa con Auth0.', statusCode: 400 });
+    }
+
+    if (process.env.DEV) console.log('[LOGIN] hash length:', user.contrasenia ? String(user.contrasenia).length : 0);
     const isMatch = await bcrypt.compare(contrasenia, user.contrasenia);
+    if (process.env.DEV) console.log('[LOGIN] bcrypt.compare result:', isMatch);
     if (!isMatch) return errorRes(res, {message: 'Contraseña incorrecta',statusCode: 400});
 
     if(!user.active) return errorRes(res, {message: 'Usuario desactivado',statusCode: 400});
+
+    // Eliminado: no exigir verificación de correo para iniciar sesión
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: '1h'

@@ -4,7 +4,7 @@ import prisma from '../../database/prisma.js'
 // Prisma: { id, userId, type, amount, expiryDate, isActive, createdAt, updatedAt }
 // Legacy: { id, tipo_credito, cantidad, vencimiento, id_usuario, fecha_alta, busquedas(JSON), compra_creditos(JSON) }
 const mapCreditToLegacy = (c) => {
-    if (\!c) return null;
+    if (!c) return null;
     
     return {
         id: c.id,
@@ -74,7 +74,7 @@ const creditoModel = {
             }
         });
         
-        if (\!credit) return null;
+        if (!credit) return null;
         
         return {
             ...mapCreditToLegacy(credit),
@@ -121,7 +121,7 @@ const creditoModel = {
         // Filtrar créditos de plan más recientes (como hace el código original)
         const filteredCredits = [];
         const planCredits = credits.filter(c => c.type === 'PLAN');
-        const otherCredits = credits.filter(c => c.type \!== 'PLAN');
+        const otherCredits = credits.filter(c => c.type !== 'PLAN');
         
         if (planCredits.length > 0) {
             // Solo el plan más reciente
@@ -137,10 +137,10 @@ const creditoModel = {
     
     editById: async (id, credito) => {
         const updateData = {};
-        if (credito.tipo_credito \!== undefined) updateData.type = credito.tipo_credito.toUpperCase();
-        if (credito.cantidad \!== undefined) updateData.amount = credito.cantidad;
-        if (credito.vencimiento \!== undefined) updateData.expiryDate = credito.vencimiento;
-        if (credito.id_usuario \!== undefined) updateData.userId = credito.id_usuario;
+        if (credito.tipo_credito !== undefined) updateData.type = credito.tipo_credito.toUpperCase();
+        if (credito.cantidad !== undefined) updateData.amount = credito.cantidad;
+        if (credito.vencimiento !== undefined) updateData.expiryDate = credito.vencimiento;
+        if (credito.id_usuario !== undefined) updateData.userId = credito.id_usuario;
         
         if (Object.keys(updateData).length === 0) return false;
         
@@ -149,7 +149,7 @@ const creditoModel = {
             data: updateData
         });
         
-        return \!\!updated;
+        return !!updated;
     },
     
     create: async (tipo_credito, cantidad, vencimiento, id_usuario) => {
@@ -171,8 +171,9 @@ const creditoModel = {
             where: { id },
             data: { isActive: false }
         });
-        return \!\!deleted;
+        return !!deleted;
     }
 }
 
 export default creditoModel
+

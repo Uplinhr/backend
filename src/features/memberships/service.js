@@ -161,13 +161,13 @@ async function createMercadoPagoPreapproval(userId, plan) {
   // Se recomienda usar el endpoint Preapproval de Suscripciones si está habilitado.
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    const backUrl = process.env.WEBHOOK_BASE_URL || '';
+    const backUrl = `${process.env.WEBHOOK_BASE_URL}/api/mercadopago/webhook` || '';
     // Pseudocódigo: crear preapproval (subscription) para débito automático
     // const resp = await mercadopago.preapproval.create({ ... });
     // return { customerId: resp.payer_id, subscriptionId: resp.id };
-    return { customerId: user.email, subscriptionId: null };
+    return { customerId: user.email, subscriptionId: null, webhookUrl: backUrl };
   } catch (e) {
-    return { customerId: null, subscriptionId: null };
+    return { customerId: null, subscriptionId: null, webhookUrl: backUrl };
   }
 }
 

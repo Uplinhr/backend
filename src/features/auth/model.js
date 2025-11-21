@@ -13,7 +13,7 @@ const mapRoleFromPrisma = (role) => {
 // Prisma: { id, email, name, password, role, createdAt, updatedAt, deletedAt, planId? }
 // Legacy: { id, nombre, apellido, email, contrasenia, fecha_alta, active, num_celular, rol, id_plan, plan(JSON), creditos(JSON), consultorias(JSON), empresas(JSON) }
 const mapUserToLegacy = (u) => {
-    if (\!u) return null;
+    if (!u) return null;
 
     // Parse name -> nombre + apellido
     let nombre = null, apellido = null;
@@ -58,9 +58,6 @@ const authModel = {
             where: {
                 email: email,
                 deletedAt: null // Solo usuarios activos (no soft-deleted)
-            },
-            include: {
-                plan: true // Si se relaciona con Plan
             }
         });
 
@@ -87,8 +84,9 @@ const authModel = {
             where: { id },
             data: { password }
         });
-        return \!\!updated;
+        return !!updated;
     },
 }
 
 export default authModel
+

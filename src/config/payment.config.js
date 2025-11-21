@@ -4,9 +4,9 @@ dotenv.config();
 export default {
   // MercadoPago Configuration
   mercadopago: {
-    accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
-    publicKey: process.env.MERCADOPAGO_PUBLIC_KEY,
-    webhookUrl: `${process.env.WEBHOOK_BASE_URL}/mercadopago`,
+    accessToken: process.env.MP_ACCESS_TOKEN,
+    publicKey: process.env.MP_PUBLIC_KEY,
+    webhookUrl: `${process.env.WEBHOOK_BASE_URL}/api/mercadopago/webhook`,
   },
 
   // PayPal Configuration
@@ -14,7 +14,7 @@ export default {
     clientId: process.env.PAYPAL_CLIENT_ID,
     clientSecret: process.env.PAYPAL_CLIENT_SECRET,
     mode: process.env.PAYPAL_MODE || 'sandbox', // 'sandbox' or 'live'
-    webhookUrl: `${process.env.WEBHOOK_BASE_URL}/paypal`,
+    webhookUrl: `${process.env.WEBHOOK_BASE_URL}/api/paypal/webhook`,
   },
 
   // Payoneer Configuration
@@ -22,7 +22,7 @@ export default {
     clientId: process.env.PAYONEER_CLIENT_ID,
     clientSecret: process.env.PAYONEER_CLIENT_SECRET,
     apiUrl: process.env.PAYONEER_API_URL || 'https://api.payoneer.com',
-    webhookUrl: `${process.env.WEBHOOK_BASE_URL}/payoneer`,
+    webhookUrl: `${process.env.WEBHOOK_BASE_URL}/api/payoneer/webhook`,
   },
 
   // Security Configuration

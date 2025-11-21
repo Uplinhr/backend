@@ -158,6 +158,7 @@ model User {
   id               String       @id @default(cuid())
   auth0Id          String?      @unique // Para integración con Auth0
   email            String       @unique
+  password         String?
   name             String?
   provider         AuthProvider @default(MAGIC_LINK)
   emailVerified    Boolean      @default(false)
