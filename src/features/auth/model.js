@@ -38,6 +38,7 @@ const mapUserToLegacy = (u) => {
         num_celular: null, // No existe en Prisma por ahora
         rol: mapRoleFromPrisma(u.role),
         id_plan: u.planId || null, // Si se relaciona con Plan
+        pictureUrl: u.pictureUrl,
         // Estructuras relacionadas: compatibilidad (null por ahora, ya que no existen en schema)
         plan: JSON.stringify({
             id: null, nombre: null, creditos_mes: null, meses_cred: null,

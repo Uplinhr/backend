@@ -50,12 +50,7 @@ export const getOwn = async (req, res) => {
 export const getById = async (req, res) => {
     try{
         const {id} = req.params
-        if(isNaN(id)) { // SI ID NO ES NUMERICO
-            return errorRes(res, {
-                message: 'El ID debe ser numerico',
-                statusCode: 400
-            })
-        }
+        // Removed isNaN check for CUID support
         const usuario = await usuarioModel.getById(id)
         if(usuario === null){ // SI NO EXISTE EL USUARIO
             return errorRes(res,{
@@ -79,14 +74,9 @@ export const getById = async (req, res) => {
 export const editOwn =  async (req, res) => {
     try{
         const {id} = req.params
-        if(isNaN(id)) {
-            return errorRes(res, {
-                message: 'El id debe ser un numero',
-                statusCode: 404
-            })
-        }
+        // Removed isNaN check for CUID support
 
-        if(Number(id) !== Number(req.user.id)){
+        if(id !== req.user.id){
             return errorRes(res, {
                 message: 'Solo puedes editar tu propio usuario',
                 statusCode: 404
@@ -146,12 +136,7 @@ export const editById = async (req, res) => {
     try{
         const {id} = req.params
         const usuario = await usuarioModel.getById(id)
-        if(isNaN(id)) {
-            return errorRes(res, {
-                message: 'El id debe ser un numero',
-                statusCode: 404
-            })
-        }
+        // Removed isNaN check for CUID support
 
         const changed = await usuarioModel.editById(id, req.body)
         if(!changed){
@@ -201,12 +186,7 @@ export const editById = async (req, res) => {
 export const enableById = async (req,res) => {
     try{
         const {id} = req.params
-        if(isNaN(id)) {
-            return errorRes(res, {
-                message: 'El id debe ser un numero',
-                statusCode: 404
-            })
-        }
+        // Removed isNaN check for CUID support
 
         const enabled = await usuarioModel.enableById(id)
         if(!enabled){
@@ -232,12 +212,7 @@ export const enableById = async (req,res) => {
 export const deleteById = async (req, res) => {
     try{
         const {id} = req.params
-        if(isNaN(id)) {
-            return errorRes(res, {
-                message: 'El id debe ser un numero',
-                statusCode: 404
-            })
-        }
+        // Removed isNaN check for CUID support
 
         const deleted = await usuarioModel.deleteById(id)
         if(!deleted){

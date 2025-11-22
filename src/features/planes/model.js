@@ -22,7 +22,10 @@ const mapPrismaPlanToLegacy = (p) => {
 
 const planModel = {
     getAll: async () => {
-        const rows = await prisma.plan.findMany({ orderBy: { createdAt: 'asc' } });
+        const rows = await prisma.plan.findMany({ 
+            where: { isActive: true },
+            orderBy: { createdAt: 'asc' } 
+        });
         return rows.map(mapPrismaPlanToLegacy) || null;
     },
     getById: async (id) => {
@@ -32,19 +35,29 @@ const planModel = {
     editById: async (id, plan) => {
         const data = {};
         if (plan.nombre !== undefined) data.name = plan.nombre;
-        if (plan.precio !== undefined) data.price = plan.precio;
+        if (plan.precio !== undefined) data.price = parseFloat(plan.precio); // Convert to number!
         if (plan.active !== undefined) data.isActive = !!plan.active;
-        // Consolidar extras en features JSON
-        const featureUpdates = {};
-        if (plan.creditos_mes !== undefined) featureUpdates.creditos_mes = plan.creditos_mes;
-        if (plan.meses_cred !== undefined) featureUpdates.meses_cred = plan.meses_cred;
-        if (plan.horas_cons !== undefined) featureUpdates.horas_cons = plan.horas_cons;
-        if (plan.custom !== undefined) featureUpdates.custom = plan.custom;
-        if (Object.keys(featureUpdates).length > 0) {
-            // merge con features actuales
+        
+        // Handle features - if features object is provided directly, use it
+        // Otherwise, build from individual fields
+        if (plan.features && typeof plan.features === 'object') {
+            // Features provided directly - merge with existing
             const current = await prisma.plan.findUnique({ where: { id }, select: { features: true } });
-            data.features = { ...(current?.features || {}), ...featureUpdates };
+            data.features = { ...(current?.features || {}), ...plan.features };
+        } else {
+            // Build features from individual legacy fields
+            const featureUpdates = {};
+            if (plan.creditos_mes !== undefined) featureUpdates.creditos_mes = plan.creditos_mes;
+            if (plan.meses_cred !== undefined) featureUpdates.meses_cred = plan.meses_cred;
+            if (plan.horas_cons !== undefined) featureUpdates.horas_cons = plan.horas_cons;
+            if (plan.custom !== undefined) featureUpdates.custom = plan.custom;
+            
+            if (Object.keys(featureUpdates).length > 0) {
+                const current = await prisma.plan.findUnique({ where: { id }, select: { features: true } });
+                data.features = { ...(current?.features || {}), ...featureUpdates };
+            }
         }
+        
         if (Object.keys(data).length === 0) return false;
         await prisma.plan.update({ where: { id }, data });
         return true;

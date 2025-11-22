@@ -26,12 +26,7 @@ export const getAll = async (req, res) => {
 export const getById = async (req, res) => {
     try{
         const {id} = req.params
-        if(isNaN(id)) { // SI ID NO ES NUMERICO
-            return errorRes(res, {
-                message: 'El ID debe ser numerico',
-                statusCode: 400
-            })
-            }
+        // Removed isNaN check for CUID support
         const plan = await planModel.getById(id)
         if(plan === null){ // SI NO EXISTE EL PLAN
             return errorRes(res,{
@@ -55,12 +50,7 @@ export const getById = async (req, res) => {
 export const editById = async (req, res) => {
     try{
         const {id} = req.params
-        if(isNaN(id)) {
-            return errorRes(res, {
-                message: 'El id debe ser un numero',
-                statusCode: 404
-            })
-        }
+        // Removed isNaN check for CUID support
 
         const changed = await planModel.editById(id, req.body)
         if(!changed){
@@ -69,7 +59,12 @@ export const editById = async (req, res) => {
             statusCode: 500
           })
         }
+        
+        // Fetch the updated plan to return
+        const updatedPlan = await planModel.getById(id);
+        
         successRes(res, {
+            data: updatedPlan,
             message: 'Plan editado exitosamente',
             statusCode: 201
         })
@@ -111,12 +106,7 @@ export const create = async (req, res) => {
 export const enableById = async (req,res) => {
     try{
         const {id} = req.params
-        if(isNaN(id)) {
-            return errorRes(res, {
-                message: 'El id debe ser un numero',
-                statusCode: 404
-            })
-        }
+        // Removed isNaN check for CUID support
 
         const enabled = await planModel.enableById(id)
         if(!enabled){
@@ -142,12 +132,7 @@ export const enableById = async (req,res) => {
 export const deleteById = async (req, res) => {
   try{
       const {id} = req.params
-      if(isNaN(id)) {
-          return errorRes(res, {
-              message: 'El id debe ser un numero',
-              statusCode: 404
-          })
-      }
+      // Removed isNaN check for CUID support
 
       const deleted = await planModel.deleteById(id)
       if(!deleted){
@@ -186,12 +171,7 @@ export const deleteById = async (req, res) => {
 export const renewPlan = async (req, res) => {
   try{
     const {id_plan, id_usuario} = req.body
-    if(isNaN(id_plan) || isNaN(id_usuario)){
-      return errorRes(res, {
-          message: 'Los id deben ser un numeros',
-          statusCode: 404
-      })
-    }
+    // Removed isNaN check for CUID support
     const plan = await planModel.getById(id_plan)
     if(!plan) {
       return errorRes(res, {

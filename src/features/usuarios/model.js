@@ -25,6 +25,7 @@ const mapUserToLegacy = (u) => {
         active: u.deletedAt ? false : true,
         num_celular: null,
         rol: mapRoleToLegacy(u.role),
+        pictureUrl: u.pictureUrl,
         // Estructuras relacionadas no existen en Prisma actual: proveer compatibilidad
         plan: {
             id: null,

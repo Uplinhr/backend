@@ -27,9 +27,12 @@ import { cartRoutes } from './features/cart/index.js';
 import { taxesRoutes } from './features/taxes/index.js';
 import { paymentsRoutes } from './features/payments/index.js';
 import adminTalentSearchRoutes from './features/admin/talent-search.routes.js';
+import publicTalentSearchRoutes from './features/admin/talent-search.public.routes.js';
 import membershipsRoutes from './features/memberships/routes.js';
 import membershipsAdminRoutes from './features/memberships/admin.routes.js';
+import membershipsPublicRoutes from './features/memberships/public.routes.js';
 import membershipsWebhooksRoutes from './features/webhooks/memberships.routes.js';
+import planesPublicRoutes from './features/planes/public.routes.js';
 import { securityHeaders, preventParameterPollution, sanitizeData, generalRateLimiter, auditLog } from './middlewares/security.middleware.js';
 
 const app = express();
@@ -108,6 +111,11 @@ app.use('/api/webhooks/memberships', membershipsWebhooksRoutes);
 
 // Rutas administrativas
 app.use('/api/admin', adminTalentSearchRoutes);
+
+// Rutas públicas
+app.use('/api/talent-search-services', publicTalentSearchRoutes);
+app.use('/api/memberships-public', membershipsPublicRoutes);
+app.use('/api/plans-public', planesPublicRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ 

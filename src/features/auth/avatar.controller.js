@@ -17,13 +17,32 @@ export const upload = multer({
   },
 });
 
+// Resuelve el usuario autenticado tanto para sesiones Auth0 como para JWT local
+const resolveAvatarUser = async (req) => {
+  // Caso Auth0: req.auth.payload.sub -> user.auth0Id
+  const claims = req.auth?.payload;
+  if (claims?.sub) {
+    const user = await prisma.user.findFirst({ where: { auth0Id: claims.sub } });
+    return { user, source: 'auth0' };
+  }
+
+  // Caso login clásico: authRequired deja el usuario en req.user
+  if (req.user?.id) {
+    const user = await prisma.user.findUnique({ where: { id: String(req.user.id) } });
+    return { user, source: 'local' };
+  }
+
+  return { user: null, source: 'none' };
+};
+
 export const uploadAvatar = async (req, res) => {
   try {
-    const claims = req.auth?.payload;
-    if (!claims?.sub) return res.status(401).json({ success: false, error: 'Unauthorized' });
-
-    const user = await prisma.user.findFirst({ where: { auth0Id: claims.sub } });
-    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    const { user, source } = await resolveAvatarUser(req);
+    if (!user) {
+      const status = source === 'none' ? 401 : 404;
+      const error = source === 'none' ? 'Unauthorized' : 'User not found';
+      return res.status(status).json({ success: false, error });
+    }
 
     const file = req.file;
     if (!file) return res.status(400).json({ success: false, error: 'Archivo requerido (campo "file")' });
@@ -47,10 +66,12 @@ export const uploadAvatar = async (req, res) => {
 
 export const deleteAvatar = async (req, res) => {
   try {
-    const claims = req.auth?.payload;
-    if (!claims?.sub) return res.status(401).json({ success: false, error: 'Unauthorized' });
-    const user = await prisma.user.findFirst({ where: { auth0Id: claims.sub } });
-    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    const { user, source } = await resolveAvatarUser(req);
+    if (!user) {
+      const status = source === 'none' ? 401 : 404;
+      const error = source === 'none' ? 'Unauthorized' : 'User not found';
+      return res.status(status).json({ success: false, error });
+    }
 
     const folderRoot = process.env.CLOUDINARY_FOLDER || 'avatars';
     const publicId = `${folderRoot}/${user.id}/avatar`;

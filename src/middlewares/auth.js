@@ -150,8 +150,9 @@ export const authRequired = async (req, res, next) => {
       });
     }
 
-    // Compat: mapear role -> rol para módulos existentes
-    req.user = { ...user, rol: user.role };
+    // Compat: mapear role de Prisma (CLIENTE/ADMINISTRADOR) -> rol legacy (cliente/admin)
+    const legacyRole = user.role === 'ADMINISTRADOR' ? 'admin' : 'cliente';
+    req.user = { ...user, rol: legacyRole };
     
     // Log de autenticación exitosa
     const processingTime = Date.now() - startTime;

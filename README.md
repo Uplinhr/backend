@@ -12,61 +12,38 @@ Este proyecto tiene como objetivo ser un complemento de las funcionalidades back
 
 ## 🔧 Instrucciones
 
-En caso de querer iniciar el proyecto, instalar <a href="https://dev.mysql.com/downloads/installer">MySQL</a> en forma local (Se recomienda agregar en las variables de entorno) y ejecutar los siguientes comandos:
+1. **Clonar el repositorio**:
+   ```bash
+   git clone https://github.com/Uplinhr/backend.git
+   cd backend
+   ```
 
-**`git clone https://github.com/Uplinhr/backend.git`** (descargar el repositorio)
+2. **Instalar dependencias**:
+   ```bash
+   npm install
+   ```
 
-**`cd backend`** (acceder a la carpeta del proyecto)
+3. **Configurar Variables de Entorno**:
+   Copiar el archivo `.env.example` a `.env` y completar los valores necesarios (Base de datos, Auth0, Pagos, etc.).
+   ```bash
+   cp .env.example .env
+   ```
 
-**`npm i`** (instalar las dependencias en npm)
+4. **Base de Datos (Prisma)**:
+   Asegurarse de tener PostgreSQL corriendo y la variable `DATABASE_URL` configurada.
+   ```bash
+   npm run prisma:generate  # Generar cliente de Prisma
+   npm run prisma:deploy    # Aplicar migraciones a la BD
+   # Opcional: npm run prisma:seed  # Poblar BD con datos de prueba
+   ```
 
-**`npm run migrate`** (ejecutar las migraciones)
+5. **Iniciar el Servidor**:
+   ```bash
+   npm run dev   # Modo desarrollo
+   npm start     # Modo producción
+   ```
 
-**`npm run seeders`** (ejecutar los seeders)
-
-**`npm run dev`** (iniciar el backend)
-
-Antes de iniciar el backend, asegurarse de tener configuradas las variables de entorno, para eso debe generar el archivo: “.env” con la siguiente información:
-
-
-DB_HOST=localhost
-
-DB_USER=root
-
-DB_PASSWORD=admin
-
-DB_NAME=uplindb
-
-PORT=4000
-
-JWT_SECRET=claveAuthPista
-
-DEV=true
-
-MAIL_API_KEY=re_aDh93bUh_DbsA2Lc4wwYk3VKVBwonAHcY
-
-EMAIL_FROM=noreply@noreply.uplinhr.com
-
-FRONTEND_URL=http://localhost:3000
-
-SERVER_PORT=4000
-
-
-Tenga en cuenta que “DB_USER” y “DB_PASSWORD” debe coincidir con los datos de su cuenta al momento de instalar <a href="https://dev.mysql.com/downloads/installer">MySQL</a> en forma local, y “DB_NAME” es el nombre que tendrá la base de datos en su sistema cuando ejecute las migraciones
-
-
-En caso de necesitar reiniciar la base de datos localmente, debe eliminar el archivo con la dirección: “src/database/seeders/executed.json” ejecutar los siguientes comandos:
-
-**`mysql -u [usuario] -p`** (Ingresar a la consola de MySQL, al ejecutar, va a solicitar la contraseña de la cuenta)
-**`DROP DATABASE IF EXISTS [DB_NAME];`** (Eliminar la base de datos en caso de existir)
-
-A continuación, debe volver a ejecutar:
-
-**`npm run migrate`** (ejecutar las migraciones)
-**`npm run seeders`** (ejecutar los seeders)
-**`npm run dev`** (iniciar el backend)
-
-El **`sistema de migraciones`** se encuentra en la dirección: “src/database/run-migrations.js” y actúa sobre la carpeta “migrations”. El de **`seeders`** se encuentra en la misma dirección que las migraciones pero con nombre: “run-seeders.js”, y actúa sobre la carpeta: “seeders”
+Para más detalles sobre la configuración y variables de entorno, ver [INFORME_BACKEND.md](./INFORME_BACKEND.md).
 
 
 ---
@@ -154,14 +131,17 @@ Las rutas del proyecto se definien en el archivo: **`“routes,js”`** dentro d
 
 ## 🧰 Tecnologías Utilizadas
 
-- **`ExpressJS`**: Framework web para Node.js, utilizado para construir la API REST
-- **`MySQL`**: Controlador MySQL para Node.js (versión mejorada del driver mysql tradicional)
-- **`Morgan`**: Para entorno de desarrollo, permite ver en consola las peticiones que se realizan en el servidor.
-- **`Bcrypt`**: Librería para hashing de contraseñas (algoritmo bcrypt).
-- **`Jsonwebtoken`**: Implementación de JSON Web Tokens (JWT) para autenticación stateless.
-- **`Cookie-parser`**: Middleware para parsing de cookies HTTP.
-- **`Resend`**: Servicio de envío de emails transaccionales.
-- **`Cors`**: Middleware para habilitar Cross-Origin Resource Sharing.
+- **`Node.js` & `Express`**: Core del backend.
+- **`PostgreSQL`**: Base de datos relacional.
+- **`Prisma ORM`**: Manejo de base de datos y migraciones.
+- **`Auth0`**: Gestión de identidad y autenticación.
+- **`MercadoPago` & `PayPal`**: Pasarelas de pago.
+- **`Resend`**: Envío de emails.
+- **`Cloudinary`**: Almacenamiento de imágenes.
+- **`Winston`**: Logging avanzado.
+- **`Node Cron`**: Tareas programadas (facturación).
+
+Para un detalle exhaustivo de las tecnologías y servicios, consultar el archivo [INFORME_BACKEND.md](./INFORME_BACKEND.md).
 
 ---
 
