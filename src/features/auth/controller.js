@@ -29,11 +29,17 @@ import { Resend } from "resend";
 export const register = async (req, res) => {
   try {
     // Soporte para campos legacy y nuevos
+    // Soporte para campos legacy y nuevos
     const nombre = req.body.nombre || req.body.name;
     const apellido = req.body.apellido;
     const contrasenia = req.body.contrasenia || req.body.password;
     const email = req.body.email;
     const num_celular = req.body.num_celular;
+
+    const { 
+      companyName, country, website, linkedin, 
+      companyEmail, companyPhone, companyAddress, companyTaxId 
+    } = req.body;
 
     if(!nombre || !contrasenia || !email) {
       return errorRes(res, {
@@ -44,10 +50,24 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
 
-    const idUsuario = await authModel.createUsuario(nombre, apellido, hashedPassword, email, num_celular)
+    const newUser = await authModel.createUsuario({
+      nombre,
+      apellido,
+      hashedPassword,
+      email,
+      num_celular,
+      companyName,
+      country,
+      website,
+      linkedin,
+      companyEmail,
+      companyPhone,
+      companyAddress,
+      companyTaxId
+    });
 
     // Generar token para onboarding fluido
-    const token = jwt.sign({ id: idUsuario }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, {
       expiresIn: '1h'
     });
 
@@ -170,7 +190,7 @@ export const register = async (req, res) => {
 
     // Enviar email de verificación al usuario
     try {
-      const verifyToken = jwt.sign({ id: idUsuario, purpose: 'verify_email' }, process.env.JWT_SECRET, { expiresIn: '24h' });
+      const verifyToken = jwt.sign({ id: newUser.id, purpose: 'verify_email' }, process.env.JWT_SECRET, { expiresIn: '24h' });
       const verifyLink = `${process.env.FRONTEND_URL}/verify-email?token=${verifyToken}`;
       await resend.emails.send({
         from: `UplinHR <${process.env.EMAIL_FROM}>`,
@@ -195,7 +215,7 @@ export const register = async (req, res) => {
     }
 
     successRes(res, {
-      data: { id: idUsuario, token },
+      data: { id: newUser.id, token },
       message: 'Usuario creado exitosamente',
       statusCode: 201
     })
@@ -307,7 +327,9 @@ export const login = async (req, res) => {
 
     if(!user.active) return errorRes(res, {message: 'Usuario desactivado',statusCode: 400});
 
-    // Eliminado: no exigir verificación de correo para iniciar sesión
+    if (!user.emailVerified) {
+      return errorRes(res, { message: 'Por favor verifica tu correo electrónico para iniciar sesión.', statusCode: 403 });
+    }
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: '1h'

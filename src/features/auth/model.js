@@ -35,7 +35,8 @@ const mapUserToLegacy = (u) => {
         contrasenia: u.password, // Prisma usa 'password', legacy espera 'contrasenia'
         fecha_alta: u.createdAt,
         active: u.deletedAt ? 0 : 1, // Prisma usa deletedAt, legacy usa active (1/0)
-        num_celular: null, // No existe en Prisma por ahora
+        emailVerified: u.emailVerified,
+        num_celular: u.phone,
         rol: mapRoleFromPrisma(u.role),
         id_plan: u.planId || null, // Si se relaciona con Plan
         pictureUrl: u.pictureUrl,
@@ -64,22 +65,61 @@ const authModel = {
 
         return mapUserToLegacy(u);
     },
-    createUsuario: async (nombre, apellido, hashedPassword, email, num_celular) => {
+    createUsuario: async (userData) => {
+        const { 
+            nombre, apellido, hashedPassword, email, num_celular, 
+            companyName, country, website, linkedin,
+            companyEmail, companyPhone, companyAddress, companyTaxId 
+        } = userData;
+
         // Combinar nombre + apellido en name
         const fullName = [nombre, apellido].filter(Boolean).join(' ').trim();
 
-        const created = await prisma.user.create({
-            data: {
-                email: email,
-                password: hashedPassword, // Prisma usa 'password'
-                name: fullName || null,
-                role: 'CLIENTE', // Default role
-                // planId: null por ahora (si se relaciona con Plan)
+        const result = await prisma.$transaction(async (tx) => {
+            // 1. Crear Usuario
+            const user = await tx.user.create({
+                data: {
+                    email: email,
+                    password: hashedPassword,
+                    name: fullName || null,
+                    role: 'CLIENTE',
+                    phone: num_celular || null,
+                    emailVerified: false, // Asegurar que empieza no verificado
+                }
+            });
+
+            // 2. Crear UserProfile (Datos personales extra)
+            if (country || linkedin) {
+                await tx.userProfile.create({
+                    data: {
+                        userId: user.id,
+                        country: country || null,
+                        linkedinUrl: linkedin || null,
+                    }
+                });
             }
+
+            // 3. Crear CompanyProfile (Datos de empresa)
+            if (companyName) {
+                await tx.companyProfile.create({
+                    data: {
+                        userId: user.id,
+                        companyName: companyName,
+                        website: website || null,
+                        companyEmail: companyEmail || null,
+                        companyPhone: companyPhone || null,
+                        address: companyAddress || null,
+                        taxId: companyTaxId || null
+                    }
+                });
+            }
+
+            return user;
         });
 
-        return created.id;
+        return result;
     },
+
     editPassword: async (id, password) => {
         const updated = await prisma.user.update({
             where: { id },
